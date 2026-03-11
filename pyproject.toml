@@ -1,0 +1,14 @@
+[project]
+name = "3d-tts-simulator"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "accelerate>=1.13.0",
+    "hf-transfer>=0.1.9",
+    "torch>=2.10.0",
+    "torchaudio>=2.10.0",
+    "torchvision>=0.25.0",
+    "transformers>=5.3.0",
+]
