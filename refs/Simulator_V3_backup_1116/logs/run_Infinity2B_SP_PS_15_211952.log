@@ -1,0 +1,1401 @@
+INFO--log_tools.setup_logger:   日志系统初始化完成
+INFO--main_for_infinity2B_SP_PS.main_for_Infinity2B_SeqParal_PredSparse:   Infinity2B模型-序列并行+预测稀疏-模型运行开始
+INFO--hardware_config.__init__:   CIM配置: 存算比=1, 权重位宽=8, 宏：256行 x 32列
+INFO--hardware_config.__init__:   工作频率=400MHz, 功耗=4.048582995951417e-14J/op
+INFO--hardware_config.__init__:   DRAM配置: 带宽=249999392.768KB/s, 功耗=7.20896e-09J/KB
+INFO--hardware_config.__init__:   NoC配置: 包宽度=512bit, 带宽=25000000.0KB/s, 工作频率=400MHz, 功耗=5.48864e-08J/KB
+INFO--hardware_config.__init__:   NNULT配置: entry_num=256, cycle_period=2.4999999999999998e-06ms, power=2.1584W
+INFO--hardware_config.__init__:   topk配置: entry_num=32, cycle_period=2.4999999999999998e-06ms, power=13591264.000000002W
+INFO--hardware_config.__init__:   SRAM Buffer配置: 容量=256KB, 平均功耗=0.1087632896W
+INFO--CrossAttn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--CrossAttn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--CrossAttn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--CrossAttn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--CrossAttn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--CrossAttn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=1*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=1
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=1, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=0.39%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=64
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算延迟: 0.00308
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM延迟: 0.0018328794519322216
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC延迟: 0.0001603125
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性延迟: 3.203125e-06
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总延迟: 0.005076395076932221
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=1*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=1
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=1, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=0.39%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=64
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性能耗: 4.4247199999999997e-07
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算能耗: 0.052301442591093115
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM能耗: 0.21140996096000003
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC能耗: 0.0140783616
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型SRAM能耗: 0.035336027384089176
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总能耗: 0.31312623500718234
+INFO--Attn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--Attn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--Attn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--Attn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--Attn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--Attn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--Attn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--Attn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=1*1
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=1
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=1, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=0.39%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=1, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=0.39%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=64
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算延迟: 0.00026000000000000003
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM延迟: 0.001057010379902108
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC延迟: 0.00015755859375
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性延迟: 3.203125e-06
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总延迟: 0.001477772098652108
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=1*1
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=1
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=1, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=0.39%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=1, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=0.39%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=8
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=64
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算能耗: 0.004415056842105263
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM能耗: 0.12191883263999999
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC能耗: 0.0138365184
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性能耗: 4.4247199999999997e-07
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型SRAM能耗: 0.010286550702623935
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总能耗: 0.14017085035410526
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=32
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=64
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 0.00024000000000000003
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.0020650050157485027
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 0.0001575
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型GELU+LayerNorm延迟: 5.703125e-06
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 0.002468208140748503
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.gelu_energy_consumption:   NNULT gelu能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=32
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=64
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型非线性能耗: 7.878159999999999e-07
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算能耗: 0.004075437085020242
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM能耗: 0.2381840384
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC能耗: 0.0138313728
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型SRAM能耗: 0.017180827955539647
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总能耗: 0.2732724640565599
+INFO--CrossAttn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--CrossAttn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--CrossAttn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--CrossAttn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--CrossAttn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--CrossAttn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=4*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=4
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=4, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=1.56%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=256
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算延迟: 0.00368
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM延迟: 0.0018835045748969998
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC延迟: 0.00064125
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性延迟: 1.2578124999999999e-05
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总延迟: 0.0062173326998970005
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=4*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=4
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=4, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=1.56%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=256
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性能耗: 1.7375119999999998e-06
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算能耗: 0.06249003530364372
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM能耗: 0.21724921856
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC能耗: 0.0563134464
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型SRAM能耗: 0.04327792364662063
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总能耗: 0.3793323614222644
+INFO--Attn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--Attn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--Attn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--Attn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--Attn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--Attn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--Attn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--Attn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=4*5
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=4
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=4, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=1.56%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=40
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=5, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=1.95%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=256
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算延迟: 0.0010600000000000002
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM延迟: 0.0011564090588343423
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC延迟: 0.000631171875
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性延迟: 1.2578124999999999e-05
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总延迟: 0.002860159058834343
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=4*5
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=4
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=4, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=1.56%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=40
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=5, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=1.95%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=32
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=256
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算能耗: 0.01799984712550607
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM能耗: 0.13338378239999998
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC能耗: 0.0554284032
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性能耗: 1.7375119999999998e-06
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型SRAM能耗: 0.019909139713156037
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总能耗: 0.20681377023750605
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=128
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=256
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 0.0009600000000000001
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.002116005139624132
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 0.00063
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型GELU+LayerNorm延迟: 1.2578124999999999e-05
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 0.003718583264624132
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.gelu_energy_consumption:   NNULT gelu能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=128
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=256
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型非线性能耗: 1.7375119999999998e-06
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算能耗: 0.016301748340080968
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM能耗: 0.24406654976
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC能耗: 0.0553254912
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型SRAM能耗: 0.025884502304769786
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总能耗: 0.34158002911685076
+INFO--CrossAttn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--CrossAttn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--CrossAttn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--CrossAttn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--CrossAttn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--CrossAttn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=16*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=16
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=16, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=6.25%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=1024
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算延迟: 0.00608
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM延迟: 0.0020860050667561147
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC延迟: 0.002565
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性延迟: 5.007812499999999e-05
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总延迟: 0.010781083191756115
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=16*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=16
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=16, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=6.25%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=1024
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性能耗: 6.917671999999999e-06
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算能耗: 0.10324440615384614
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM能耗: 0.24060624896
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC能耗: 0.2252537856
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型SRAM能耗: 0.07504550869674641
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总能耗: 0.6441568670825926
+INFO--Attn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--Attn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--Attn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--Attn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--Attn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--Attn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--Attn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--Attn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=16*21
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=16
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=16, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=6.25%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=168
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=21, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=8.20%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=1024
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算延迟: 0.00426
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM延迟: 0.001555878779117531
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC延迟: 0.0025396875000000003
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性延迟: 5.007812499999999e-05
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总延迟: 0.008405644404117531
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=16*21
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=16
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=16, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=6.25%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=168
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=21, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=8.20%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=128
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=1024
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算能耗: 0.0723390082591093
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM能耗: 0.17945985024000002
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC能耗: 0.2230308864
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性能耗: 6.917671999999999e-06
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型SRAM能耗: 0.05851043434237788
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总能耗: 0.47483666257110935
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=512
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=1024
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 0.0038400000000000005
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.0023200056351266474
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 0.00252
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型GELU+LayerNorm延迟: 5.007812499999999e-05
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 0.008730083760126649
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.gelu_energy_consumption:   NNULT gelu能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=512
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=1024
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型非线性能耗: 6.917671999999999e-06
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算能耗: 0.06520699336032387
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM能耗: 0.2675965952
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC能耗: 0.2213019648
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型SRAM能耗: 0.06076880820703434
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总能耗: 0.6148812792393582
+INFO--CrossAttn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--CrossAttn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--CrossAttn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--CrossAttn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--CrossAttn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--CrossAttn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=36, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=7.03%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=2304
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.01ms
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算延迟: 0.01008
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM延迟: 0.0024235058865213054
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC延迟: 0.0057712499999999995
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性延迟: 0.000112578125
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总延迟: 0.018387334011521303
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=36, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=7.03%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=2304
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.01mJ
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性能耗: 1.5551271999999998e-05
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算能耗: 0.1711683575708502
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM能耗: 0.27953463296
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC能耗: 0.5068210176
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型SRAM能耗: 0.12799148378028935
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总能耗: 1.0855310431831395
+INFO--Attn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--Attn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--Attn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--Attn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--Attn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--Attn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--Attn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--Attn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*57
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=36, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=7.03%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=456
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=57, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=22.27%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=2304
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.01ms
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算延迟: 0.00978
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM延迟: 0.0022332866744925353
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC延迟: 0.005790234375
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性延迟: 0.000112578125
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总延迟: 0.017916099174492536
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*57
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=36, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=7.03%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=456
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=57, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=22.27%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=2304
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.01mJ
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算能耗: 0.1660740612145749
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM能耗: 0.2575941632
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC能耗: 0.5084881920000001
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性能耗: 1.5551271999999998e-05
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型SRAM能耗: 0.12471128851312976
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总能耗: 0.932171967686575
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=2304
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.01ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 0.00864
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.002660006460964173
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 0.00567
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型GELU+LayerNorm延迟: 0.000112578125
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 0.01708258458596417
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.gelu_energy_consumption:   NNULT gelu能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=2304
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.01mJ
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型非线性能耗: 1.5551271999999998e-05
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算能耗: 0.14671573506072874
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM能耗: 0.3068133376
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC能耗: 0.4979294208
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型SRAM能耗: 0.1189093180441419
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总能耗: 1.0703833627768706
+INFO--CrossAttn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--CrossAttn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--CrossAttn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--CrossAttn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--CrossAttn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--CrossAttn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--CrossAttn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=64*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=64
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=64, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=4096
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.01ms
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算延迟: 0.01568
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM延迟: 0.002896007034192574
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC延迟: 0.01026
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性延迟: 0.00020007812499999998
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总延迟: 0.029036085159192575
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=64*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=64
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=64, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=4096
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.01mJ
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型非线性能耗: 2.7638311999999995e-05
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型计算能耗: 0.26626188955465585
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型DRAM能耗: 0.33403437056
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型NoC能耗: 0.9010151424
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型SRAM能耗: 0.20211584889724954
+INFO--run_CrossAttn_baseline.run_CrossAttn_baseline:   Attn基线模型总能耗: 1.7034548897239055
+INFO--Attn_Layer_Baseline.q_gen_per_core:   start q_gen_per_core
+INFO--Attn_Layer_Baseline.k_gen_per_core:   start k_gen_per_core
+INFO--Attn_Layer_Baseline.v_gen_per_core:   start v_gen_per_core
+INFO--Attn_Layer_Baseline.psum_s_gen_per_core:   start psum_s_gen_per_core
+INFO--Attn_Layer_Baseline.s_allreduce_on_noc_per_core:   start s_allreduce_on_noc_per_core
+INFO--Attn_Layer_Baseline.sv_gen_per_core:   start sv_gen_per_core
+INFO--Attn_Layer_Baseline.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--Attn_Layer_Baseline.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=64*121
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=64
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=64, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=968
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=121, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=47.27%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=4096
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.01ms
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算延迟: 0.01778
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM延迟: 0.0032107577986995187
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC延迟: 0.01053375
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性延迟: 0.00020007812499999998
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总延迟: 0.03172458592369952
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=64*121
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=64
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=64, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=968
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=121, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=1, 利用率=47.27%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=512
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=4096
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.01mJ
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型计算能耗: 0.30192196404858296
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型DRAM能耗: 0.37033869312000006
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型NoC能耗: 0.9250553856
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型非线性能耗: 2.7638311999999995e-05
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型SRAM能耗: 0.2208301008806025
+INFO--run_Attn_baseline.run_Attn_baseline:   Attn基线模型总能耗: 1.597343681080583
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=2048
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=4096
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.01ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 0.015360000000000002
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.0031360076171367095
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 0.01008
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型GELU+LayerNorm延迟: 0.00020007812499999998
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 0.02877608574213671
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.00ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.gelu_energy_consumption:   NNULT gelu能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=2048
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=4096
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.01mJ
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型非线性能耗: 2.7638311999999995e-05
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算能耗: 0.2608279734412955
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM能耗: 0.36171677696000004
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC能耗: 0.8852078592
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型SRAM能耗: 0.20030603181609252
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总能耗: 1.708086279729388
+INFO--CrossAttn_Layer_SeqParal.q_gen_per_core:   start q_gen_per_core
+INFO--CrossAttn_Layer_SeqParal.k_gen_per_core:   start k_gen_per_core
+INFO--CrossAttn_Layer_SeqParal.v_gen_per_core:   start v_gen_per_core
+INFO--CrossAttn_Layer_SeqParal.q_all2all_transfer:   start q_all2all_transfer
+INFO--CrossAttn_Layer_SeqParal.k_allgather_transfer:   start k_allgather_transfer
+INFO--CrossAttn_Layer_SeqParal.v_allgather_transfer:   start v_allgather_transfer
+INFO--CrossAttn_Layer_SeqParal.chunk_s_gen_per_core:   start chunk_s_gen_per_core
+INFO--CrossAttn_Layer_SeqParal.sv_gen_per_core:   start sv_gen_per_core
+INFO--CrossAttn_Layer_SeqParal.sv_all2all_transfer:   start sv_all2all_transfer
+INFO--CrossAttn_Layer_SeqParal.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--CrossAttn_Layer_SeqParal.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.01ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=36, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=28.12%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=9216
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.02ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.02ms
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型非线性延迟: 0.00045007812499999996
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型计算延迟: 0.02952
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型DRAM延迟: 0.004241510302323136
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型NoC延迟: 0.023309999999999997
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型总延迟: 0.057521588427323134
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*48
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.01ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=36, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=2, page_y=1, 利用率=28.12%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=384
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=48, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=1, 利用率=18.75%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=9216
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.01mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.03mJ
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型非线性能耗: 6.2172712e-05
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型计算能耗: 0.5012787614574898
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型DRAM能耗: 0.48922886144
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型NoC能耗: 2.0470431744
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型SRAM能耗: 0.40039917954386905
+INFO--run_CrossAttn_seqparal.run_CrossAttn_seqparal:   CrossAttn序列并行模型总能耗: 3.4380121495533587
+INFO--Attn_Layer_SeqParal_PredSparse.q_gen_per_core:   start q_gen_per_core
+INFO--Attn_Layer_SeqParal_PredSparse.k_gen_per_core:   start k_gen_per_core
+INFO--Attn_Layer_SeqParal_PredSparse.v_gen_per_core:   start v_gen_per_core
+INFO--Attn_Layer_SeqParal_PredSparse.q_all2all_transfer:   start q_all2all_transfer
+INFO--Attn_Layer_SeqParal_PredSparse.k_all2all_transfer:   start k_all2all_transfer
+INFO--Attn_Layer_SeqParal_PredSparse.v_all2all_transfer:   start v_all2all_transfer
+INFO--Attn_Layer_SeqParal_PredSparse.chunk_pred_s_gen_per_core:   start chunk_pred_s_gen_per_core
+INFO--Attn_Layer_SeqParal_PredSparse.chunk_s_gen_per_core:   start chunk_s_gen_per_core
+INFO--Attn_Layer_SeqParal_PredSparse.sv_gen_per_core:   start sv_gen_per_core
+INFO--Attn_Layer_SeqParal_PredSparse.sv_all2all_transfer:   start sv_all2all_transfer
+INFO--Attn_Layer_SeqParal_PredSparse.psum_o_gen_per_core:   start psum_o_gen_per_core
+INFO--Attn_Layer_SeqParal_PredSparse.o_allreduce_per_core:   start o_allreduce_per_core
+INFO--Latency_Computer.topk_latency:   topk input_array_nums=36
+INFO--Latency_Computer.topk_latency:   topk input_array_length=174
+INFO--Latency_Computer.topk_latency:   topk output_array_length=66
+INFO--Latency_Computer.topk_latency:   per_column_turns=2
+INFO--Latency_Computer.topk_latency:   TopK延迟=0.00ms
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*66
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.01ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=66, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=3, page_y=1, 利用率=34.38%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=66, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=3, page_y=1, 利用率=34.38%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=66, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=1, 利用率=25.78%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=9216
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.02ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.02ms
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型TopK延迟: 0.0009002219705967922
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型非线性延迟: 0.006124999999999999
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型计算延迟: 0.0333
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型DRAM延迟: 0.005819607885408543
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型NoC延迟: 0.024435
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型总延迟: 0.07057982985600533
+INFO--Latency_Computer.softmax_latency:   softmax in_matrix shape=36*66
+INFO--Latency_Computer.softmax_latency:   per_row_turns=1, row_num=36
+INFO--Latency_Computer.softmax_latency:   NNULT softmax延迟=0.00ms
+INFO--Latency_Computer.softmax_energy_consumption:   NNULT softmax能耗=0.00mJ
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.01ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=32, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=1, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=1152
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=66, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=3, page_y=1, 利用率=34.38%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=66, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=3, page_y=1, 利用率=34.38%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=66, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=1, 利用率=25.78%
+INFO--Latency_Computer.compute_cycles:   page_turn=1, 准确的计算周期数=288
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=32, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=12.50%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=9216
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.01mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.03mJ
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型TopK能耗: 7.830498855027996e-07
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型非线性能耗: 0.0008460928
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型计算能耗: 0.5654668955465587
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型DRAM能耗: 0.67125149696
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型NoC能耗: 2.1458386944
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型SRAM能耗: 0.4912956463710358
+INFO--run_Attn_seqparal_predsparse.run_Attn_seqparal_predsparse:   Attn序列并行+预测稀疏模型总能耗: 3.87469960912748
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.01ms
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=4608
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.01ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=9216
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.02ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.00ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.02ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 0.03456
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.004496010920486813
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 0.02268
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型GELU+LayerNorm延迟: 0.00045007812499999996
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 0.062186089045486816
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.01ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.00ms
+INFO--Latency_Computer.gelu_energy_consumption:   NNULT gelu能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=4608
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=9216
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.01mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.00mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.03mJ
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型非线性能耗: 6.2172712e-05
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算能耗: 0.586862940242915
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM能耗: 0.51858374656
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC能耗: 1.9917176832
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型SRAM能耗: 0.43286807116452286
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总能耗: 3.5300946138794376
