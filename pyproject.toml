@@ -3,12 +3,36 @@ name = "3d-tts-simulator"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10,<3.11"
 dependencies = [
-    "accelerate>=1.13.0",
+    "accelerate>=0.34.2",
+    "antlr4-python3-runtime==4.11.1",
+    "deepspeed",
+    "dm-env",
+    "dm-tree",
+    "fastchat",
+    "fschat[model-worker,webui]>=0.2.36",
     "hf-transfer>=0.1.9",
-    "torch>=2.10.0",
-    "torchaudio>=2.10.0",
-    "torchvision>=0.25.0",
-    "transformers>=5.3.0",
+    "jsonlines",
+    "loguru",
+    "modelscope",
+    "numpy<2",
+    "pylatexenc",
+    "ray[default]==2.38.0",
+    "scipy",
+    "setproctitle",
+    "setuptools-scm",
+    "sympy==1.13.1",
+    "timeout-decorator",
+    "torch==2.5.1",
+    "torchvision==0.20.1",
+    "transformers==4.47.0",
+    "typing-extensions",
+    "vllm==0.6.4.post1",
+    "word2number",
+]
+
+[tool.uv.workspace]
+members = [
+    "3d-tts-sw/src/envs/MATH/latex2sympy",
 ]
