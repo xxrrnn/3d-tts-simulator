@@ -1,0 +1,47 @@
+INFO--log_tools.setup_logger:   日志系统初始化完成
+INFO--main_for_ffn_baseline.main_for_FFN_baseline:   FFN基线模型运行开始
+INFO--hardware_config.__init__:   CIM配置: 存算比=1, 权重位宽=8, 宏：256行 x 32列
+INFO--hardware_config.__init__:   工作频率=400MHz, 功耗=4.048582995951417e-14J/op
+INFO--hardware_config.__init__:   DRAM配置: 带宽=249999392.768KB/s, 功耗=7.20896e-09J/KB
+INFO--hardware_config.__init__:   NoC配置: 包宽度=512bit, 带宽=25000000.0KB/s, 工作频率=400MHz, 功耗=5.48864e-08J/KB
+INFO--hardware_config.__init__:   NNULT配置: entry_num=256, cycle_period=2.4999999999999998e-06ms, power=2.1584W
+INFO--hardware_config.__init__:   SRAM Buffer配置: 容量=256KB, 平均功耗=0.0033988528W
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.16ms
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.01ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=131072
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.33ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=262144
+INFO--Latency_Computer.compute_latency:   CIM计算延迟=0.66ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.04ms
+INFO--Latency_Computer.transfer_latency:   DRAM传输延迟=0.04ms
+INFO--Latency_Computer.transfer_latency:   NoC传输延迟=0.65ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 0.9830400000000001
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.07168017410598193
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 0.64512
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型GELU+LayerNorm延迟: 0.012800078125
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 1.712640252230982
+INFO--Latency_Computer.layernorm_latency:   NNULT layernorm延迟=0.16ms
+INFO--Latency_Computer.layernorm_energy_consumption:   NNULT layernorm能耗=0.00mJ
+INFO--Latency_Computer.gelu_latency:   NNULT gelu延迟=0.01ms
+INFO--Latency_Computer.gelu_energy_consumption:   NNULT gelu能耗=0.00mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=4, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=4, 准确的计算周期数=131072
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.09mJ
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=32, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=64, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=262144
+INFO--Latency_Computer.compute_energy_consumption:   CIM计算能耗=0.17mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.06mJ
+INFO--Latency_Computer.transfer_energy_consumption:   DRAM传输能耗=0.06mJ
+INFO--Latency_Computer.transfer_energy_consumption:   NoC传输能耗=0.89mJ
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型非线性能耗: 0.0017681720719999999
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算能耗: 16.69299030024291
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM能耗: 8.2678120448
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC能耗: 56.6533029888
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型SRAM能耗: 0.37254477546803066
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总能耗: 81.98841828138295

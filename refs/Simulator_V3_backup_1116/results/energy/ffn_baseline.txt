@@ -1,0 +1,2 @@
+total_latency: 1.71ms
+total_energy_consumption: 81.99mJ

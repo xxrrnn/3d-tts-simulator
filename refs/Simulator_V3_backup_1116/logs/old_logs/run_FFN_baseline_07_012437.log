@@ -1,0 +1,21 @@
+INFO--log_tools.setup_logger:   日志系统初始化完成
+INFO--main.main:   FFN基线模型运行开始
+INFO--hardware_config.__init__:   CIM配置: 存算比=1, 权重位宽=8, 宏：256行 x 16列
+INFO--hardware_config.__init__:   工作频率=400MHz, 功耗=4.048582995951417e-14J/op
+INFO--hardware_config.__init__:   DRAM配置: 带宽=80530636.8KB/s, 功耗=7.20896e-09J/KB
+INFO--hardware_config.__init__:   NoC配置: 包宽度=256bit, 带宽=12500000.0KB/s, 工作频率=400MHz, 功耗=6.8040769536e-08J/KB
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=128, matrix_B.matrix_height=2048, cim_config.macro_col_num=16, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=8, page_y=8, 利用率=100.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=8, 准确的计算周期数=262144
+INFO--Latency_Computer.compute_latency:   计算延迟=0.66ms
+INFO--Latency_Computer.map_weight_to_cim:   matrix_B.matrix_width=2048, matrix_B.matrix_height=128, cim_config.macro_col_num=16, cim_config.macro_row_num=256
+INFO--Latency_Computer.map_weight_to_cim:   page_x=128, page_y=1, 利用率=50.00%
+INFO--Latency_Computer.compute_cycles:   page_turn=16, 准确的计算周期数=524288
+INFO--Latency_Computer.compute_latency:   计算延迟=1.31ms
+INFO--Latency_Computer.transfer_latency:   传输延迟=0.11ms
+INFO--Latency_Computer.transfer_latency:   传输延迟=0.11ms
+INFO--Latency_Computer.transfer_latency:   传输延迟=1.29ms
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型计算延迟: 1.9660800000000003
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型DRAM延迟: 0.22252400716145834
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型NoC延迟: 1.29024
+INFO--run_FFN_baseline.run_FFN_baseline:   FFN基线模型总延迟: 3.4788440071614586
