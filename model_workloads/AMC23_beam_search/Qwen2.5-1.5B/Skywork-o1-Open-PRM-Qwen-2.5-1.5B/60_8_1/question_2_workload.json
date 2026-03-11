@@ -1,0 +1,66 @@
+{
+  "question_id": "question_2",
+  "prefill": {
+    "kv_cache_count": 1528
+  },
+  "decode": {
+    "steps": [
+      {
+        "step": 0,
+        "branch_count": 8,
+        "branch_tokens": [
+          88,
+          91,
+          89,
+          109,
+          110,
+          117,
+          88,
+          84
+        ],
+        "selected_branch_index": 4
+      },
+      {
+        "step": 1,
+        "branch_count": 8,
+        "branch_tokens": [
+          225,
+          152,
+          197,
+          145,
+          239,
+          149,
+          205,
+          204
+        ],
+        "selected_branch_index": 7
+      },
+      {
+        "step": 2,
+        "branch_count": 5,
+        "branch_tokens": [
+          201,
+          200,
+          181,
+          208,
+          187
+        ],
+        "selected_branch_index": 0
+      },
+      {
+        "step": 3,
+        "branch_count": 1,
+        "branch_tokens": [
+          15
+        ],
+        "selected_branch_index": 0
+      },
+      {
+        "step": 4,
+        "branch_count": 0,
+        "branch_tokens": [],
+        "selected_branch_index": -1
+      }
+    ]
+  }
+}

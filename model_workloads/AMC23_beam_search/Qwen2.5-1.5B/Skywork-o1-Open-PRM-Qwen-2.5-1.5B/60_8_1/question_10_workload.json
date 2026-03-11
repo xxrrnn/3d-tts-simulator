@@ -1,0 +1,131 @@
+{
+  "question_id": "question_10",
+  "prefill": {
+    "kv_cache_count": 1985
+  },
+  "decode": {
+    "steps": [
+      {
+        "step": 0,
+        "branch_count": 8,
+        "branch_tokens": [
+          158,
+          105,
+          106,
+          88,
+          103,
+          109,
+          113,
+          108
+        ],
+        "selected_branch_index": 7
+      },
+      {
+        "step": 1,
+        "branch_count": 7,
+        "branch_tokens": [
+          136,
+          127,
+          105,
+          108,
+          518,
+          177,
+          687
+        ],
+        "selected_branch_index": 2
+      },
+      {
+        "step": 2,
+        "branch_count": 5,
+        "branch_tokens": [
+          33,
+          37,
+          32,
+          34,
+          36
+        ],
+        "selected_branch_index": 4
+      },
+      {
+        "step": 3,
+        "branch_count": 2,
+        "branch_tokens": [
+          55,
+          54
+        ],
+        "selected_branch_index": 0
+      },
+      {
+        "step": 4,
+        "branch_count": 2,
+        "branch_tokens": [
+          54,
+          45
+        ],
+        "selected_branch_index": 1
+      },
+      {
+        "step": 5,
+        "branch_count": 4,
+        "branch_tokens": [
+          113,
+          111,
+          113,
+          119
+        ],
+        "selected_branch_index": 3
+      },
+      {
+        "step": 6,
+        "branch_count": 2,
+        "branch_tokens": [
+          85,
+          83
+        ],
+        "selected_branch_index": 1
+      },
+      {
+        "step": 7,
+        "branch_count": 3,
+        "branch_tokens": [
+          36,
+          37,
+          57
+        ],
+        "selected_branch_index": 1
+      },
+      {
+        "step": 8,
+        "branch_count": 1,
+        "branch_tokens": [
+          41
+        ],
+        "selected_branch_index": 0
+      },
+      {
+        "step": 9,
+        "branch_count": 3,
+        "branch_tokens": [
+          33,
+          30,
+          29
+        ],
+        "selected_branch_index": 1
+      },
+      {
+        "step": 10,
+        "branch_count": 1,
+        "branch_tokens": [
+          22
+        ],
+        "selected_branch_index": 0
+      },
+      {
+        "step": 11,
+        "branch_count": 0,
+        "branch_tokens": [],
+        "selected_branch_index": -1
+      }
+    ]
+  }
+}
