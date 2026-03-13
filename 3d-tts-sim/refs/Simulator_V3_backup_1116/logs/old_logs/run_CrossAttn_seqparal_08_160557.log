@@ -1,0 +1,2 @@
+INFO--log_tools.setup_logger:   日志系统初始化完成
+INFO--main_for_crossattn_seqparal.main_for_CrossAttn_seqparal:   CrossAttn序列并行模型运行开始

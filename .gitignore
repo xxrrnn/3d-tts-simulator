@@ -1,0 +1,155 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.Python/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Model files
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+
+# Large model directories
+*/models/
+*/checkpoints/
+*/weights/
+**/data/models/
+
+# Hugging Face cache
+.cache/
+transformers_cache/
+huggingface_cache/
+**/huggingface/
+
+# Training artifacts
+wandb/
+tensorboard/
+*.log
+logs/
+outputs/
+results/
+runs/
+
+# Data files (often large)
+*.csv
+*.json
+*.jsonl
+*.parquet
+*.feather
+*.arrow
+*.tfrecord
+*.tar.gz
+*.zip
+*.7z
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Environments
+*.env
+.env.*
+
+# Custom patterns for this project
+3d-tts-sw/data/models/
+3d-tts-sw/src/envs/MATH/latex2sympy/.venv/
+*.incomplete
+
+# Output files and visualizations
+output/
+outputs/
+*/output/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Java archives
+*.jar
+
+# Ray/distributed training
+/tmp/
+ray_results/
+
+# GPU related
+*.cuda
+*.gpu
+
+# Large datasets
+dataset/
+datasets/
+data/*.bin
+data/*.pt
+data/*.pth

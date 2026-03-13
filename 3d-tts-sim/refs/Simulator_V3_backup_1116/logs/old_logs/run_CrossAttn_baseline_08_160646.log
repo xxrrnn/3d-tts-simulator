@@ -1,0 +1,2 @@
+INFO--log_tools.setup_logger:   日志系统初始化完成
+INFO--main_for_crossattn_baseline.main_for_CrossAttn_baseline:   CrossAttn基线模型运行开始
