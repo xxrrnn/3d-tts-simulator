@@ -13,12 +13,12 @@ os.environ['HF_ENDPOINT'] = 'https://hf-mirror.com'
 # 获取项目根目录和模型目录路径
 current_dir = Path(__file__).parent
 project_root = current_dir.parent
-models_dir = project_root / "3d-tts-sw" / "data" / "models"
+models_dir = project_root /  "data" / "models"
 
 # 可用的本地模型映射
 LOCAL_MODELS = {
     # Policy models
-    "qwen2.5-1.5b": str(models_dir / "Qwen2.5-1.5B"),
+    "qwen2.5-1.5b-math": str(models_dir / "Qwen2.5-Math-1.5B"),
     "qwen2.5-3b": str(models_dir / "Qwen2.5-3B"),
     "qwen2.5-math-1.5b": str(models_dir / "Qwen2.5-Math-1.5B-Instruct"),
     "qwen2.5-math-7b": str(models_dir / "Qwen2.5-Math-7B-Instruct"),
@@ -30,7 +30,7 @@ LOCAL_MODELS = {
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument(
-    "--model", "-m", type=str, default="qwen2.5-1.5b", 
+    "--model", "-m", type=str, default="qwen2.5-1.5b-math", 
     help=f"Model name. Available local models: {list(LOCAL_MODELS.keys())}\n"
          f"Or use HuggingFace model path directly"
 )
@@ -63,7 +63,7 @@ print('\n\n')
 
 model_name_dict = {
     # 本地模型路径映射
-    str(models_dir / "Qwen2.5-1.5B"): "qwen_2_5_1_5b_policy",
+    str(models_dir / "Qwen2.5-Math-1.5B"): "qwen_2_5_1_5b_math_policy",
     str(models_dir / "Qwen2.5-3B"): "qwen_2_5_3b_policy", 
     str(models_dir / "Qwen2.5-Math-1.5B-Instruct"): "qwen_2_5_math_1_5b_policy",
     str(models_dir / "Qwen2.5-Math-7B-Instruct"): "qwen_2_5_math_7b_policy",

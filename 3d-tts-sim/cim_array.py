@@ -28,19 +28,21 @@ class CIM_Array:
         kv_prec: int=8,
         w_prec: int=8, 
         batch_size:int=1,
-        pe_dp_size: int=1,
         cxt_len: int=256,
-        is_generation: bool=False,
+        model_type: str="policy",
         
+        # cim config
         subarray_height: int=1,
         subarray_width: int=8,
         macro_row_num: int=256,
         macro_col_num: int=32,
         working_frequency: float=400,
-        energy_efficiency: float=24.7,
+        # energy_efficiency: float=24.7,
+        cim_energy:float = 0,
+        cim_area:float = 0,
     ):
-        assert pe_energy != 0, "ERROR! You must provide the energy cost of a PE."
-        assert len(pe_array_dim) == 2, f"ERROR! The dimension of PE array must be 2. But you gave {len(pe_array_dim)}."
+        # assert pe_energy != 0, "ERROR! You must provide the energy cost of a PE."
+        # assert len(pe_array_dim) == 2, f"ERROR! The dimension of PE array must be 2. But you gave {len(pe_array_dim)}."
         
         self.model_name    = model_name
         self.i_prec        = i_prec
@@ -53,15 +55,23 @@ class CIM_Array:
         self.macro_row_num = macro_row_num
         self.macro_col_num = macro_col_num
         self.working_frequency = working_frequency
-        self.energy_efficiency = energy_efficiency
+        # self.energy_efficiency = energy_efficiency
+        self.cim_energy = cim_energy # 29.49 mW per macro follow DCIM-GCN
+        self.cim_area = cim_area     # 0.424mm^2 per macro follow DCIM-GCN
         
-        self._init_model_profiler(model_name, cxt_len, is_generation)
+        self._init_model_profiler(model_name, model_type, cxt_len)
     
-    def _init_model_profiler(self, model_name, cxt_len: int=256, is_generation: bool=False):
+    def _init_model_profiler(self, model_name, model_type:str, cxt_len: int=256):
         model_name_dict = {
-            
+            "qwen2.5-1.5b-math": "qwen_2_5_1_5b_math_policy",
+            "qwen2.5-3b": "qwen_2_5_3b_policy",
+            "qwen2.5-math-1.5b": "qwen_2_5_math_1_5b_policy",
+            "qwen2.5-math-7b": "qwen_2_5_math_7b_policy",
+            "skywork-prm-1.5b": "skywork_prm_1_5b_reward",
+            "math-shepherd-7b": "math_shepherd_7b_reward",
+            "skywork-reward-v2-llama-3.2-1b": "skywork_reward_v2_llama_3_2_1b_reward",
         }
-        file_path = f'./model_shape_config/{model_name_dict[model_name]}.pickle'
+        file_path = f'./model_shape_config/{model_type}/{model_name_dict[model_name]}.pickle'
         with open(file_path, 'rb') as f:
             model_config, layer_config = pickle.load(f)
         
@@ -72,10 +82,10 @@ class CIM_Array:
         output_dim = {}
         for name, weight_shape in layer_config.items():
             weight_dim[name] = [1] + weight_shape
-            if is_generation: # generation
+            if model_type == "policy": # policy model
                 input_dim[name]  = [1, batch_size, weight_shape[1]]
                 output_dim[name] = [1, batch_size, weight_shape[0]]
-            else:
+            else: # reward model
                 input_dim[name]  = [batch_size, cxt_len, weight_shape[1]]
                 output_dim[name] = [batch_size, cxt_len, weight_shape[0]]
 
@@ -92,21 +102,21 @@ class CIM_Array:
 
         for l_idx in range(num_hidden_layers):
             op_name = f'model.layers.{l_idx}.self_attn.attn_qk'
-            if is_generation: # generation
+            if model_type == "policy": # policy model
                 weight_dim[op_name] = [batch_size * num_key_value_heads, cxt_len, head_size] # key dimension
                 input_dim[op_name]  = [batch_size * num_key_value_heads, query_share_factor, head_size] # query dimension
                 output_dim[op_name] = [batch_size * num_key_value_heads, query_share_factor, cxt_len] # score dimension
-            else:
+            else: # reward model
                 weight_dim[op_name] = [batch_size * num_key_value_heads, cxt_len, head_size] # key dimension
                 input_dim[op_name]  = [batch_size * num_key_value_heads, query_share_factor * cxt_len, head_size] # query dimension
                 output_dim[op_name] = [batch_size * num_key_value_heads, query_share_factor * cxt_len, cxt_len] # score dimension
             
             op_name = f'model.layers.{l_idx}.self_attn.attn_v'
-            if is_generation: # generation
+            if model_type == "policy": # policy model
                 weight_dim[op_name] = [batch_size * num_key_value_heads, head_size, cxt_len] # value dimension
                 input_dim[op_name]  = [batch_size * num_key_value_heads, query_share_factor, cxt_len] # score dimension
                 output_dim[op_name] = [batch_size * num_key_value_heads, query_share_factor, head_size] # output dimension
-            else:
+            else: # reward model
                 weight_dim[op_name] = [batch_size * num_key_value_heads, head_size, cxt_len] # value dimension
                 input_dim[op_name]  = [batch_size * num_key_value_heads, query_share_factor * cxt_len, cxt_len] # score dimension
                 output_dim[op_name] = [batch_size * num_key_value_heads, query_share_factor * cxt_len, head_size] # output dimension
