@@ -1,7 +1,0 @@
-INFO--log_tools.setup_logger:   日志系统初始化完成
-INFO--main_for_ffn_baseline.main_for_FFN_baseline:   FFN基线模型运行开始
-INFO--hardware_config.__init__:   CIM配置: 存算比=1, 权重位宽=8, 宏：256行 x 16列
-INFO--hardware_config.__init__:   工作频率=400MHz, 功耗=4.048582995951417e-14J/op
-INFO--hardware_config.__init__:   DRAM配置: 带宽=161061273.6KB/s, 功耗=7.20896e-09J/KB
-INFO--hardware_config.__init__:   NoC配置: 包宽度=256bit, 带宽=12500000.0KB/s, 工作频率=400MHz, 功耗=6.8040769536e-08J/KB
-INFO--hardware_config.__init__:   NNULT配置: entry_num=16, cycle_period=0.00068ms, power=0.0591mW

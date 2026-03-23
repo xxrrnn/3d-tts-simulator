@@ -1,7 +1,0 @@
-INFO--log_tools.setup_logger:   日志系统初始化完成
-INFO--main_for_attn_baseline.main_for_Attn_baseline:   Attn基线模型运行开始
-INFO--hardware_config.__init__:   CIM配置: 存算比=1, 权重位宽=8, 宏：256行 x 32列
-INFO--hardware_config.__init__:   工作频率=400MHz, 功耗=4.048582995951417e-14J/op
-INFO--hardware_config.__init__:   DRAM配置: 带宽=249999392.768KB/s, 功耗=7.20896e-09J/KB
-INFO--hardware_config.__init__:   NoC配置: 包宽度=512bit, 带宽=25000000.0KB/s, 工作频率=400MHz, 功耗=5.48864e-08J/KB
-INFO--hardware_config.__init__:   NNULT配置: entry_num=256, cycle_period=2.4999999999999998e-06ms, power=2.1584W
