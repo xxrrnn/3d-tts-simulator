@@ -1,0 +1,20 @@
+vllm==0.6.4.post1
+torch==2.5.1
+transformers==4.47.0
+dm-env
+dm-tree
+fastchat
+deepspeed
+jsonlines
+scipy
+typing_extensions
+setproctitle
+accelerate>=0.34.2
+numpy<2
+pylatexenc
+loguru
+antlr4-python3-runtime==4.11.1 # ! The version needs to be compatible with sympy.
+word2number
+timeout-decorator
+setuptools_scm
+modelscope
