@@ -191,7 +191,9 @@ class MathEvaluator:
         extracted_answers = [self._task.extract_answer(txt) for txt in gen_answers]
         output_list = [
             {
-                "path_idx": i, "text": txt, "value": v, "extracted_answer": extracted_answer, "reward_history": reward,
+                "path_idx": i, "text": txt, 
+                # "value": v,  # 注释掉：与reward_history重复
+                "extracted_answer": extracted_answer, "reward_history": reward,
                 "token_history": token, "prob_history": prob, "model_history": model,
                 "token_prob_history": token_prob
             }

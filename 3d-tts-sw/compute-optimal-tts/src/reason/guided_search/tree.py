@@ -168,11 +168,13 @@ class LanguageNode(Node):
         num_generated_token: Optional[int] = None,
         model_name: str = "",
         token_prob_list: Optional[List[float]] = None,
+        prm_step_scores: Optional[List[float]] = None,
     ) -> None:
         super().__init__(parent, prior_p, initial_value, parent_value)
         self.text_state = text_state
         self.last_action = last_action
         self.prm_value = prm_value
+        self.prm_step_scores = prm_step_scores
 
         self.num_generated_token = num_generated_token
         self.has_collected_token_num = False
@@ -193,6 +195,7 @@ class LanguageNode(Node):
         if not self.is_root():
             info_dict["last_action"] = self.last_action
             info_dict["prm_value"] = self.prm_value
+            info_dict["prm_step_scores"] = self.prm_step_scores
         else:
             info_dict["text_state"] = self.text_state
         return info_dict
@@ -393,6 +396,7 @@ class SearchTree:
                                 branch_info = {
                                     "child_index": child_idx,
                                     "reward_score": c_value,
+                                    "prm_step_scores": child.prm_step_scores,
                                     "q_plus_a": c_q_plus_a,
                                     "parent_value": c_parent_value,
                                     "prior_prob": ps[child_idx],
@@ -443,6 +447,7 @@ class SearchTree:
                                 branch_info = {
                                     "action": action,
                                     "reward_score": c_value,
+                                    "prm_step_scores": child.prm_step_scores,
                                     "q_plus_a": c_q_plus_a,
                                     "parent_value": c_parent_value,
                                     "prior_prob": ps[action],
@@ -684,6 +689,7 @@ class SearchTree:
                         traceback.print_exc()
                         # prms = [[0.0] for _ in simulate_env.legal_actions]
             child_values = []
+            prm_scores_per_action: List[Optional[List[float]]] = []
             for act, rs in zip(simulate_env.legal_actions, prms):
                 if len(simulate_env.action_history) + 1 != len(rs):
                     logger.warning(f"PRM value length not match with action history. len(prm)={len(rs)}, "
@@ -694,12 +700,15 @@ class SearchTree:
                         import traceback
                         traceback.print_exc()
                     child_values.append(0.0)
+                    prm_scores_per_action.append([float(x) for x in rs] if rs is not None else [])
                 elif len(rs) == 0:
                     logger.warning(f"Empty PRM value for: \nState: \n{text_state} \naction: \n{act}, will be set to 0.0")
                     child_values.append(0.0)
+                    prm_scores_per_action.append([])
                 else:
                     # prm-last
                     child_values.append(rs[-1])  # PRM get last r as single reward, [0.9783847332000732, 0.9621075391769409]
+                    prm_scores_per_action.append([float(x) for x in rs])
                     # # prm-min
                     # child_values.append(min(rs))
                     # # prob-prm
@@ -717,6 +726,8 @@ class SearchTree:
                 #  `self._init_critic=True`, since with LLM
                 child_value = 0.0
 
+            step_prm = prm_scores_per_action[i] if self._init_critic_value else None
+
             if self.direct_io:
                 node.children[i] = LanguageNode(
                     parent=node,
@@ -729,6 +740,7 @@ class SearchTree:
                     num_generated_token=action_dict["num_token"],
                     model_name=model_name,
                     token_prob_list=action_dict.get("token_probs", []),
+                    prm_step_scores=step_prm,
                 )
             else:
                 node.children[action] = LanguageNode(
@@ -742,6 +754,7 @@ class SearchTree:
                     num_generated_token=action_dict["num_token"],
                     model_name=model_name,
                     token_prob_list=action_dict.get("token_probs", []),
+                    prm_step_scores=step_prm,
                 )
             # set terminal node here
             if simulate_env._next_state_terminated[action]:
@@ -821,6 +834,7 @@ class SearchTree:
                 prior_p=node_info["prior_p"],
                 prm_value=node_info.get("prm_value", None),
                 initial_value=node_info.get("initial_value", 0.0),
+                prm_step_scores=node_info.get("prm_step_scores", None),
             )
 
             if not reset_visit_info:
