@@ -1,6 +1,6 @@
 #!/bin/bash
 
-conda activate tts
+# conda activate tts
 
 POLICY_MODEL_PATH=$1
 VALUE_MODEL_PATH=$2
@@ -63,7 +63,8 @@ do
     enforce_eager=false
     cpu_offload_gb=0
 
-    gpu_memory_utilization=0.95
+    # 降低GPU显存使用率，避免CUDA内存访问错误
+    gpu_memory_utilization=0.65
     if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
         tensor_parallel_size=2
     else

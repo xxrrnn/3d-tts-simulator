@@ -4,7 +4,10 @@
 if command -v uv &> /dev/null; then
     echo "Using uv environment..."
 elif command -v conda &> /dev/null; then
-    conda activate tts 2>/dev/null || true
+    echo "Using conda environment..."
+    # 正确初始化 conda
+    source /root/miniconda3/etc/profile.d/conda.sh
+    conda activate tts
 else
     echo "Neither uv nor conda found, using system python..."
 fi
@@ -145,8 +148,23 @@ export BEAM_SEARCH_DETAILED_LOG=$beam_search_detailed_log
 export PYTHONPATH=$(pwd)
 cd ${PYTHONPATH}
 
-export CUDA_VISIBLE_DEVICES=0
-GPU_LIST=(0 0)
+# 根据 n_gpus 动态设置 CUDA_VISIBLE_DEVICES 和 GPU_LIST
+if [ $n_gpus -eq 1 ]; then
+    export CUDA_VISIBLE_DEVICES=0
+    GPU_LIST=(0 0)
+elif [ $n_gpus -eq 2 ]; then
+    export CUDA_VISIBLE_DEVICES=0,1
+    GPU_LIST=(0 1)
+elif [ $n_gpus -eq 3 ]; then
+    export CUDA_VISIBLE_DEVICES=0,1,2
+    GPU_LIST=(0 1 2)
+elif [ $n_gpus -eq 4 ]; then
+    export CUDA_VISIBLE_DEVICES=0,1,2,3
+    GPU_LIST=(0 1 2 3)
+else
+    echo "Error: n_gpus must be 1, 2, 3, or 4"
+    exit 1
+fi
 echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES, n_gpus: $n_gpus"
 echo "GPU_LIST:"
 echo "${GPU_LIST[@]}"

@@ -210,7 +210,7 @@
 
 ```bash
 # 运行分析（按配置分组，包含极端情况分析）
-cd /DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/analyze
+cd /root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/analyze
 python analyze_branch_selection.py --verbose
 
 # 使用自定义极端值阈值（默认1.5）
@@ -222,7 +222,7 @@ cat branch_selection_analysis.json
 
 ### 命令行参数
 
-- `--workload-dir`: Workload目录路径（默认：`/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sim/model_workloads`）
+- `--workload-dir`: Workload目录路径（默认：`/root/autodl-tmp/3d-tts-simulator/3d-tts-sim/model_workloads`）
 - `--output`: 输出JSON文件路径（默认：`branch_selection_analysis.json`）
 - `--extreme-threshold`: 极端值阈值倍数（默认：1.5）
   - 值越大，判定为"极端"的标准越严格

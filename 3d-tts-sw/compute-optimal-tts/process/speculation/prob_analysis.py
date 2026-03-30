@@ -157,13 +157,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Analyze probability patterns for branch selection")
     parser.add_argument(
         "--input",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
         help="Directory containing generated speculation json files",
     )
     parser.add_argument("--n", type=int, default=8, help="Number of tokens after common prefix")
     parser.add_argument(
         "--output",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/prob_analysis_result.json",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/prob_analysis_result.json",
         help="Output analysis json file",
     )
     parser.add_argument("--verbose", "-v", action="store_true")

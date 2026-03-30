@@ -159,12 +159,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate speculation workloads from src/output jsonl files")
     parser.add_argument(
         "--input",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/output",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/output",
         help="Input root directory (default: src/output)",
     )
     parser.add_argument(
         "--output",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
         help="Output root directory (default: process/speculation/output)",
     )
     parser.add_argument("--verbose", "-v", action="store_true", help="Enable debug logs")

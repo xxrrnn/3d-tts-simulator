@@ -242,12 +242,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Train stronger no-reward branch selector")
     parser.add_argument(
         "--input",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
         help="Input directory with record_0.json files",
     )
     parser.add_argument(
         "--output",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/branch_selection_strong_ml_result.json",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/branch_selection_strong_ml_result.json",
         help="Output json path",
     )
     parser.add_argument("--n-head", type=int, default=8)

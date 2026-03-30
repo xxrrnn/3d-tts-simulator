@@ -167,13 +167,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Analyze reward/index selection bias from speculation outputs")
     parser.add_argument(
         "--input",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
         help="Directory containing speculation output json files",
     )
     parser.add_argument("--max-k", type=int, default=6, help="Max history length k for all-zero condition")
     parser.add_argument(
         "--output",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/reward_analysis_result.json",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/reward_analysis_result.json",
         help="Output analysis json file",
     )
     parser.add_argument("--verbose", "-v", action="store_true")

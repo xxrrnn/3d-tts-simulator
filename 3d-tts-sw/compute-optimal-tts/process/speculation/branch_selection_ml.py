@@ -430,12 +430,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Train small ML models to predict selected branch")
     parser.add_argument(
         "--input",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output",
         help="Input folder with speculation workload json files",
     )
     parser.add_argument(
         "--output",
-        default="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/branch_selection_ml_result.json",
+        default="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/speculation/output/branch_selection_ml_result.json",
         help="Output result json path",
     )
     parser.add_argument("--n-head", type=int, default=8, help="Head token count after common prefix")

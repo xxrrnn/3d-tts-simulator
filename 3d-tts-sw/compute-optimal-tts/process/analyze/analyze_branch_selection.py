@@ -491,7 +491,7 @@ def main():
     parser.add_argument(
         '--workload-dir',
         type=str,
-        default='/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sim/model_workloads',
+        default='/root/autodl-tmp/3d-tts-simulator/3d-tts-sim/model_workloads',
         help='Workload目录路径'
     )
     parser.add_argument(

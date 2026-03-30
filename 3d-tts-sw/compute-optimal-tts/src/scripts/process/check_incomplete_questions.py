@@ -9,6 +9,9 @@
     --delete        删除有问题的配置目录（需要确认）
     --output-dir    指定输出目录路径（默认: ../output）
     --help          显示帮助信息
+
+注意:
+    如果配置目录中存在 avg_result.json 文件，将被视为已完成并跳过检查
 """
 
 import os
@@ -40,6 +43,12 @@ def check_question_folders(base_path):
             # 检查是否是应该包含question_*的目录（比如256_4_1这样的配置目录）
             parent_name = os.path.basename(root)
             if parent_name and '_' in parent_name and parent_name.replace('_', '').isdigit():
+                # 检查是否存在 avg_result.json，如果存在说明已完成
+                avg_result_path = os.path.join(root, 'avg_result.json')
+                if os.path.exists(avg_result_path):
+                    # 已完成，跳过
+                    continue
+                
                 results.append({
                     'path': root,
                     'issue': 'NO_QUESTIONS',

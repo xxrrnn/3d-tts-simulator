@@ -6,7 +6,7 @@
 
 usage:
 
-cd /DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/wordload
+cd /root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/wordload
 # 为单个数据集生成
 python gen_workload.py --input ../../src/output/AMC23_beam_search --verbose
 # 或批量处理
@@ -156,7 +156,7 @@ def generate_all_workloads(input_dir: Path, dataset_name: str) -> None:
                 logger.info(f"    Processing config: {config_dir.name}")
                 
                 # 创建输出目录
-                output_base = Path("/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sim/model_workloads") / dataset_name / policy_dir.name / reward_dir.name / config_dir.name
+                output_base = Path("/root/autodl-tmp/3d-tts-simulator/3d-tts-sim/model_workloads") / dataset_name / policy_dir.name / reward_dir.name / config_dir.name
                 output_base.mkdir(parents=True, exist_ok=True)
                 
                 # 处理所有问题

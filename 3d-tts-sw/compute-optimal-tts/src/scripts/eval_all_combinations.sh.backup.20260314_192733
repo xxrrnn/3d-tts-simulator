@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 基础路径配置
-BASE_PATH="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/data/models"
-export LOGDIR="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
+BASE_PATH="/root/autodl-tmp/3d-tts-simulator/data/models"
+export LOGDIR="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
 export HOST_ADDR="0.0.0.0"
 export CONTROLLER_PORT=10014
 export WORKER_BASE_PORT=10081

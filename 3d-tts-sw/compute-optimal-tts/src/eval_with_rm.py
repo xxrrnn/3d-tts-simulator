@@ -11,7 +11,7 @@ from reason.inference.rm_call import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]  # .../3d-tts-simulator
-DEFAULT_RM_PATH = "/DISK1/data/rnxu_24/Paper/3d-tts-simulator/data/models/Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+DEFAULT_RM_PATH = "/root/autodl-tmp/3d-tts-simulator/data/models/Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
 
 
 def build_rm_caller(rm_model_path: str, controller_addr: str) -> RMRemoteCaller:

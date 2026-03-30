@@ -17,7 +17,7 @@
 ### 1. 只检查，不删除
 
 ```bash
-cd /DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/scripts/process
+cd /root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/scripts/process
 ./check_questions.sh
 ```
 

@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # 基础路径配置
-BASE_PATH="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/data/models"
-export LOGDIR="/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
+BASE_PATH="/root/autodl-tmp/models"
+export LOGDIR="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
 export HOST_ADDR="0.0.0.0"
 export CONTROLLER_PORT=10014
 export WORKER_BASE_PORT=10081
 
 # GPU配置 (统一管理)
-N_GPUS=2  # 可选值: 1, 2, 3, 4
+N_GPUS=1  # 可选值: 1, 2, 3, 4
 
 # 脚本路径配置
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,7 +16,7 @@ SRC_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 OUTPUT_BASE_DIR="${SRC_DIR}/output"
 
 # 卡死检测：单次评估最大运行时长（秒）
-EVAL_TIMEOUT_SECONDS=7200
+EVAL_TIMEOUT_SECONDS=720000
 
 # Policy模型列表
 POLICY_MODELS=(
@@ -32,8 +32,8 @@ POLICY_MODELS=(
 
 # Reward模型列表
 REWARD_MODELS=(
-    # "math-shepherd-mistral-7b-prm"
-    # "Skywork-o1-Open-PRM-Qwen-2.5-7B"
+    "math-shepherd-mistral-7b-prm"
+    "Skywork-o1-Open-PRM-Qwen-2.5-7B"
     "Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
     # "Qwen2.5-Math-PRM-7B"
 )
@@ -91,7 +91,7 @@ start_services() {
     export POLICY_MODEL_PATH="$policy_path"
     
     # 根据 N_GPUS 参数选择对应的服务脚本
-    local serve_script="scripts/serve_gpu2_2-3.sh"
+    local serve_script="scripts/serve_gpu${N_GPUS}.sh"
     
     if [ ! -f "$serve_script" ]; then
         log_message "错误: 服务脚本不存在: $serve_script"
@@ -103,7 +103,8 @@ start_services() {
     bash "$serve_script" "$policy_path" "$reward_path" "$HOST_ADDR" "$CONTROLLER_PORT" "$WORKER_BASE_PORT" &
     SERVICE_PID=$!
     
-    wait_and_log 30
+    # 增加等待时间，确保大模型有足够时间加载到GPU
+    wait_and_log 60
 }
 
 # 删除当前组合对应的输出目录（避免不完整输出残留）
@@ -117,6 +118,30 @@ cleanup_output_dir() {
     local policy_model="${policy_path##*/}"
     local reward_model="${reward_path##*/}"
 
+}
+
+# 检查评估是否已完成
+check_evaluation_completed() {
+    local policy_path=$1
+    local reward_path=$2
+    local task=$3
+    local branch_width=$4
+    local num_seq=$5
+    
+    local policy_model="${policy_path##*/}"
+    local reward_model="${reward_path##*/}"
+    
+    # 构建输出目录路径
+    local output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/16384_${branch_width}_${num_seq}"
+    local result_file="${output_dir}/avg_result.json"
+    
+    # 检查avg_result.json是否存在
+    if [ -f "$result_file" ]; then
+        log_message "✓ 跳过已完成的评估: ${task}, Branch=${branch_width}, NumSeq=${num_seq}"
+        return 0  # 已完成
+    else
+        return 1  # 未完成
+    fi
 }
 
 # 运行评估
@@ -140,10 +165,10 @@ run_evaluation() {
             --width "$branch_width" \
             --num_seq "$num_seq" \
             --temperature 0.7 \
-            --max_new_tokens 131072 \
+            --max_new_tokens 16384 \
             --tree_max_depth 16384 \
             --bs "$batch_size" \
-            --mt 120 \
+            --mt 120000 \
             --n_gpus "$N_GPUS" \
             --double_line_break 1 \
             --local 0 \
@@ -231,6 +256,11 @@ main() {
                         log_message "Dataset: ${task}"
                         log_message "Branch Width: ${branch_width}"
                         log_message "Num Seq: ${num_seq}"
+                        
+                        # 检查是否已完成，如果已完成则跳过
+                        if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"; then
+                            continue
+                        fi
                         
                         run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq"
                     done

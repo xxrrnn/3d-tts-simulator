@@ -1,7 +1,7 @@
 #!/bin/bash
-export VALUE_MODEL_PATH=/DISK1/data/rnxu_24/Paper/3d-tts-simulator/data/models/Skywork-o1-Open-PRM-Qwen-2.5-1.5B
-export POLICY_MODEL_PATH=/DISK1/data/rnxu_24/Paper/3d-tts-simulator/data/models/Qwen2.5-Math-1.5B-Instruct
-export LOGDIR=/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs
+export VALUE_MODEL_PATH=/root/autodl-tmp/3d-tts-simulator/data/models/Skywork-o1-Open-PRM-Qwen-2.5-1.5B
+export POLICY_MODEL_PATH=/root/autodl-tmp/3d-tts-simulator/data/models/Qwen2.5-Math-1.5B-Instruct
+export LOGDIR=/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs
 export HOST_ADDR=0.0.0.0 && export CONTROLLER_PORT=10014 && export WORKER_BASE_PORT=10081
 
 bash scripts/serve_gpu1.sh $POLICY_MODEL_PATH $VALUE_MODEL_PATH $HOST_ADDR $CONTROLLER_PORT $WORKER_BASE_PORT
