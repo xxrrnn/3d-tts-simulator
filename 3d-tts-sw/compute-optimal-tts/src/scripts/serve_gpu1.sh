@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# 使用 uv 激活虚拟环境，如果没有则跳过
-if command -v uv &> /dev/null; then
-    echo "Using uv environment..."
-elif command -v conda &> /dev/null; then
-    echo "Using conda environment..."
-else
-    echo "Neither uv nor conda found, using system python..."
-fi
-
 POLICY_MODEL_PATH=$1
 VALUE_MODEL_PATH=$2
 NUM_RM_WORKER=1
@@ -66,14 +57,14 @@ do
     tmux send-keys "source ~/.bashrc && source ${project_root}/.venv/bin/activate 2>/dev/null || conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
 
     max_model_length=8192
-    max_num_sequences=0
+    max_num_sequences=4
     enforce_eager=false
     cpu_offload_gb=0
 
     if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
-        gpu_memory_utilization=0.95
+        gpu_memory_utilization=0.80
     else
-        gpu_memory_utilization=0.88
+        gpu_memory_utilization=0.80
     fi
 
     if [[ "$POLICY_MODEL_PATH" =~ "DeepSeek-R1" ]]; then

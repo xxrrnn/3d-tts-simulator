@@ -1,201 +1,168 @@
-# 工作负载生成器 (Workload Generator)
+# Workload 生成器说明
 
-从 beam search JSON 数据构建推理工作负载的工具，用于分析和理解整个推理过程。
+本目录包含两个工作负载生成器，用于从beam search结果中提取workload信息。
 
-## 功能特性
+## 文件说明
 
-- **Prefill 阶段分析**: 提取 KV cache 数量、初始 tokens、beam size 等信息
-- **Decode 阶段分析**: 详细记录每个 step 的 branch 数量、token 数、选择的 branch index 等
-- **结构化输出**: 按照 `dataset/policy_model/reward_model` 的层次结构组织输出
-- **独立文件**: 每个问题生成单独的工作负载文件
+### 1. `gen_workload.py` - 标准工作负载生成器
 
-## 安装和使用
+**目标**: 从beam search结果生成标准workload格式
 
-### 基本用法
+**输出内容**:
+- Prefill的KV cache数量
+- 每个decode step的分支数量、token数量、reward得分
+- 被选中的分支索引
 
-```bash
-# 生成工作负载
-python gen_workload.py --input src/output/AMC23_beam_search --verbose
-
-# 分析工作负载
-python analyze_workload.py --workload-dir workload/AMC23_beam_search/Qwen2.5-1.5B/Skywork-o1-Open-PRM-Qwen-2.5-1.5B/60_8_1/ --max-files 5
-```
-
-### 命令行参数
-
-#### gen_workload.py
-- `--input`: 输入目录路径 (必需)
-- `--dataset`: 数据集名称 (可选，默认从路径自动提取)
-- `--verbose`: 详细输出
-
-#### analyze_workload.py
-- `--workload-dir`: 工作负载目录路径 (必需)
-- `--max-files`: 最多分析的文件数 (默认: 3)
-
-## 输出文件结构
-
-```
-workload/
-├── AMC23_beam_search/              # 数据集名称
-│   └── Qwen2.5-1.5B/               # 策略模型
-│       └── Skywork-o1-Open-PRM-Qwen-2.5-1.5B/  # 奖励模型
-│           └── 60_8_1/             # 配置参数
-│               ├── question_0_workload.json
-│               ├── question_1_workload.json
-│               └── ...
-```
-
-## 工作负载文件格式
-
-每个工作负载文件包含以下信息：
-
-### 基本信息
+**输出格式**:
 ```json
 {
-  "question_id": "question_0",
-  "original_question": "问题原文...",
-  "groundtruth": "27.0",
-  "final_answer": "27",
-  "generation_metadata": {
-    "dataset": "AMC23_beam_search",
-    "source_file": "原始文件路径",
-    "generated_by": "gen_workload.py"
-  }
-}
-```
-
-### Prefill 阶段
-```json
-{
+  "question_id": "question_X",
   "prefill": {
-    "phase": "prefill",
-    "question": "问题原文",
-    "question_length": 258,
-    "kv_cache_count": 220,      // KV cache 数量
-    "initial_tokens": 168,      // 初始 tokens 数
-    "beam_size": 1,            // beam search 大小
-    "max_step": 60,            // 最大步数
-    "initial_branches": 4       // 初始分支数
-  }
-}
-```
-
-### Decode 阶段
-```json
-{
+    "kv_cache_count": int
+  },
   "decode": {
-    "phase": "decode",
-    "total_steps": 9,
     "steps": [
       {
-        "step": 0,
-        "current_nodes": 1,
-        "selection_process": {
-          "available_branches": 4,
-          "terminated_count": 0,
-          "branches": [
-            {
-              "branch_index": 0,
-              "selected": true,           // 是否被选择
-              "reward_score": 0.9968,     // 奖励分数
-              "prior_prob": 0.9877,       // 先验概率
-              "num_tokens": 75,           // token 数量
-              "branch_content_length": 335,
-              "full_path_length": 335
-            }
-          ]
-        },
-        "expansion_results": {
-          "pre_expansion_value": 0.9968,
-          "final_status": "expanded",
-          "num_new_children": 2,
-          "api_completion_tokens": 168,
-          "terminated": false
-        },
-        "summary": {
-          "nodes_to_expand": 1,
-          "terminated_nodes": 0,
-          "beam_width_used": 1,
-          "nodes_expanded": 1,
-          "final_terminated_nodes": 0
-        }
+        "step": int,
+        "branch_count": int,
+        "branch_tokens": [int, ...],
+        "branch_rewards": [float, ...],
+        "selected_branch_index": int
       }
-    ],
-    "final_path_info": {
-      "final_node_value": 0.9899,
-      "is_terminated": true
-    },
-    "statistics": {
-      "total_completion_tokens": 2187,
-      "tree_completion_tokens": 761,
-      "reward_history": [0.9968, 0.9931, ...],
-      "token_history": [75, 21, 40, ...],
-      "prob_history": [0.9877, 0.9861, ...]
-    }
+    ]
   }
 }
 ```
 
-## 关键指标说明
+**输出大小**: 小（每个问题 1-2 KB）
 
-### Prefill 阶段指标
-- **kv_cache_count**: 预填充后的 KV cache 条目数量
-- **initial_tokens**: 第一次推理产生的 token 数量
-- **initial_branches**: 第一次推理产生的分支数量
+**输出目录**: `/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sim/model_workloads/`
 
-### Decode 阶段指标
-- **available_branches**: 每步可选择的分支数量
-- **selected**: 分支是否被选择 (true/false)
-- **num_tokens**: 每个分支产生的 token 数量
-- **reward_score**: 分支的奖励分数
-- **api_completion_tokens**: API 调用产生的 completion token 数
-- **final_status**: 节点最终状态 (expanded/terminated)
+### 2. `gen_workload_beam.py` - Beam Search配置增强版
 
-## 使用场景
+**目标**: 在标准workload基础上增加beam search特有的配置信息
 
-1. **性能分析**: 了解推理过程的计算开销和资源需求
-2. **算法优化**: 分析 beam search 的分支选择策略
-3. **Token 追踪**: 监控 prefill 和 decode 阶段的 token 消耗
-4. **质量评估**: 通过奖励分数和选择路径评估推理质量
+**输出内容**:
+- 所有`gen_workload.py`的内容
+- **额外增加**:
+  - Beam search配置（beam_size, max_step）
+  - 每步的terminated_count（终止分支数）
+  - **selected_branch_indices（复数）**：记录所有被选中的分支索引列表
 
-## 输出示例
+**重要说明**:
+- 虽然`beam_size=2`，但每一步**可能选中2、4或更多个分支**
+- 这是因为beam search从多个父节点同时扩展
+- 例如：Step 0选中2个分支 → Step 1这2个分支各自扩展 → 可能产生4个被选中的子分支
 
-运行分析工具后的输出示例：
-
+**输出格式**:
+```json
+{
+  "question_id": "question_X",
+  "prefill": {
+    "kv_cache_count": int
+  },
+  "beam_search_config": {
+    "beam_size": int,
+    "max_step": int
+  },
+  "decode_steps": [
+    {
+      "step": int,
+      "branch_count": int,
+      "branch_tokens": [int, ...],
+      "branch_rewards": [float, ...],
+      "branch_parent_indices": [int, ...],  // 新增：父分支索引，-1表示根节点
+      "selected_branch_indices": [int, ...],  // 注意：复数，可能有多个
+      "terminated_count": int
+    }
+  ]
+}
 ```
-🔧 Prefill 阶段:
-  - 问题长度: 258 字符
-  - KV Cache 数量: 220
-  - 初始 tokens: 168
-  - Beam size: 1
-  - 初始分支数: 4
 
-🚀 Decode 阶段:
-  - 总步数: 9
-  Step 0:
-    - 可用分支: 4
-    - 选择分支: 1
-    - 新子节点: 2
-    - API tokens: 168
-    - 节点扩展: expanded
+**字段说明**:
+- `branch_parent_indices`: 每个分支的父分支索引（指向上一步的分支数组索引）
+  - `-1`: 表示根节点（仅在Step 0）
+  - `>= 0`: 表示来自上一步的第几个分支（基于上一步的branch数组索引）
+  - 用于追踪beam search的树形结构
+  - **示例**：如果Step 1的分支3的parent=5，表示该分支来自Step 0的分支5
 
-📊 整体统计:
-  - 总完成tokens: 2187
-  - 树搜索tokens: 761
-  - 总生成分支数: 29
-  - 总生成tokens: 284
-  - 奖励分数范围: 0.9899 - 0.9974
-  - 最终奖励分数: 0.9899
+**树结构追踪示例**：
+```
+Step 0: selected=[2, 5]
+  ├─ 分支2 (reward=0.062)
+  └─ 分支5 (reward=0.053)
 
-🎯 选择的推理路径:
-  Step 0: Branch 0 (奖励: 0.9968, tokens: 75)
-  Step 1: Branch 0 (奖励: 0.9931, tokens: 21)
-  ...
+Step 1: parent_indices=[2, 2, 5, 5, 5]
+  ├─ 分支0 (parent=2) ← 来自Step0分支2
+  ├─ 分支1 (parent=2) ← 来自Step0分支2
+  ├─ 分支2 (parent=5) ← 来自Step0分支5
+  ├─ 分支3 (parent=5) ← 来自Step0分支5
+  └─ 分支4 (parent=5) ← 来自Step0分支5
+```
+
+**输出大小**: 小（每个问题 5-10 KB，取决于步数）
+
+**输出目录**: `/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sim/model_workloads_beam/`
+
+## 使用方法
+
+### 标准版本（gen_workload.py）
+
+```bash
+cd /DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/wordload
+
+# 单个数据集
+python gen_workload.py --input ../../src/output/MATH_beam_search --verbose
+
+# 批量处理
+for dataset in AMC23_beam_search AIME24_beam_search MATH_beam_search; do
+    python gen_workload.py --input ../../src/output/$dataset --verbose
+done
+```
+
+### Beam增强版本（gen_workload_beam.py）
+
+```bash
+cd /DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/wordload
+
+# 单个数据集
+python gen_workload_beam.py --input ../../src/output/AIME24_beam_search --verbose
+
+# 批量处理
+for dataset in AMC23_beam_search AIME24_beam_search MATH_beam_search; do
+    python gen_workload_beam.py --input ../../src/output/$dataset --verbose
+done
 ```
 
 ## 注意事项
 
-1. 确保输入目录包含有效的 beam search 日志文件
-2. 工作负载文件以 JSON 格式保存，便于后续处理和分析
-3. 支持多种数据集和模型组合的批量处理
-4. KV cache 数量是基于问题长度和初始 tokens 的估算值
+1. **详细日志依赖**: 两个工具都需要record文件中包含`detailed_beam_search_log`字段。如果没有这个字段，文件会被跳过。
+
+2. **格式兼容**: `gen_workload_beam.py`的输出完全兼容`gen_workload.py`，只是额外增加了beam search配置信息。
+
+3. **多output支持**: 两个工具都能正确处理`detailed_beam_search_log`在`output[0]`或`output[1]`中的情况。
+
+## 选择哪个工具？
+
+- **只需要基本workload信息**: 使用`gen_workload.py`
+- **需要beam search配置信息（beam_size等）**: 使用`gen_workload_beam.py`
+- **需要分析beam search的探索策略**: 使用`gen_workload_beam.py`（包含terminated_count等信息）
+
+## 关键区别
+
+| 特性 | gen_workload.py | gen_workload_beam.py |
+|------|----------------|----------------------|
+| prefill信息 | ✅ | ✅ |
+| decode步骤统计 | ✅ | ✅ |
+| branch tokens | ✅ | ✅ |
+| branch rewards | ✅ | ✅ |
+| selected_branch_index | ✅ | ❌ |
+| **selected_branch_indices** | ❌ | ✅ (支持多个) |
+| **branch_parent_indices** | ❌ | ✅ (追踪树结构) |
+| **beam_search_config** | ❌ | ✅ |
+| **terminated_count** | ❌ | ✅ |
+| 文件大小 | 1-2 KB | 5-10 KB |
+
+**注意**: 
+- 两个工具都**不包含**分支的文本内容，只包含统计信息。这就是workload的定义！
+- `gen_workload_beam.py`使用`selected_branch_indices`（复数）来记录每步可能有**多个**被选中的分支

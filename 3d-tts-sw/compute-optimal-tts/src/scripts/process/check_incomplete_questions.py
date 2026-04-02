@@ -17,6 +17,7 @@
 import os
 import sys
 import argparse
+import glob
 from pathlib import Path
 from collections import defaultdict
 
@@ -53,7 +54,8 @@ def check_question_folders(base_path):
                     'path': root,
                     'issue': 'NO_QUESTIONS',
                     'details': '完全没有 question_* 文件夹',
-                    'severity': 'high'
+                    'severity': 'high',
+                    'lock_files': []
                 })
             continue
         
@@ -77,7 +79,8 @@ def check_question_folders(base_path):
                     'issue': 'NOT_START_ZERO',
                     'details': f'从 {question_nums[0]} 开始，应该从 0 开始',
                     'numbers': question_nums,
-                    'severity': 'medium'
+                    'severity': 'medium',
+                    'lock_files': []
                 })
             
             # 检查是否连续
@@ -85,6 +88,18 @@ def check_question_folders(base_path):
             if question_nums != expected:
                 missing = set(expected) - set(question_nums)
                 severity = 'high' if len(missing) > 5 else 'low'
+                
+                # 检查缺失的问题是否有对应的锁文件
+                lock_dir = os.path.join(root, 'lock_dir')
+                lock_files = []
+                if os.path.exists(lock_dir):
+                    for missing_num in sorted(missing):
+                        # 检查可能的锁文件格式：question_N_0.lock, question_N_1.lock, 等等
+                        lock_pattern = f'question_{missing_num}_*.lock'
+                        locks = glob.glob(os.path.join(lock_dir, lock_pattern))
+                        if locks:
+                            lock_files.extend(locks)
+                
                 results.append({
                     'path': root,
                     'issue': 'NOT_CONTINUOUS',
@@ -93,7 +108,8 @@ def check_question_folders(base_path):
                     'missing': sorted(missing),
                     'total': len(question_nums),
                     'expected_total': len(expected),
-                    'severity': severity
+                    'severity': severity,
+                    'lock_files': lock_files  # 添加锁文件列表
                 })
                 
         except Exception as e:
@@ -101,7 +117,8 @@ def check_question_folders(base_path):
                 'path': root,
                 'issue': 'ERROR',
                 'details': str(e),
-                'severity': 'high'
+                'severity': 'high',
+                'lock_files': []
             })
     
     return results
@@ -166,6 +183,14 @@ def print_detailed_list(results):
             print(f"   缺失编号: {missing[:20]}{'...' if len(missing) > 20 else ''}")
             print(f"   完成度: {r['total']}/{r['expected_total']} ({r['total']*100//r['expected_total']}%)")
         
+        # 显示锁文件信息
+        if 'lock_files' in r and r['lock_files']:
+            print(f"   {Colors.MAGENTA}发现锁文件: {len(r['lock_files'])} 个{Colors.END}")
+            for lock_file in r['lock_files'][:5]:
+                print(f"      - {os.path.basename(lock_file)}")
+            if len(r['lock_files']) > 5:
+                print(f"      ... 还有 {len(r['lock_files']) - 5} 个")
+        
         print(f"   {Colors.BLUE}完整路径:{Colors.END} {r['path']}")
         print()
 
@@ -181,38 +206,51 @@ def prompt_delete(results):
     for r in results:
         by_severity[r.get('severity', 'unknown')].append(r)
     
+    # 统计有锁文件的问题
+    with_locks = [r for r in results if r.get('lock_files')]
+    
     print(f"{Colors.BOLD}按严重程度统计:{Colors.END}")
     print(f"  {Colors.RED}●{Colors.END} 高严重 (建议删除): {len(by_severity['high'])} 个")
     print(f"  {Colors.YELLOW}●{Colors.END} 中严重: {len(by_severity['medium'])} 个")
     print(f"  {Colors.GREEN}●{Colors.END} 低严重 (可能还在运行): {len(by_severity['low'])} 个")
+    print(f"  {Colors.MAGENTA}●{Colors.END} 有锁文件的问题: {len(with_locks)} 个")
     
     print(f"\n{Colors.BOLD}删除选项:{Colors.END}")
     print("  1. 只删除高严重程度的 (完全没有question文件夹)")
     print("  2. 删除高+中严重程度的")
     print("  3. 删除所有有问题的配置")
-    print("  4. 自定义选择")
+    print("  4. 只删除锁文件（保留已完成的结果，重新推理缺失部分）")
+    print("  5. 自定义选择")
     print("  0. 取消，不删除任何内容")
     
     while True:
-        choice = input(f"\n{Colors.BOLD}请选择 [0-4]:{Colors.END} ").strip()
+        choice = input(f"\n{Colors.BOLD}请选择 [0-5]:{Colors.END} ").strip()
         
         if choice == '0':
             print(f"{Colors.GREEN}✓ 已取消删除操作{Colors.END}")
-            return []
+            return [], 'none'
         
         elif choice == '1':
             to_delete = by_severity['high']
+            delete_mode = 'directory'
             break
         
         elif choice == '2':
             to_delete = by_severity['high'] + by_severity['medium']
+            delete_mode = 'directory'
             break
         
         elif choice == '3':
             to_delete = results
+            delete_mode = 'directory'
             break
         
         elif choice == '4':
+            to_delete = with_locks
+            delete_mode = 'lock_only'
+            break
+        
+        elif choice == '5':
             print(f"\n{Colors.CYAN}输入要删除的配置编号 (用逗号或空格分隔，如: 1,3,5 或 1-5):{Colors.END}")
             indices_input = input("编号: ").strip()
             
@@ -226,24 +264,40 @@ def prompt_delete(results):
                         indices.append(int(part))
                 
                 to_delete = [results[i-1] for i in indices if 0 < i <= len(results)]
+                
+                # 询问删除模式
+                print(f"\n{Colors.CYAN}选择删除模式:{Colors.END}")
+                print("  1. 删除整个配置目录")
+                print("  2. 只删除锁文件")
+                mode_choice = input("请选择 [1-2]: ").strip()
+                delete_mode = 'directory' if mode_choice == '1' else 'lock_only'
                 break
             except:
                 print(f"{Colors.RED}输入格式错误，请重新输入{Colors.END}")
                 continue
         
         else:
-            print(f"{Colors.RED}无效选择，请输入 0-4{Colors.END}")
+            print(f"{Colors.RED}无效选择，请输入 0-5{Colors.END}")
     
     if not to_delete:
         print(f"{Colors.YELLOW}没有选中任何配置{Colors.END}")
-        return []
+        return [], 'none'
     
     # 最终确认
-    print(f"\n{Colors.RED}{Colors.BOLD}将要删除 {len(to_delete)} 个配置:{Colors.END}")
-    for i, r in enumerate(to_delete[:10], 1):
-        path_parts = r['path'].split('/')
-        rel_path = '/'.join(path_parts[-4:])
-        print(f"  {i}. {rel_path}")
+    if delete_mode == 'lock_only':
+        total_locks = sum(len(r.get('lock_files', [])) for r in to_delete)
+        print(f"\n{Colors.YELLOW}{Colors.BOLD}将要删除 {total_locks} 个锁文件（来自 {len(to_delete)} 个配置）:{Colors.END}")
+        for i, r in enumerate(to_delete[:10], 1):
+            path_parts = r['path'].split('/')
+            rel_path = '/'.join(path_parts[-4:])
+            lock_count = len(r.get('lock_files', []))
+            print(f"  {i}. {rel_path} ({lock_count} 个锁文件)")
+    else:
+        print(f"\n{Colors.RED}{Colors.BOLD}将要删除 {len(to_delete)} 个配置:{Colors.END}")
+        for i, r in enumerate(to_delete[:10], 1):
+            path_parts = r['path'].split('/')
+            rel_path = '/'.join(path_parts[-4:])
+            print(f"  {i}. {rel_path}")
     
     if len(to_delete) > 10:
         print(f"  ... 还有 {len(to_delete) - 10} 个")
@@ -251,35 +305,57 @@ def prompt_delete(results):
     confirm = input(f"\n{Colors.BOLD}确认删除? (yes/no):{Colors.END} ").strip().lower()
     
     if confirm in ['yes', 'y']:
-        return to_delete
+        return to_delete, delete_mode
     else:
         print(f"{Colors.GREEN}✓ 已取消删除操作{Colors.END}")
-        return []
+        return [], 'none'
 
 
-def delete_directories(to_delete):
-    """删除指定的目录"""
+def delete_directories(to_delete, delete_mode='directory'):
+    """删除指定的目录或锁文件"""
     import shutil
     
-    print(f"\n{Colors.BOLD}开始删除...{Colors.END}\n")
-    
-    success = 0
-    failed = 0
-    
-    for r in to_delete:
-        path = r['path']
-        try:
-            print(f"删除: {path}")
-            shutil.rmtree(path)
-            success += 1
-        except Exception as e:
-            print(f"{Colors.RED}✗ 失败: {e}{Colors.END}")
-            failed += 1
-    
-    print(f"\n{Colors.BOLD}删除完成:{Colors.END}")
-    print(f"  {Colors.GREEN}✓{Colors.END} 成功: {success}")
-    if failed > 0:
-        print(f"  {Colors.RED}✗{Colors.END} 失败: {failed}")
+    if delete_mode == 'lock_only':
+        print(f"\n{Colors.BOLD}开始删除锁文件...{Colors.END}\n")
+        
+        success = 0
+        failed = 0
+        
+        for r in to_delete:
+            lock_files = r.get('lock_files', [])
+            for lock_file in lock_files:
+                try:
+                    print(f"删除锁文件: {lock_file}")
+                    os.remove(lock_file)
+                    success += 1
+                except Exception as e:
+                    print(f"{Colors.RED}✗ 失败: {e}{Colors.END}")
+                    failed += 1
+        
+        print(f"\n{Colors.BOLD}锁文件删除完成:{Colors.END}")
+        print(f"  {Colors.GREEN}✓{Colors.END} 成功: {success}")
+        if failed > 0:
+            print(f"  {Colors.RED}✗{Colors.END} 失败: {failed}")
+    else:
+        print(f"\n{Colors.BOLD}开始删除配置目录...{Colors.END}\n")
+        
+        success = 0
+        failed = 0
+        
+        for r in to_delete:
+            path = r['path']
+            try:
+                print(f"删除: {path}")
+                shutil.rmtree(path)
+                success += 1
+            except Exception as e:
+                print(f"{Colors.RED}✗ 失败: {e}{Colors.END}")
+                failed += 1
+        
+        print(f"\n{Colors.BOLD}删除完成:{Colors.END}")
+        print(f"  {Colors.GREEN}✓{Colors.END} 成功: {success}")
+        if failed > 0:
+            print(f"  {Colors.RED}✗{Colors.END} 失败: {failed}")
 
 
 def main():
@@ -345,10 +421,10 @@ def main():
     
     # 如果启用删除模式
     if args.delete:
-        to_delete = prompt_delete(results)
+        to_delete, delete_mode = prompt_delete(results)
         
         if to_delete:
-            delete_directories(to_delete)
+            delete_directories(to_delete, delete_mode)
     else:
         print(f"\n{Colors.CYAN}💡 提示: 使用 --delete 选项可以交互式删除有问题的配置{Colors.END}\n")
 

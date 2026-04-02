@@ -1,5 +1,6 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 # 使用 uv 激活虚拟环境，如果没有则跳过
 if command -v uv &> /dev/null; then
     echo "Using uv environment..."
@@ -11,6 +12,8 @@ elif command -v conda &> /dev/null; then
 else
     echo "Neither uv nor conda found, using system python..."
 fi
+=======
+>>>>>>> 207a1d0 (A6000 0401)
 
 # Default arguments
 LM=models--meta-llama--Llama-3.2-1B-Instruct

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Straggler识别与注意力熵分析工具
 
 ## 概述
@@ -123,10 +124,59 @@ cat RUNTIME_PRUNING_STRATEGY.md        # Runtime剪枝策略（重要！）
 ## 输出文件结构
 
 ### straggler_analysis.json
+=======
+# Straggler Branch 识别工具
+
+识别符合straggler定义的branch，并生成完整的分析报告。
+
+## Straggler定义
+
+一个branch被认为是straggler，需要同时满足以下条件：
+
+1. **Token数量超过80** - `branch_tokens > 80`
+2. **超过其他branch最大值的2倍** - `branch_tokens > max(other_branches) * 2`
+3. **Branch数量至少为2** - `len(branches) >= 2`
+
+## 使用方法
+
+### 基本用法
+
+```bash
+cd /DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/threshold
+
+# 使用默认路径
+python3 identify_stragglers.py
+
+# 指定输入目录
+python3 identify_stragglers.py --input ../wordload/model_workloads_need
+
+# 详细输出
+python3 identify_stragglers.py --verbose
+
+# 自定义输出文件
+python3 identify_stragglers.py --output my_analysis.json --report my_report.txt
+```
+
+### 参数说明
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `--input` | `../wordload/model_workloads_need` | Workload文件目录 |
+| `--output` | `straggler_analysis.json` | JSON输出文件 |
+| `--report` | `straggler_report.txt` | 文本报告文件 |
+| `--verbose` | False | 详细日志输出 |
+
+## 输出文件
+
+### 1. JSON文件 (`straggler_analysis.json`)
+
+完整的结构化数据，包含每个straggler的详细信息：
+>>>>>>> 207a1d0 (A6000 0401)
 
 ```json
 {
   "summary": {
+<<<<<<< HEAD
     "total_workload_files": 30,
     "files_with_stragglers": 15,
     "total_straggler_branches": 23,
@@ -152,11 +202,39 @@ cat RUNTIME_PRUNING_STRATEGY.md        # Runtime剪枝策略（重要！）
       },
       "step_info": { ... },
       "stats": { ... }
+=======
+    "total_workload_files": 1957,
+    "files_with_stragglers": 638,
+    "total_straggler_branches": 1010
+  },
+  "stragglers": [
+    {
+      "source_file": "path/to/workload.json",
+      "question_id": "question_26",
+      "step": 1,
+      "straggler_branch_index": 0,
+      "straggler_tokens": 260,
+      "straggler_reward": 0.1878,
+      "is_selected": true,
+      "step_info": {
+        "step": 1,
+        "branch_count": 2,
+        "branch_tokens": [260, 63],
+        "branch_rewards": [0.1878, 0.1549],
+        "selected_branch_index": 0
+      },
+      "stats": {
+        "max_other_tokens": 63,
+        "ratio_to_max_other": 4.13,
+        "total_branches": 2
+      }
+>>>>>>> 207a1d0 (A6000 0401)
     }
   ]
 }
 ```
 
+<<<<<<< HEAD
 ## 关键发现
 
 基于`16384_4_1`数据集的分析：
@@ -266,3 +344,177 @@ A: 这是一个反直觉但重要的发现。它说明：
 位置: `/DISK1/data/rnxu_24/Paper/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/process/threshold/`
 
 最后更新: 2026-04-01
+=======
+### 2. 文本报告 (`straggler_report.txt`)
+
+易读的摘要报告，按题目分组：
+
+```
+================================================================================
+STRAGGLER BRANCH ANALYSIS REPORT
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+  total_workload_files: 1957
+  files_with_stragglers: 638
+  total_straggler_branches: 1010
+
+STRAGGLERS BY QUESTION (40 questions)
+--------------------------------------------------------------------------------
+
+question_0 - 12 straggler(s)
+  Source: ../wordload/.../question_0_workload.json
+
+  Step 0:
+    Straggler branch: 0 (not selected)
+    Tokens: 270 (ratio: 3.60x)
+    Reward: 0.990256
+    All branches (3):
+      Branch 0: 270 tokens, reward=0.990256 <-- STRAGGLER
+      Branch 1: 75 tokens, reward=0.996802 [SELECTED]
+      Branch 2: 74 tokens, reward=0.995485
+```
+
+## 分析结果
+
+基于当前数据集的分析：
+
+- **总workload文件**: 1,957个
+- **包含straggler的文件**: 638个 (32.6%)
+- **Straggler branch总数**: 1,010个
+
+### Straggler统计
+
+| 指标 | 最小值 | 最大值 | 平均值 |
+|------|--------|--------|--------|
+| Token数量 | 81 | 5,224 | 357.2 |
+| 与其他branch最大值的比例 | 2.00x | 98.60x | 4.97x |
+| 被选为最终答案的比例 | - | - | 35.5% |
+
+### 关键发现
+
+1. **35.5%的straggler被选为最终答案** - 说明长的branch不一定是错的
+2. **平均比例4.97x** - straggler通常是其他branch的5倍长
+3. **最大比例98.6x** - 存在极端情况
+
+## 数据结构
+
+### JSON字段说明
+
+#### Summary部分
+- `total_workload_files` - 分析的workload文件总数
+- `files_with_stragglers` - 包含straggler的文件数
+- `total_straggler_branches` - straggler branch总数
+
+#### Stragglers部分（每个straggler）
+
+**位置信息**:
+- `source_file` - 源workload文件路径
+- `question_id` - 题目ID
+- `step` - 步骤编号
+
+**Straggler信息**:
+- `straggler_branch_index` - straggler的branch索引
+- `straggler_tokens` - token数量
+- `straggler_reward` - reward得分
+- `is_selected` - 是否被选为最终答案
+
+**完整步骤信息**:
+- `step_info.branch_count` - 该步骤的branch总数
+- `step_info.branch_tokens` - 所有branch的token数量
+- `step_info.branch_rewards` - 所有branch的reward
+- `step_info.selected_branch_index` - 被选中的branch索引
+
+**统计信息**:
+- `stats.max_other_tokens` - 其他branch的最大token数
+- `stats.ratio_to_max_other` - 与其他branch最大值的比例
+- `stats.total_branches` - 该步骤的总branch数
+
+## 进一步分析
+
+### 使用Python分析
+
+```python
+import json
+
+with open('straggler_analysis.json', 'r') as f:
+    data = json.load(f)
+
+# 找出所有被选中的straggler
+selected_stragglers = [s for s in data['stragglers'] if s['is_selected']]
+print(f"Selected stragglers: {len(selected_stragglers)}")
+
+# 找出最长的straggler
+longest = max(data['stragglers'], key=lambda x: x['straggler_tokens'])
+print(f"Longest: {longest['straggler_tokens']} tokens in {longest['question_id']}")
+
+# 按比例排序
+by_ratio = sorted(data['stragglers'], key=lambda x: x['stats']['ratio_to_max_other'], reverse=True)
+print(f"Highest ratio: {by_ratio[0]['stats']['ratio_to_max_other']:.2f}x")
+```
+
+### 按数据集统计
+
+```python
+from collections import defaultdict
+
+dataset_stats = defaultdict(int)
+for s in data['stragglers']:
+    dataset = s['source_file'].split('/')[1]  # 提取数据集名
+    dataset_stats[dataset] += 1
+
+for dataset, count in sorted(dataset_stats.items()):
+    print(f"{dataset}: {count} stragglers")
+```
+
+## 集成到其他工具
+
+### 1. 与动态剪枝器集成
+
+可以使用straggler数据来训练或调整剪枝策略：
+
+```python
+from threshold.dynamic_pruner import DynamicPruner
+
+# 加载straggler数据
+with open('straggler_analysis.json', 'r') as f:
+    stragglers = json.load(f)['stragglers']
+
+# 分析straggler的特征
+straggler_rewards = [s['straggler_reward'] for s in stragglers]
+print(f"Straggler reward mean: {np.mean(straggler_rewards):.4f}")
+```
+
+### 2. 生成训练数据
+
+为straggler预测模型生成训练数据：
+
+```python
+training_data = []
+for s in stragglers:
+    training_data.append({
+        'features': {
+            'tokens': s['straggler_tokens'],
+            'reward': s['straggler_reward'],
+            'ratio': s['stats']['ratio_to_max_other'],
+            'num_branches': s['stats']['total_branches']
+        },
+        'label': 'straggler',
+        'is_correct': s['is_selected']
+    })
+```
+
+## 相关文件
+
+- `identify_stragglers.py` - 主程序
+- `straggler_analysis.json` - JSON输出
+- `straggler_report.txt` - 文本报告
+- `README.md` - 本文档
+
+---
+
+**创建时间**: 2026-04-01  
+**版本**: v1.0  
+**作者**: Assistant
+>>>>>>> 207a1d0 (A6000 0401)

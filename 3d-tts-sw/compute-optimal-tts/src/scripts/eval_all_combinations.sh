@@ -14,9 +14,14 @@ N_GPUS=1  # 可选值: 1, 2, 3, 4
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 OUTPUT_BASE_DIR="${SRC_DIR}/output"
+CHECK_SCRIPT="${SCRIPT_DIR}/process/check_incomplete_questions.py"
 
 # 卡死检测：单次评估最大运行时长（秒）
+<<<<<<< HEAD
 EVAL_TIMEOUT_SECONDS=720000
+=======
+EVAL_TIMEOUT_SECONDS=21600
+>>>>>>> 207a1d0 (A6000 0401)
 
 # Policy模型列表
 POLICY_MODELS=(
@@ -32,16 +37,22 @@ POLICY_MODELS=(
 
 # Reward模型列表
 REWARD_MODELS=(
+<<<<<<< HEAD
     "math-shepherd-mistral-7b-prm"
     "Skywork-o1-Open-PRM-Qwen-2.5-7B"
+=======
+>>>>>>> 207a1d0 (A6000 0401)
     "Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+    "math-shepherd-mistral-7b-prm"
+    "Skywork-o1-Open-PRM-Qwen-2.5-7B"
     # "Qwen2.5-Math-PRM-7B"
 )
 
 # 数据集配置 (任务名, batch_size)
+# batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
-    "AIME24 30"
-    "AMC23 40"
+    "AIME24 30"  # 从 30 降到 15（减少50%）
+    "AMC23 40"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
 
@@ -104,7 +115,43 @@ start_services() {
     SERVICE_PID=$!
     
     # 增加等待时间，确保大模型有足够时间加载到GPU
+<<<<<<< HEAD
     wait_and_log 60
+=======
+    wait_and_log 30
+>>>>>>> 207a1d0 (A6000 0401)
+}
+
+# 删除锁文件（保留已完成的结果）
+cleanup_lock_files() {
+    local policy_path=$1
+    local reward_path=$2
+    local task=$3
+    local branch_width=$4
+    local num_seq=$5
+
+    local policy_model="${policy_path##*/}"
+    local reward_model="${reward_path##*/}"
+    
+    # 构建输出目录路径
+    local output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/16384_${branch_width}_${num_seq}"
+    local lock_dir="${output_dir}/lock_dir"
+    
+    if [ ! -d "$lock_dir" ]; then
+        log_message "锁文件目录不存在: $lock_dir"
+        return 0
+    fi
+    
+    # 查找并删除所有锁文件
+    local lock_count=$(find "$lock_dir" -name "*.lock" -type f 2>/dev/null | wc -l)
+    
+    if [ $lock_count -gt 0 ]; then
+        log_message "发现 $lock_count 个锁文件，正在删除..."
+        find "$lock_dir" -name "*.lock" -type f -delete
+        log_message "✓ 已删除所有锁文件"
+    else
+        log_message "没有发现锁文件"
+    fi
 }
 
 # 删除当前组合对应的输出目录（避免不完整输出残留）
@@ -117,7 +164,62 @@ cleanup_output_dir() {
 
     local policy_model="${policy_path##*/}"
     local reward_model="${reward_path##*/}"
+    
+    # 构建输出目录路径
+    local output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/16384_${branch_width}_${num_seq}"
+    
+    if [ -d "$output_dir" ]; then
+        log_message "删除输出目录: $output_dir"
+        rm -rf "$output_dir"
+    fi
+}
 
+# 检查评估是否已完成
+check_evaluation_completed() {
+    local policy_path=$1
+    local reward_path=$2
+    local task=$3
+    local branch_width=$4
+    local num_seq=$5
+    
+    local policy_model="${policy_path##*/}"
+    local reward_model="${reward_path##*/}"
+    
+    # 构建输出目录路径
+    local output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/16384_${branch_width}_${num_seq}"
+    local result_file="${output_dir}/avg_result.json"
+    
+    # 检查avg_result.json是否存在
+    if [ -f "$result_file" ]; then
+        log_message "✓ 跳过已完成的评估: ${task}, Branch=${branch_width}, NumSeq=${num_seq}"
+        return 0  # 已完成
+    else
+        return 1  # 未完成
+    fi
+}
+
+# 检查评估是否部分完成
+check_partial_completion() {
+    local policy_path=$1
+    local reward_path=$2
+    local task=$3
+    local branch_width=$4
+    local num_seq=$5
+    
+    local policy_model="${policy_path##*/}"
+    local reward_model="${reward_path##*/}"
+    
+    local output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/16384_${branch_width}_${num_seq}"
+    
+    # 检查是否有部分结果
+    if [ -d "$output_dir" ]; then
+        local question_count=$(find "$output_dir" -maxdepth 1 -type d -name "question_*" 2>/dev/null | wc -l)
+        if [ $question_count -gt 0 ]; then
+            log_message "发现 $question_count 个已完成的问题，将保留并继续"
+            return 0  # 有部分结果
+        fi
+    fi
+    return 1  # 没有部分结果
 }
 
 # 检查评估是否已完成
@@ -168,7 +270,11 @@ run_evaluation() {
             --max_new_tokens 16384 \
             --tree_max_depth 16384 \
             --bs "$batch_size" \
+<<<<<<< HEAD
             --mt 120000 \
+=======
+            --mt 600000    \
+>>>>>>> 207a1d0 (A6000 0401)
             --n_gpus "$N_GPUS" \
             --double_line_break 1 \
             --local 0 \
@@ -186,9 +292,20 @@ run_evaluation() {
                 log_message "评估失败: ${task}, Branch=${branch_width}, NumSeq=${num_seq} - 退出码: ${exit_code}"
             fi
 
-            # 失败或卡死时：停止服务 -> 删除不完整输出 -> 重启服务
+            # 失败时的智能清理策略
             stop_services
-            cleanup_output_dir "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"
+            
+            # 检查是否有部分完成的结果
+            if check_partial_completion "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"; then
+                # 有部分结果：只删除锁文件，保留已完成的部分
+                log_message "采用智能重试：保留已完成结果，只删除锁文件"
+                cleanup_lock_files "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"
+            else
+                # 没有结果或结果很少：删除整个目录
+                log_message "没有有效结果，删除整个输出目录重新开始"
+                cleanup_output_dir "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"
+            fi
+            
             start_services "$policy_path" "$reward_path"
 
             attempt=$((attempt + 1))

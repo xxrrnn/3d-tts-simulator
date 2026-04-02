@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 """
+<<<<<<< HEAD
 识别符合straggler定义的branch并计算注意力熵
+=======
+识别符合straggler定义的branch
+>>>>>>> 207a1d0 (A6000 0401)
 
 Straggler定义:
 1. 超过80 token
 2. 超过除它之外其他branch最大值的2倍
 3. 只统计branch数量不为1的情况
 
+<<<<<<< HEAD
 输出完整的branch情况汇总，包括原始位置信息和注意力熵分析
+=======
+输出完整的branch情况汇总，包括原始位置信息
+>>>>>>> 207a1d0 (A6000 0401)
 """
 
 import json
@@ -15,7 +23,10 @@ import argparse
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import logging
+<<<<<<< HEAD
 import numpy as np
+=======
+>>>>>>> 207a1d0 (A6000 0401)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -54,6 +65,7 @@ def is_straggler(branch_tokens: List[int], branch_index: int) -> bool:
     return False
 
 
+<<<<<<< HEAD
 def calculate_attention_entropy(token_probs: List[float]) -> Dict[str, float]:
     """计算token概率序列的注意力熵
     
@@ -96,6 +108,10 @@ def calculate_attention_entropy(token_probs: List[float]) -> Dict[str, float]:
 
 def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
     """分析单个workload文件，找出所有straggler情况并计算注意力熵
+=======
+def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
+    """分析单个workload文件，找出所有straggler情况
+>>>>>>> 207a1d0 (A6000 0401)
     
     Args:
         workload_path: workload文件路径
@@ -117,12 +133,16 @@ def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
             branch_count = step_info.get('branch_count', 0)
             branch_tokens = step_info.get('branch_tokens', [])
             branch_rewards = step_info.get('branch_rewards', [])
+<<<<<<< HEAD
             branch_token_probs = step_info.get('branch_token_probs', [])
+=======
+>>>>>>> 207a1d0 (A6000 0401)
             selected_branch_index = step_info.get('selected_branch_index', -1)
             
             # 检查每个branch是否为straggler
             for branch_idx, tokens in enumerate(branch_tokens):
                 if is_straggler(branch_tokens, branch_idx):
+<<<<<<< HEAD
                     # 计算注意力熵（如果有token_probs数据）
                     entropy_metrics = None
                     has_token_probs = False
@@ -142,6 +162,8 @@ def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
                                 entropy_metrics = calculate_attention_entropy(token_probs)
                                 has_token_probs = True
                     
+=======
+>>>>>>> 207a1d0 (A6000 0401)
                     straggler_info = {
                         # 位置信息
                         'source_file': str(workload_path),
@@ -154,10 +176,13 @@ def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
                         'straggler_reward': branch_rewards[branch_idx] if branch_idx < len(branch_rewards) else None,
                         'is_selected': (branch_idx == selected_branch_index),
                         
+<<<<<<< HEAD
                         # 注意力熵信息
                         'has_token_probs': has_token_probs,
                         'entropy_metrics': entropy_metrics,
                         
+=======
+>>>>>>> 207a1d0 (A6000 0401)
                         # 完整的step信息
                         'step_info': {
                             'step': step_num,
@@ -165,8 +190,11 @@ def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
                             'branch_tokens': branch_tokens,
                             'branch_rewards': branch_rewards,
                             'selected_branch_index': selected_branch_index,
+<<<<<<< HEAD
                             'has_branch_token_probs': len(branch_token_probs) > 0,
                             'num_branches_with_probs': len(branch_token_probs),
+=======
+>>>>>>> 207a1d0 (A6000 0401)
                         },
                         
                         # 统计信息
@@ -179,6 +207,7 @@ def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
                     
                     stragglers.append(straggler_info)
                     
+<<<<<<< HEAD
                     entropy_str = f", entropy={entropy_metrics['mean_entropy']:.4f}" if has_token_probs else ", no token_probs"
                     logger.debug(f"Found straggler in {question_id} step {step_num}: "
                                f"branch {branch_idx} has {tokens} tokens "
@@ -188,6 +217,14 @@ def analyze_workload_file(workload_path: Path) -> List[Dict[str, Any]]:
         logger.error(f"Error processing {workload_path}: {e}")
         import traceback
         traceback.print_exc()
+=======
+                    logger.debug(f"Found straggler in {question_id} step {step_num}: "
+                               f"branch {branch_idx} has {tokens} tokens "
+                               f"(ratio: {straggler_info['stats']['ratio_to_max_other']:.2f}x)")
+    
+    except Exception as e:
+        logger.error(f"Error processing {workload_path}: {e}")
+>>>>>>> 207a1d0 (A6000 0401)
     
     return stragglers
 
@@ -223,7 +260,10 @@ def analyze_all_workloads(workload_dir: Path, output_file: Path) -> None:
             'total_workload_files': total_files,
             'files_with_stragglers': processed_files,
             'total_straggler_branches': len(all_stragglers),
+<<<<<<< HEAD
             'stragglers_with_token_probs': sum(1 for s in all_stragglers if s['has_token_probs']),
+=======
+>>>>>>> 207a1d0 (A6000 0401)
         },
         'stragglers': all_stragglers
     }
@@ -238,7 +278,10 @@ def analyze_all_workloads(workload_dir: Path, output_file: Path) -> None:
     logger.info(f"Total workload files: {total_files}")
     logger.info(f"Files with stragglers: {processed_files}")
     logger.info(f"Total straggler branches: {len(all_stragglers)}")
+<<<<<<< HEAD
     logger.info(f"Stragglers with token_probs: {output_data['summary']['stragglers_with_token_probs']}")
+=======
+>>>>>>> 207a1d0 (A6000 0401)
     logger.info(f"Output saved to: {output_file}")
     
     # 统计信息
@@ -254,6 +297,7 @@ def analyze_all_workloads(workload_dir: Path, output_file: Path) -> None:
                    f"avg={sum(ratios)/len(ratios):.2f}x")
         logger.info(f"  Selected as final branch: {selected_count}/{len(all_stragglers)} "
                    f"({selected_count/len(all_stragglers)*100:.1f}%)")
+<<<<<<< HEAD
         
         # 注意力熵统计
         stragglers_with_entropy = [s for s in all_stragglers if s['has_token_probs']]
@@ -285,6 +329,8 @@ def analyze_all_workloads(workload_dir: Path, output_file: Path) -> None:
                 diff = np.mean(selected_entropies) - np.mean(not_selected_entropies)
                 logger.info(f"  Difference (selected - not_selected): {diff:.4f}")
                 logger.info(f"  → {'Selected stragglers have HIGHER entropy' if diff > 0 else 'Selected stragglers have LOWER entropy'}")
+=======
+>>>>>>> 207a1d0 (A6000 0401)
 
 
 def generate_summary_report(straggler_file: Path, output_report: Path) -> None:
@@ -301,7 +347,11 @@ def generate_summary_report(straggler_file: Path, output_report: Path) -> None:
     
     lines = []
     lines.append("=" * 80)
+<<<<<<< HEAD
     lines.append("STRAGGLER BRANCH ANALYSIS REPORT WITH ATTENTION ENTROPY")
+=======
+    lines.append("STRAGGLER BRANCH ANALYSIS REPORT")
+>>>>>>> 207a1d0 (A6000 0401)
     lines.append("=" * 80)
     lines.append("")
     
@@ -312,6 +362,7 @@ def generate_summary_report(straggler_file: Path, output_report: Path) -> None:
         lines.append(f"  {key}: {value}")
     lines.append("")
     
+<<<<<<< HEAD
     # Entropy analysis summary
     stragglers_with_entropy = [s for s in stragglers if s['has_token_probs']]
     if stragglers_with_entropy:
@@ -348,6 +399,8 @@ def generate_summary_report(straggler_file: Path, output_report: Path) -> None:
         
         lines.append("")
     
+=======
+>>>>>>> 207a1d0 (A6000 0401)
     # Group by question
     question_groups = {}
     for s in stragglers:
@@ -373,6 +426,7 @@ def generate_summary_report(straggler_file: Path, output_report: Path) -> None:
             lines.append(f"    Tokens: {s['straggler_tokens']} "
                         f"(ratio: {stats['ratio_to_max_other']:.2f}x)")
             lines.append(f"    Reward: {s['straggler_reward']:.6f}" if s['straggler_reward'] else "    Reward: N/A")
+<<<<<<< HEAD
             
             # 添加熵信息
             if s['has_token_probs'] and s['entropy_metrics']:
@@ -387,6 +441,8 @@ def generate_summary_report(straggler_file: Path, output_report: Path) -> None:
             else:
                 lines.append(f"    Attention Entropy: N/A (no token_probs data)")
             
+=======
+>>>>>>> 207a1d0 (A6000 0401)
             lines.append(f"    All branches ({step_info['branch_count']}):")
             
             for i, (tokens, reward) in enumerate(zip(step_info['branch_tokens'], 
@@ -405,9 +461,15 @@ def generate_summary_report(straggler_file: Path, output_report: Path) -> None:
 
 
 def main():
+<<<<<<< HEAD
     parser = argparse.ArgumentParser(description='识别符合straggler定义的branch并计算注意力熵')
     parser.add_argument('--input', 
                        default='../wordload/model_workloads/16384_4_1',
+=======
+    parser = argparse.ArgumentParser(description='识别符合straggler定义的branch')
+    parser.add_argument('--input', 
+                       default='../wordload/model_workloads_need',
+>>>>>>> 207a1d0 (A6000 0401)
                        help='Workload目录路径')
     parser.add_argument('--output',
                        default='straggler_analysis.json',

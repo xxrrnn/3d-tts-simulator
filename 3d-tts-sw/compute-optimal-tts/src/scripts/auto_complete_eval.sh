@@ -98,7 +98,11 @@ delete_incomplete() {
     log_section "删除不完整的结果"
     log_message "执行: $CHECK_SCRIPT --delete --output-dir $OUTPUT_DIR"
     
+<<<<<<< HEAD
     # 使用 expect 自动化交互，选择删除所有有问题的配置（选项3）
+=======
+    # 使用 expect 自动化交互，选择删除锁文件（选项4）
+>>>>>>> 207a1d0 (A6000 0401)
     # 如果没有 expect，使用 python 脚本的自动确认方式
     if command -v expect &> /dev/null; then
         expect << EOF
@@ -106,7 +110,11 @@ set timeout -1
 spawn python3 "$CHECK_SCRIPT" --delete --output-dir "$OUTPUT_DIR"
 expect {
     "请选择 *:" {
+<<<<<<< HEAD
         send "3\r"
+=======
+        send "4\r"
+>>>>>>> 207a1d0 (A6000 0401)
         exp_continue
     }
     "确认删除*:" {
@@ -119,7 +127,11 @@ EOF
     else
         # 如果没有 expect，尝试使用 yes 命令自动回答
         log_message "${YELLOW}注意: 系统未安装 expect，尝试使用备用方法${END}"
+<<<<<<< HEAD
         echo -e "3\nyes" | python3 "$CHECK_SCRIPT" --delete --output-dir "$OUTPUT_DIR"
+=======
+        echo -e "4\nyes" | python3 "$CHECK_SCRIPT" --delete --output-dir "$OUTPUT_DIR"
+>>>>>>> 207a1d0 (A6000 0401)
     fi
     
     local exit_code=$?
