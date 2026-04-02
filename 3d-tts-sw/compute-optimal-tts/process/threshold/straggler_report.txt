@@ -1,0 +1,416 @@
+================================================================================
+STRAGGLER BRANCH ANALYSIS REPORT WITH ATTENTION ENTROPY
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+  total_workload_files: 30
+  files_with_stragglers: 15
+  total_straggler_branches: 23
+  stragglers_with_token_probs: 23
+
+ATTENTION ENTROPY SUMMARY
+--------------------------------------------------------------------------------
+  Total stragglers with entropy data: 23
+  Mean entropy: min=0.0012, max=0.1024, avg=0.0358
+  Mean prob: min=0.8086, max=0.9984, avg=0.9395
+
+  Selected stragglers (n=11):
+    Mean entropy: 0.0383
+    Mean prob: 0.9416
+
+  Not selected stragglers (n=12):
+    Mean entropy: 0.0335
+    Mean prob: 0.9375
+
+  Entropy difference (selected - not_selected): 0.0048
+  → Selected stragglers have HIGHER entropy (less confident)
+
+STRAGGLERS BY QUESTION (15 questions)
+--------------------------------------------------------------------------------
+
+question_0 - 2 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_0_workload.json
+
+  Step 4:
+    Straggler branch: 1 (not selected)
+    Tokens: 141 (ratio: 3.00x)
+    Reward: 0.375212
+    Attention Entropy:
+      Mean: 0.0118, Std: 0.0494
+      Mean prob: 0.9776, Min prob: 0.1048
+      High confidence tokens (>0.9): 135/141 (95.7%)
+      Low confidence tokens (<0.5): 3/141 (2.1%)
+    All branches (3):
+      Branch 0: 46 tokens, reward=0.466865
+      Branch 1: 141 tokens, reward=0.375212 <-- STRAGGLER
+      Branch 2: 47 tokens, reward=0.477002 [SELECTED]
+
+  Step 5:
+    Straggler branch: 2 (not selected)
+    Tokens: 1256 (ratio: 2.91x)
+    Reward: 0.040238
+    Attention Entropy:
+      Mean: 0.0162, Std: 0.0594
+      Mean prob: 0.9730, Min prob: 0.0229
+      High confidence tokens (>0.9): 1180/1256 (93.9%)
+      Low confidence tokens (<0.5): 26/1256 (2.1%)
+    All branches (4):
+      Branch 0: 431 tokens, reward=0.548657 [SELECTED]
+      Branch 1: 374 tokens, reward=0.512317
+      Branch 2: 1256 tokens, reward=0.040238 <-- STRAGGLER
+      Branch 3: 161 tokens, reward=0.538503
+
+question_12 - 2 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_12_workload.json
+
+  Step 1:
+    Straggler branch: 1 (SELECTED)
+    Tokens: 208 (ratio: 2.14x)
+    Reward: 0.122688
+    Attention Entropy:
+      Mean: 0.0397, Std: 0.0770
+      Mean prob: 0.9482, Min prob: 0.2225
+      High confidence tokens (>0.9): 51/208 (24.5%)
+      Low confidence tokens (<0.5): 1/208 (0.5%)
+    All branches (4):
+      Branch 0: 60 tokens, reward=0.074189
+      Branch 1: 208 tokens, reward=0.122688 [SELECTED] <-- STRAGGLER
+      Branch 2: 97 tokens, reward=0.073831
+      Branch 3: 8 tokens, reward=0.062003
+
+  Step 4:
+    Straggler branch: 0 (not selected)
+    Tokens: 116 (ratio: 3.52x)
+    Reward: 0.111342
+    Attention Entropy:
+      Mean: 0.0728, Std: 0.1102
+      Mean prob: 0.8656, Min prob: 0.0328
+      High confidence tokens (>0.9): 82/116 (70.7%)
+      Low confidence tokens (<0.5): 13/116 (11.2%)
+    All branches (4):
+      Branch 0: 116 tokens, reward=0.111342 <-- STRAGGLER
+      Branch 1: 29 tokens, reward=0.102916
+      Branch 2: 27 tokens, reward=0.210596
+      Branch 3: 33 tokens, reward=0.223620 [SELECTED]
+
+question_13 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_13_workload.json
+
+  Step 1:
+    Straggler branch: 1 (SELECTED)
+    Tokens: 471 (ratio: 3.20x)
+    Reward: 0.104296
+    Attention Entropy:
+      Mean: 0.0264, Std: 0.0723
+      Mean prob: 0.9525, Min prob: 0.0260
+      High confidence tokens (>0.9): 133/471 (28.2%)
+      Low confidence tokens (<0.5): 4/471 (0.8%)
+    All branches (4):
+      Branch 0: 147 tokens, reward=0.067932
+      Branch 1: 471 tokens, reward=0.104296 [SELECTED] <-- STRAGGLER
+      Branch 2: 65 tokens, reward=0.058209
+      Branch 3: 95 tokens, reward=0.057713
+
+question_14 - 2 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_14_workload.json
+
+  Step 0:
+    Straggler branch: 0 (not selected)
+    Tokens: 2959 (ratio: 41.10x)
+    Reward: 0.008095
+    Attention Entropy:
+      Mean: 0.0089, Std: 0.0434
+      Mean prob: 0.9868, Min prob: 0.0211
+      High confidence tokens (>0.9): 2872/2959 (97.1%)
+      Low confidence tokens (<0.5): 28/2959 (0.9%)
+    All branches (4):
+      Branch 0: 2959 tokens, reward=0.008095 <-- STRAGGLER
+      Branch 1: 68 tokens, reward=0.063268
+      Branch 2: 68 tokens, reward=0.063465
+      Branch 3: 72 tokens, reward=0.064524 [SELECTED]
+
+  Step 1:
+    Straggler branch: 0 (not selected)
+    Tokens: 361 (ratio: 2.30x)
+    Reward: 0.077936
+    Attention Entropy:
+      Mean: 0.0532, Std: 0.1079
+      Mean prob: 0.9148, Min prob: 0.1172
+      High confidence tokens (>0.9): 290/361 (80.3%)
+      Low confidence tokens (<0.5): 29/361 (8.0%)
+    All branches (4):
+      Branch 0: 361 tokens, reward=0.077936 <-- STRAGGLER
+      Branch 1: 156 tokens, reward=0.100136
+      Branch 2: 76 tokens, reward=0.143217 [SELECTED]
+      Branch 3: 157 tokens, reward=0.100899
+
+question_16 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_16_workload.json
+
+  Step 1:
+    Straggler branch: 1 (SELECTED)
+    Tokens: 195 (ratio: 3.75x)
+    Reward: 0.071985
+    Attention Entropy:
+      Mean: 0.0069, Std: 0.0380
+      Mean prob: 0.9918, Min prob: 0.6714
+      High confidence tokens (>0.9): 51/195 (26.2%)
+      Low confidence tokens (<0.5): 0/195 (0.0%)
+    All branches (2):
+      Branch 0: 52 tokens, reward=0.064536
+      Branch 1: 195 tokens, reward=0.071985 [SELECTED] <-- STRAGGLER
+
+question_17 - 3 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_17_workload.json
+
+  Step 0:
+    Straggler branch: 1 (not selected)
+    Tokens: 215 (ratio: 3.26x)
+    Reward: 0.029768
+    Attention Entropy:
+      Mean: 0.0195, Std: 0.0661
+      Mean prob: 0.9679, Min prob: 0.1044
+      High confidence tokens (>0.9): 199/215 (92.6%)
+      Low confidence tokens (<0.5): 6/215 (2.8%)
+    All branches (3):
+      Branch 0: 66 tokens, reward=0.073105
+      Branch 1: 215 tokens, reward=0.029768 <-- STRAGGLER
+      Branch 2: 65 tokens, reward=0.079292 [SELECTED]
+
+  Step 6:
+    Straggler branch: 2 (not selected)
+    Tokens: 119 (ratio: 2.83x)
+    Reward: 0.038277
+    Attention Entropy:
+      Mean: 0.0969, Std: 0.1276
+      Mean prob: 0.8086, Min prob: 0.0140
+      High confidence tokens (>0.9): 77/119 (64.7%)
+      Low confidence tokens (<0.5): 19/119 (16.0%)
+    All branches (4):
+      Branch 0: 32 tokens, reward=0.040885 [SELECTED]
+      Branch 1: 32 tokens, reward=0.036395
+      Branch 2: 119 tokens, reward=0.038277 <-- STRAGGLER
+      Branch 3: 42 tokens, reward=0.038573
+
+  Step 9:
+    Straggler branch: 2 (SELECTED)
+    Tokens: 104 (ratio: 4.73x)
+    Reward: 0.051137
+    Attention Entropy:
+      Mean: 0.0575, Std: 0.1015
+      Mean prob: 0.9204, Min prob: 0.2900
+      High confidence tokens (>0.9): 16/104 (15.4%)
+      Low confidence tokens (<0.5): 1/104 (1.0%)
+    All branches (3):
+      Branch 0: 22 tokens, reward=0.046790
+      Branch 1: 17 tokens, reward=0.043769
+      Branch 2: 104 tokens, reward=0.051137 [SELECTED] <-- STRAGGLER
+
+question_18 - 2 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_18_workload.json
+
+  Step 3:
+    Straggler branch: 0 (not selected)
+    Tokens: 150 (ratio: 2.11x)
+    Reward: 0.263267
+    Attention Entropy:
+      Mean: 0.0070, Std: 0.0424
+      Mean prob: 0.9879, Min prob: 0.1667
+      High confidence tokens (>0.9): 146/150 (97.3%)
+      Low confidence tokens (<0.5): 2/150 (1.3%)
+    All branches (3):
+      Branch 0: 150 tokens, reward=0.263267 <-- STRAGGLER
+      Branch 1: 71 tokens, reward=0.285998
+      Branch 2: 62 tokens, reward=0.286513 [SELECTED]
+
+  Step 43:
+    Straggler branch: 3 (SELECTED)
+    Tokens: 112 (ratio: 2.87x)
+    Reward: 0.648292
+    Attention Entropy:
+      Mean: 0.0446, Std: 0.1078
+      Mean prob: 0.9316, Min prob: 0.3360
+      High confidence tokens (>0.9): 23/112 (20.5%)
+      Low confidence tokens (<0.5): 2/112 (1.8%)
+    All branches (4):
+      Branch 0: 27 tokens, reward=0.355864
+      Branch 1: 39 tokens, reward=0.352110
+      Branch 2: 32 tokens, reward=0.335991
+      Branch 3: 112 tokens, reward=0.648292 [SELECTED] <-- STRAGGLER
+
+question_19 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_19_workload.json
+
+  Step 2:
+    Straggler branch: 1 (not selected)
+    Tokens: 483 (ratio: 9.86x)
+    Reward: 0.050949
+    Attention Entropy:
+      Mean: 0.0191, Std: 0.0637
+      Mean prob: 0.9680, Min prob: 0.0372
+      High confidence tokens (>0.9): 450/483 (93.2%)
+      Low confidence tokens (<0.5): 12/483 (2.5%)
+    All branches (4):
+      Branch 0: 49 tokens, reward=0.116838
+      Branch 1: 483 tokens, reward=0.050949 <-- STRAGGLER
+      Branch 2: 49 tokens, reward=0.127596 [SELECTED]
+      Branch 3: 46 tokens, reward=0.105617
+
+question_21 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_21_workload.json
+
+  Step 1:
+    Straggler branch: 2 (SELECTED)
+    Tokens: 1037 (ratio: 4.80x)
+    Reward: 0.480739
+    Attention Entropy:
+      Mean: 0.0105, Std: 0.0491
+      Mean prob: 0.9807, Min prob: 0.1140
+      High confidence tokens (>0.9): 207/1037 (20.0%)
+      Low confidence tokens (<0.5): 4/1037 (0.4%)
+    All branches (4):
+      Branch 0: 216 tokens, reward=0.025072
+      Branch 1: 148 tokens, reward=0.040344
+      Branch 2: 1037 tokens, reward=0.480739 [SELECTED] <-- STRAGGLER
+      Branch 3: 166 tokens, reward=0.047845
+
+question_23 - 2 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_23_workload.json
+
+  Step 4:
+    Straggler branch: 1 (not selected)
+    Tokens: 1999 (ratio: 4.73x)
+    Reward: 0.026735
+    Attention Entropy:
+      Mean: 0.0012, Std: 0.0146
+      Mean prob: 0.9984, Min prob: 0.3285
+      High confidence tokens (>0.9): 1991/1999 (99.6%)
+      Low confidence tokens (<0.5): 2/1999 (0.1%)
+    All branches (4):
+      Branch 0: 80 tokens, reward=0.147792 [SELECTED]
+      Branch 1: 1999 tokens, reward=0.026735 <-- STRAGGLER
+      Branch 2: 360 tokens, reward=0.103602
+      Branch 3: 423 tokens, reward=0.119958
+
+  Step 5:
+    Straggler branch: 1 (SELECTED)
+    Tokens: 335 (ratio: 3.42x)
+    Reward: 0.181343
+    Attention Entropy:
+      Mean: 0.0319, Std: 0.0802
+      Mean prob: 0.9433, Min prob: 0.0018
+      High confidence tokens (>0.9): 84/335 (25.1%)
+      Low confidence tokens (<0.5): 4/335 (1.2%)
+    All branches (4):
+      Branch 0: 98 tokens, reward=0.123507
+      Branch 1: 335 tokens, reward=0.181343 [SELECTED] <-- STRAGGLER
+      Branch 2: 85 tokens, reward=0.124314
+      Branch 3: 95 tokens, reward=0.130180
+
+question_27 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_27_workload.json
+
+  Step 6:
+    Straggler branch: 2 (SELECTED)
+    Tokens: 151 (ratio: 3.08x)
+    Reward: 0.037190
+    Attention Entropy:
+      Mean: 0.1024, Std: 0.1384
+      Mean prob: 0.8561, Min prob: 0.3681
+      High confidence tokens (>0.9): 7/151 (4.6%)
+      Low confidence tokens (<0.5): 1/151 (0.7%)
+    All branches (4):
+      Branch 0: 10 tokens, reward=0.032863
+      Branch 1: 49 tokens, reward=0.027695
+      Branch 2: 151 tokens, reward=0.037190 [SELECTED] <-- STRAGGLER
+      Branch 3: 8 tokens, reward=0.035761
+
+question_28 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_28_workload.json
+
+  Step 6:
+    Straggler branch: 0 (SELECTED)
+    Tokens: 148 (ratio: 2.24x)
+    Reward: 0.121150
+    Attention Entropy:
+      Mean: 0.0188, Std: 0.0670
+      Mean prob: 0.9717, Min prob: 0.1243
+      High confidence tokens (>0.9): 139/148 (93.9%)
+      Low confidence tokens (<0.5): 3/148 (2.0%)
+    All branches (4):
+      Branch 0: 148 tokens, reward=0.121150 [SELECTED] <-- STRAGGLER
+      Branch 1: 66 tokens, reward=0.096871
+      Branch 2: 55 tokens, reward=0.112671
+      Branch 3: 56 tokens, reward=0.109550
+
+question_29 - 2 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_29_workload.json
+
+  Step 0:
+    Straggler branch: 3 (not selected)
+    Tokens: 133 (ratio: 2.05x)
+    Reward: 0.033135
+    Attention Entropy:
+      Mean: 0.0752, Std: 0.1115
+      Mean prob: 0.8320, Min prob: 0.0002
+      High confidence tokens (>0.9): 92/133 (69.2%)
+      Low confidence tokens (<0.5): 18/133 (13.5%)
+    All branches (4):
+      Branch 0: 37 tokens, reward=0.027882
+      Branch 1: 65 tokens, reward=0.038211 [SELECTED]
+      Branch 2: 37 tokens, reward=0.027593
+      Branch 3: 133 tokens, reward=0.033135 <-- STRAGGLER
+
+  Step 3:
+    Straggler branch: 0 (SELECTED)
+    Tokens: 117 (ratio: 2.49x)
+    Reward: 0.181721
+    Attention Entropy:
+      Mean: 0.0451, Std: 0.0941
+      Mean prob: 0.9185, Min prob: 0.0089
+      High confidence tokens (>0.9): 98/117 (83.8%)
+      Low confidence tokens (<0.5): 7/117 (6.0%)
+    All branches (4):
+      Branch 0: 117 tokens, reward=0.181721 [SELECTED] <-- STRAGGLER
+      Branch 1: 47 tokens, reward=0.044123
+      Branch 2: 44 tokens, reward=0.043790
+      Branch 3: 46 tokens, reward=0.035834
+
+question_3 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_3_workload.json
+
+  Step 4:
+    Straggler branch: 3 (SELECTED)
+    Tokens: 212 (ratio: 2.33x)
+    Reward: 0.660081
+    Attention Entropy:
+      Mean: 0.0376, Std: 0.1023
+      Mean prob: 0.9427, Min prob: 0.3285
+      High confidence tokens (>0.9): 60/212 (28.3%)
+      Low confidence tokens (<0.5): 4/212 (1.9%)
+    All branches (4):
+      Branch 0: 68 tokens, reward=0.626284
+      Branch 1: 91 tokens, reward=0.621818
+      Branch 2: 77 tokens, reward=0.648048
+      Branch 3: 212 tokens, reward=0.660081 [SELECTED] <-- STRAGGLER
+
+question_9 - 1 straggler(s)
+  Source: ../wordload/model_workloads/16384_4_1/question_9_workload.json
+
+  Step 1:
+    Straggler branch: 2 (not selected)
+    Tokens: 407 (ratio: 3.67x)
+    Reward: 0.106350
+    Attention Entropy:
+      Mean: 0.0205, Std: 0.0662
+      Mean prob: 0.9700, Min prob: 0.0485
+      High confidence tokens (>0.9): 375/407 (92.1%)
+      Low confidence tokens (<0.5): 9/407 (2.2%)
+    All branches (4):
+      Branch 0: 111 tokens, reward=0.090007
+      Branch 1: 86 tokens, reward=0.052967
+      Branch 2: 407 tokens, reward=0.106350 <-- STRAGGLER
+      Branch 3: 83 tokens, reward=0.146418 [SELECTED]
+
+================================================================================
