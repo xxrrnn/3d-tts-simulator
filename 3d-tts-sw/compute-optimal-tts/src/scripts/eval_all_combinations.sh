@@ -17,19 +17,20 @@ OUTPUT_BASE_DIR="${SRC_DIR}/output"
 CHECK_SCRIPT="${SCRIPT_DIR}/process/check_incomplete_questions.py"
 
 # 卡死检测：单次评估最大运行时长（秒）
-<<<<<<< HEAD
 EVAL_TIMEOUT_SECONDS=720000
-=======
-EVAL_TIMEOUT_SECONDS=21600
->>>>>>> 207a1d0 (A6000 0401)
 
 # Policy模型列表
 POLICY_MODELS=(
+    "Qwen2.5-Math-7B-Instruct"
+    "Qwen2.5-Math-1.5B-Instruct"
+
+
     # "Qwen2.5-1.5B-Instruct"
     # "Qwen2.5-0.5B-Instruct"
     # "Qwen2.5-3B-Instruct"
-    "Qwen2.5-Math-7B-Instruct"
-    "Qwen2.5-Math-1.5B-Instruct"
+
+
+
     # "Llama-3.1-8B-Instruct"
     # "DeepSeek-R1-Distill-Qwen-1.5B"
     # "DeepSeek-R1-Distill-Qwen-7B"
@@ -37,14 +38,12 @@ POLICY_MODELS=(
 
 # Reward模型列表
 REWARD_MODELS=(
-<<<<<<< HEAD
     "math-shepherd-mistral-7b-prm"
     "Skywork-o1-Open-PRM-Qwen-2.5-7B"
-=======
->>>>>>> 207a1d0 (A6000 0401)
     "Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
     "math-shepherd-mistral-7b-prm"
     "Skywork-o1-Open-PRM-Qwen-2.5-7B"
+
     # "Qwen2.5-Math-PRM-7B"
 )
 
@@ -115,11 +114,7 @@ start_services() {
     SERVICE_PID=$!
     
     # 增加等待时间，确保大模型有足够时间加载到GPU
-<<<<<<< HEAD
     wait_and_log 60
-=======
-    wait_and_log 30
->>>>>>> 207a1d0 (A6000 0401)
 }
 
 # 删除锁文件（保留已完成的结果）
@@ -270,15 +265,12 @@ run_evaluation() {
             --max_new_tokens 16384 \
             --tree_max_depth 16384 \
             --bs "$batch_size" \
-<<<<<<< HEAD
             --mt 120000 \
-=======
-            --mt 600000    \
->>>>>>> 207a1d0 (A6000 0401)
             --n_gpus "$N_GPUS" \
             --double_line_break 1 \
             --local 0 \
             --beam-log 1 \
+            --logprobs-topk 20 \
             --task "$task"
 
         local exit_code=$?
@@ -310,15 +302,15 @@ run_evaluation() {
 
             attempt=$((attempt + 1))
             if [ $attempt -le $max_retries ]; then
-                log_message "将在 30 秒后进行下一次重试..."
-                wait_and_log 30
+                log_message "将在 60 秒后进行下一次重试..."
+                wait_and_log 60
             else
                 log_message "评估最终失败: ${task}, Branch=${branch_width}, NumSeq=${num_seq} - 已达到最大重试次数 (${max_retries})"
             fi
         fi
     done
 
-    wait_and_log 30
+    wait_and_log 60
 }
 
 # 主执行函数

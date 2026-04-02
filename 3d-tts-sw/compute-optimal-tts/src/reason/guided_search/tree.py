@@ -169,6 +169,7 @@ class LanguageNode(Node):
         model_name: str = "",
         token_prob_list: Optional[List[float]] = None,
         prm_step_scores: Optional[List[float]] = None,
+        token_topk_logprobs_list: Optional[List[dict]] = None,
     ) -> None:
         super().__init__(parent, prior_p, initial_value, parent_value)
         self.text_state = text_state
@@ -181,6 +182,7 @@ class LanguageNode(Node):
 
         self.model_name = model_name
         self.token_prob_list = token_prob_list if token_prob_list is not None else []
+        self.token_topk_logprobs_list = token_topk_logprobs_list if token_topk_logprobs_list is not None else []
 
     def get_path(self):
         ans = []
@@ -196,6 +198,9 @@ class LanguageNode(Node):
             info_dict["last_action"] = self.last_action
             info_dict["prm_value"] = self.prm_value
             info_dict["prm_step_scores"] = self.prm_step_scores
+            # 添加token概率信息用于计算logit entropy
+            if hasattr(self, 'token_topk_logprobs_list'):
+                info_dict["token_topk_logprobs_list"] = self.token_topk_logprobs_list
         else:
             info_dict["text_state"] = self.text_state
         return info_dict
@@ -402,6 +407,7 @@ class SearchTree:
                                     "prior_prob": ps[child_idx],
                                     "num_tokens": num_tokens[child_idx],
                                     "token_probs": child.token_prob_list,
+                                    "token_topk_logprobs": child.token_topk_logprobs_list,
                                     "selected": child_idx in selected_indices,
                                     "branch_content": child.last_action if child.last_action else "",
                                     "full_path": child.get_path() if hasattr(child, 'get_path') else ""
@@ -453,6 +459,7 @@ class SearchTree:
                                     "prior_prob": ps[action],
                                     "num_tokens": num_tokens[action],
                                     "token_probs": child.token_prob_list,
+                                    "token_topk_logprobs": child.token_topk_logprobs_list,
                                     "selected": action in selected_actions,
                                     "branch_content": str(action),
                                     "full_path": child.get_path() if hasattr(child, 'get_path') else str(action)
@@ -687,7 +694,8 @@ class SearchTree:
                     except Exception as e:
                         import traceback
                         traceback.print_exc()
-                        # prms = [[0.0] for _ in simulate_env.legal_actions]
+                        if i == 1:  # 最后一次重试失败，使用默认值
+                            prms = [[0.0] for _ in simulate_env.legal_actions]
             child_values = []
             prm_scores_per_action: List[Optional[List[float]]] = []
             for act, rs in zip(simulate_env.legal_actions, prms):
@@ -741,6 +749,7 @@ class SearchTree:
                     model_name=model_name,
                     token_prob_list=action_dict.get("token_probs", []),
                     prm_step_scores=step_prm,
+                    token_topk_logprobs_list=action_dict.get("token_topk_logprobs", []),
                 )
             else:
                 node.children[action] = LanguageNode(
@@ -755,6 +764,7 @@ class SearchTree:
                     model_name=model_name,
                     token_prob_list=action_dict.get("token_probs", []),
                     prm_step_scores=step_prm,
+                    token_topk_logprobs_list=action_dict.get("token_topk_logprobs", []),
                 )
             # set terminal node here
             if simulate_env._next_state_terminated[action]:

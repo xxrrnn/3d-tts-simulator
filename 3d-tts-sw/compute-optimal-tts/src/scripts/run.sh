@@ -33,6 +33,7 @@ double_line_break=1
 local=0
 ### beam search start
 beam_search_detailed_log=0  # 新增：控制是否输出详细beam search日志 (0=关闭, 1=开启)
+logprobs_topk=20  # 新增：控制记录 top-k logits 的 k 值（vLLM最大支持20）
 ### beam search end
 
 # Parse arguments
@@ -103,6 +104,10 @@ while [[ $# -gt 0 ]]; do
         beam_search_detailed_log="$2"
         shift 2
         ;;
+    --logprobs-topk)
+        logprobs_topk="$2"
+        shift 2
+        ;;
     ### beam search end
     *)
         echo "Unknown parameter: $1"
@@ -113,7 +118,7 @@ done
 echo "LM: $LM, RM: $RM, task: $task_name, tree_max_width: $tree_max_width, num_sequence: $num_sequence, question_parallel_num: $question_parallel_num"
 echo "batch_size: $batch_size, max_time: $max_time, n_gpus: $n_gpus, double_line_break: $double_line_break"
 ### beam search start
-echo "beam_search_detailed_log: $beam_search_detailed_log"
+echo "beam_search_detailed_log: $beam_search_detailed_log, logprobs_topk: $logprobs_topk"
 ### beam search end
 
 if [ $method == "beam_search" ]; then
@@ -146,6 +151,7 @@ VALUE_MODEL_PATH=${RM}
 
 ### beam search start
 export BEAM_SEARCH_DETAILED_LOG=$beam_search_detailed_log
+export LOGPROBS_TOPK=$logprobs_topk
 ### beam search end
 
 export PYTHONPATH=$(pwd)

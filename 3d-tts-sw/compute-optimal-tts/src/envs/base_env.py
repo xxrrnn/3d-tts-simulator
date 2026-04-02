@@ -117,6 +117,7 @@ class CoTEnv(BaseEnv):
         self.token_history = None
         self.prob_history = None
         self.token_prob_history = None
+        self.token_topk_logprobs_history = None
         self.model_history = None
         self.math_problem = None
         self._legal_actions = None
@@ -156,6 +157,7 @@ class CoTEnv(BaseEnv):
         self.token_history = []
         self.prob_history = []
         self.token_prob_history = []
+        self.token_topk_logprobs_history = []
         self.model_history = []
         self._init_query = self.build_query_str(
             cot_examples=self._cot_example_str,
@@ -182,12 +184,15 @@ class CoTEnv(BaseEnv):
         info = {"api_completion_token": api_completion_token}
         return self.get_state(model_name='raw'), info
 
-    def step(self, action, update_legal_action=True, model_name="", custom_n=0, reward=0.0, num_token=0, prob=0.0, token_probs=None):
+    def step(self, action, update_legal_action=True, model_name="", custom_n=0, reward=0.0, num_token=0, prob=0.0, token_probs=None, token_topk_logprobs=None):
         self.action_history.append(action)
         self.reward_history.append(reward)
         self.token_history.append(num_token)
         self.prob_history.append(prob)
         self.token_prob_history.append(token_probs if token_probs is not None else [])
+        if not hasattr(self, 'token_topk_logprobs_history'):
+            self.token_topk_logprobs_history = []
+        self.token_topk_logprobs_history.append(token_topk_logprobs if token_topk_logprobs is not None else [])
         if model_name:
             self.model_history.append(model_name)
         state = self.get_state(model_name=model_name)
@@ -270,6 +275,7 @@ class CoTEnv(BaseEnv):
             logps_avg_by_len = result.logp_avg_by_len  # [-0.10557132510029904, -0.23053854329903292]
             token_len = result.num_tokens  # [212, 192]
             token_logprobs = result.token_logprobs
+            token_topk_logprobs = result.token_topk_logprobs
             temp_model_names = [self.llm_gen_fns[0].model_name] * len(texts)
             temp_model_ids = [0] * len(texts)
             finish_reason_list = []
@@ -282,6 +288,7 @@ class CoTEnv(BaseEnv):
 
         text_list, prob_list, num_token_list = [], [], []
         token_probs_list = []
+        token_topk_logprobs_list = []
         model_names, model_ids = [], []
         next_state_terminated = {}
         raw_text_list = []
@@ -312,6 +319,7 @@ class CoTEnv(BaseEnv):
                 prob_list.append(logps_avg_by_len[i])
                 num_token_list.append(token_len[i])
                 token_probs_list.append(list(np.exp(token_logprobs[i])) if i < len(token_logprobs) else [])
+                token_topk_logprobs_list.append(token_topk_logprobs[i] if i < len(token_topk_logprobs) else [])
                 next_state_terminated[processed_act] = terminated
                 model_names.append(temp_model_names[i])
                 model_ids.append(temp_model_ids[i])
@@ -321,6 +329,7 @@ class CoTEnv(BaseEnv):
                 prob_list.append(logps_avg_by_len[i])
                 num_token_list.append(token_len[i])
                 token_probs_list.append(list(np.exp(token_logprobs[i])) if i < len(token_logprobs) else [])
+                token_topk_logprobs_list.append(token_topk_logprobs[i] if i < len(token_topk_logprobs) else [])
                 next_state_terminated[processed_act] = terminated
                 model_names.append(temp_model_names[i])
                 model_ids.append(temp_model_ids[i])
@@ -347,8 +356,9 @@ class CoTEnv(BaseEnv):
             "stop_str": stop_str,
             "raw_action": raw_action,
             "token_probs": token_probs,
-        } for action, prob, n_token, finish_reason, model_name, model_id, raw_action, token_probs in zip(text_list, prob_list, num_token_list,
-            finish_reason_list, model_names, model_ids, raw_text_list, token_probs_list)]
+            "token_topk_logprobs": token_topk_logprobs,
+        } for action, prob, n_token, finish_reason, model_name, model_id, raw_action, token_probs, token_topk_logprobs in zip(text_list, prob_list, num_token_list,
+            finish_reason_list, model_names, model_ids, raw_text_list, token_probs_list, token_topk_logprobs_list)]
 
         if len(self.llm_gen_fns) == 1:
             completion_tokens = result.completion_tokens
@@ -449,6 +459,8 @@ class CoTEnv(BaseEnv):
         env.token_history = copy.deepcopy(self.token_history)
         env.prob_history = copy.deepcopy(self.prob_history)
         env.token_prob_history = copy.deepcopy(self.token_prob_history)
+        if hasattr(self, 'token_topk_logprobs_history'):
+            env.token_topk_logprobs_history = copy.deepcopy(self.token_topk_logprobs_history)
         env.model_history = copy.deepcopy(self.model_history)
         env._init_query = copy.deepcopy(self._init_query)
         env._next_state_terminated = copy.deepcopy(self._next_state_terminated)

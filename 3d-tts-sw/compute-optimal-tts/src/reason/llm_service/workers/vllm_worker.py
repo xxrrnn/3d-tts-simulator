@@ -78,6 +78,7 @@ class VLLMWorker(BaseModelWorker):
         use_beam_search = params.get("use_beam_search", False)
         best_of = params.get("best_of", None)
         include_stop_str_in_output = params.get("include_stop_str_in_output", False)
+        logprobs_topk = params.get("logprobs_topk", 20)  # vLLM默认最大支持20
 
         # Handle stop_str
         stop = set()
@@ -106,7 +107,7 @@ class VLLMWorker(BaseModelWorker):
             presence_penalty=presence_penalty,
             frequency_penalty=frequency_penalty,
             best_of=best_of,
-            logprobs=1,
+            logprobs=logprobs_topk,
             include_stop_str_in_output=include_stop_str_in_output,
         )
         results_generator = engine.generate(context, sampling_params, request_id)
@@ -134,8 +135,10 @@ class VLLMWorker(BaseModelWorker):
                 "finish_reason": [output.finish_reason for output in request_output.outputs],
             }
             token_logprobs = []
+            token_topk_logprobs = []
             for output in request_output.outputs:
                 one_output_token_logprobs = []
+                one_output_token_topk_logprobs = []
                 if output.logprobs is not None:
                     for tok_lp in output.logprobs:
                         if isinstance(tok_lp, dict) and len(tok_lp) > 0:
@@ -146,10 +149,22 @@ class VLLMWorker(BaseModelWorker):
                             if lp is None:
                                 lp = 0.0
                             one_output_token_logprobs.append(float(lp))
+                            
+                            topk_dict = {}
+                            for token_id, logprob_obj in tok_lp.items():
+                                token_logprob = getattr(logprob_obj, "logprob", None)
+                                if token_logprob is None and isinstance(logprob_obj, dict):
+                                    token_logprob = logprob_obj.get("logprob", None)
+                                if token_logprob is not None:
+                                    topk_dict[int(token_id)] = float(token_logprob)
+                            one_output_token_topk_logprobs.append(topk_dict)
                         else:
                             one_output_token_logprobs.append(0.0)
+                            one_output_token_topk_logprobs.append({})
                 token_logprobs.append(one_output_token_logprobs)
+                token_topk_logprobs.append(one_output_token_topk_logprobs)
             ret["token_logprobs"] = token_logprobs
+            ret["token_topk_logprobs"] = token_topk_logprobs
             yield (json.dumps(ret) + "\0").encode()
 
     async def generate(self, params):

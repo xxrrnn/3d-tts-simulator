@@ -19,10 +19,14 @@ class ConcatedLMGenResult:
     logp_avg_by_len: List[float]
     finish_reason: List[str]
     token_logprobs: List[List[float]]
+    token_topk_logprobs: List[List[dict]] = None  # 添加topk logprobs字段
 
     # post init compute number of completion_tokens
     def __post_init__(self):
         self.completion_tokens = sum(self.num_tokens)
+        # 如果token_topk_logprobs为None，初始化为空列表
+        if self.token_topk_logprobs is None:
+            self.token_topk_logprobs = [[] for _ in self.text]
 
 
 def process_prompt(prompt: str, tokenizer: AutoTokenizer, model_name, double_line_break=0, first_generation=False):
@@ -137,6 +141,7 @@ def _generate_fastchat(
         logp_avg_by_len=avg_len_logps,
         finish_reason=results["finish_reason"],
         token_logprobs=results.get("token_logprobs", [[] for _ in results["text"]]),
+        token_topk_logprobs=results.get("token_topk_logprobs", [[] for _ in results["text"]]),
     )
 
 
@@ -256,4 +261,5 @@ def _generate_sgl(
         logp_avg_by_len=avg_len_logps,
         finish_reason=finish_reason_list,
         token_logprobs=[[] for _ in text_list],
+        token_topk_logprobs=[[] for _ in text_list],
     )
