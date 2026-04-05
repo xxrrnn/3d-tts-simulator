@@ -3,6 +3,8 @@ This file is largely borrowed from OpenR (https://github.com/openreasoner/openr)
 """
 
 import abc
+import hashlib
+from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, List, Optional
 import numpy as np
 import copy
@@ -13,6 +15,40 @@ from transformers import PreTrainedTokenizer
 from reason.inference.lm_call import LMCallingConfig, ConcatedLMGenResult
 
 INVALID_ANS = "[invalid]"
+
+
+def _derive_lm_branch_seed(eval_seed: int, question: str, step_depth: int, branch_idx: int) -> int:
+    h = hashlib.sha256(
+        f"{eval_seed}\n{question}\n{step_depth}\n{branch_idx}".encode("utf-8")
+    ).digest()
+    x = int.from_bytes(h[:4], "little") & 0x7FFFFFFF
+    return x if x != 0 else 1
+
+
+def _merge_concated_lm_results(parts: List["ConcatedLMGenResult"]) -> "ConcatedLMGenResult":
+    if not parts:
+        raise ValueError("empty LM result parts")
+    texts, num_tokens, cum_logps, logp_avg, fr, tlog, ttop = [], [], [], [], [], [], []
+    for p in parts:
+        if len(p.text) != 1:
+            raise ValueError("merge expects n=1 per chunk")
+        texts.append(p.text[0])
+        num_tokens.append(p.num_tokens[0])
+        cum_logps.append(p.cumulative_logprob[0])
+        logp_avg.append(p.logp_avg_by_len[0])
+        fr.append(p.finish_reason[0])
+        tlog.append(p.token_logprobs[0] if p.token_logprobs else [])
+        ttop.append(p.token_topk_logprobs[0] if p.token_topk_logprobs else [])
+    return ConcatedLMGenResult(
+        text=texts,
+        prompt_tokens=parts[0].prompt_tokens,
+        num_tokens=num_tokens,
+        cumulative_logprob=cum_logps,
+        logp_avg_by_len=logp_avg,
+        finish_reason=fr,
+        token_logprobs=tlog,
+        token_topk_logprobs=ttop,
+    )
 
 
 class NoLegalActionException(Exception):
@@ -261,16 +297,43 @@ class CoTEnv(BaseEnv):
                 stop_str, include_stop_str_in_output = self.sep, True
             first_generation = len(self.action_history) == 0
             messages = self.get_state(self.llm_gen_fns[0].model_name, add_step_prompt=self.add_step_prompt)
-            result: ConcatedLMGenResult = self.llm_gen_fns[0](
-                messages=messages,
-                config=LMCallingConfig(
-                    n=n,
-                    stop_str=stop_str,  # '\n\n' for Qwen-2.5-Math-1.5B-Instruct
-                    include_stop_str_in_output=include_stop_str_in_output,
-                    first_generation=first_generation,
-                    **self.config["generation_config"],
-                ),
+            eval_seed = int(self.config.get("eval_seed", 0))
+            split_n = bool(self.config.get("split_lm_n_for_seeds", True)) and n > 1
+            step_depth = len(self.action_history) if self.action_history else 0
+            qtext = self.question
+            base_kw = dict(
+                stop_str=stop_str,
+                include_stop_str_in_output=include_stop_str_in_output,
+                first_generation=first_generation,
+                **self.config["generation_config"],
             )
+            if split_n:
+                cap = self.config.get("split_lm_parallel_workers", 32)
+                if cap is None or int(cap) <= 0:
+                    max_workers = min(n, 256)
+                else:
+                    max_workers = min(n, int(cap))
+
+                def _one_branch(branch_idx: int) -> ConcatedLMGenResult:
+                    sid = _derive_lm_branch_seed(eval_seed, qtext, step_depth, branch_idx)
+                    return self.llm_gen_fns[0](
+                        messages=messages,
+                        config=LMCallingConfig(n=1, seed=sid, **base_kw),
+                    )
+
+                with ThreadPoolExecutor(max_workers=max_workers) as ex:
+                    parts: List[ConcatedLMGenResult] = list(ex.map(_one_branch, range(n)))
+                result: ConcatedLMGenResult = _merge_concated_lm_results(parts)
+            else:
+                sid0 = _derive_lm_branch_seed(eval_seed, qtext, step_depth, 0)
+                result = self.llm_gen_fns[0](
+                    messages=messages,
+                    config=LMCallingConfig(
+                        n=n,
+                        seed=sid0,
+                        **base_kw,
+                    ),
+                )
             texts = result.text  # [text1, text2]
             logps_avg_by_len = result.logp_avg_by_len  # [-0.10557132510029904, -0.23053854329903292]
             token_len = result.num_tokens  # [212, 192]

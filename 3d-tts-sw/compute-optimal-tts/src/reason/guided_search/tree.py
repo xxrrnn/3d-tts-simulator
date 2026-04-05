@@ -263,7 +263,7 @@ class SearchTree:
         if not self._eval_log_policy_model and self.model_names:
             self._eval_log_policy_model = get_model_name(self.model_names[0])
 
-        # 0405：增加straggler判定相关的参数 先设置为默认开启，后面可以参数化
+        # 0405：增加straggler判定相关的参数 
         # straggler: unusually long sibling branch gets PRM aggregate reward zeroed (beam / MCTS expansion).
         self._straggler_prune_enabled = self._cfg.get("straggler_prune_enabled", False) #是否启用straggler检测 
         self._straggler_length_ratio = float(self._cfg.get("straggler_length_ratio", 1.5)) #straggler判定的倍率值

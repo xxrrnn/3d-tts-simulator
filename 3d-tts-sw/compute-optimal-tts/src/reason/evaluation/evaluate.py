@@ -312,6 +312,7 @@ if __name__ == "__main__":
             straggler_prune_enabled=bool(args.straggler_prune),
             straggler_length_ratio=args.straggler_length_ratio,
             straggler_min_tokens=args.straggler_min_tokens,
+            eval_seed=int(args.seed),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
     elif "beam_search" in args.method:
@@ -333,6 +334,7 @@ if __name__ == "__main__":
             straggler_prune_enabled=bool(args.straggler_prune),
             straggler_length_ratio=args.straggler_length_ratio,
             straggler_min_tokens=args.straggler_min_tokens,
+            eval_seed=int(args.seed),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
     else:

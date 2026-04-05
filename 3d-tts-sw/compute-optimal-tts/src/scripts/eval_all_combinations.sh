@@ -46,18 +46,19 @@ EVAL_TIMEOUT_SECONDS=720000
 
 #     # "Qwen2.5-Math-PRM-7B"
 # )
+
 # 0405：修改为Policy + Reward 固定组合（仅跑以下三对组合）
 # 格式: "Policy目录名|Reward目录名"
 POLICY_REWARD_PAIRS=(
-    "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
-    "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+    # "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
+    # "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
     "Qwen2.5-Math-1.5B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
 )
 
 # 数据集配置 (任务名, batch_size)
 # batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
-    "AIME24 30"  # 从 30 降到 15（减少50%）
+    "AIME24 30"  # 从 30 降到 15（减少50%） straggler出现在question19
     # "AMC23 40"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
@@ -65,8 +66,8 @@ DATASETS=(
 # Branch宽度配置
 BRANCH_WIDTHS=(
     8
-    4
-    2
+    # 4
+    # 2
 )
 
 # Num_seq配置
@@ -79,7 +80,7 @@ NUM_SEQ_VALUES=(
 # 评估随机种子（传入 run.sh --seed → evaluate.py）
 EVAL_SEED=42
 # straggler：与 reason/guided_search/tree.py 中 SearchTree 一致（传入 run.sh → evaluate.py）
-STRAGGLER_PRUNE=0              # 0=关闭 1=开启
+STRAGGLER_PRUNE=1              # 0=关闭 1=开启
 STRAGGLER_LENGTH_RATIO=1.5
 STRAGGLER_MIN_TOKENS=80
 
@@ -90,7 +91,7 @@ log_message() {
 
 # 等待函数
 wait_and_log() {
-    local seconds=$3 #原来是1 等久一点？
+    local seconds=$1 #原来是1 等久一点？
     log_message "等待 ${seconds} 秒..."
     sleep $seconds
     log_message "等待完成"

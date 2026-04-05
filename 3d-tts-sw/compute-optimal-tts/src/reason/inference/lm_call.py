@@ -21,6 +21,8 @@ class LMCallingConfig:
     stop_str: Optional[Union[str, List[str]]] = None
     include_stop_str_in_output: bool = False
     first_generation: bool = False
+    # 若设置则覆盖 VLLMRemoteCaller.generation_seed（按题/步/分支派生，保证可复现）
+    seed: Optional[int] = None
 
 
 class LanguageModelCallingFunction:
@@ -58,6 +60,7 @@ class VLLMRemoteCaller(LanguageModelCallingFunction):
         super().__init__(llm_step_tag)
 
     def __call__(self, messages: str, config: LMCallingConfig) -> ConcatedLMGenResult:
+        eff_seed = config.seed if config.seed is not None else self.generation_seed
         if self.serve_type == "fastchat":
             return _generate_fastchat(
                 messages=messages,
@@ -76,7 +79,7 @@ class VLLMRemoteCaller(LanguageModelCallingFunction):
                 multi_gpu=self.multi_gpu,
                 double_line_break=self.double_line_break,
                 first_generation=config.first_generation,
-                seed=self.generation_seed,
+                seed=eff_seed,
             )
         elif self.serve_type == "sgl_api":
             return _generate_sgl(

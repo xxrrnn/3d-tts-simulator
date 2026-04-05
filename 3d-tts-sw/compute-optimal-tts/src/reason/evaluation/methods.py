@@ -37,6 +37,11 @@ class TreeSearchConfig(BasicConfig):
     straggler_prune_enabled: bool = False
     straggler_length_ratio: float = 1.5
     straggler_min_tokens: int = 80
+    eval_seed: int = 0
+    # n>1 时拆成多次 n=1（各带不同派生 seed），避免同请求多样本雷同后被去重成单分支
+    split_lm_n_for_seeds: bool = True
+    # 并行线程上限（HTTP 到同一 worker）；<=0 表示 min(n, 256)
+    split_lm_parallel_workers: int = 32
 
     def __post_init__(self):
         assert self.tree_max_width > 0, "Tree width must be greater than 0"
@@ -81,6 +86,9 @@ def beam_search(
             "direct_io": config.direct_io,
             "double_line_break": config.double_line_break,
             "model_names": config.model_names,
+            "eval_seed": config.eval_seed,
+            "split_lm_n_for_seeds": config.split_lm_n_for_seeds,
+            "split_lm_parallel_workers": config.split_lm_parallel_workers,
         },
         math_problems=[{
             "question": problem_inst["question"],
