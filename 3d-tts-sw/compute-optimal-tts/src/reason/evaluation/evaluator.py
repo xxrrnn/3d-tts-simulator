@@ -28,7 +28,7 @@ from reason.reranking.vote_utils import (
     PRM_AVG_VOTE,
     AGG_FN_MAP,
 )
-from utils import get_step_cnt, to_raw_string, load_jsonl
+from utils import get_step_cnt, setup_seed, to_raw_string, load_jsonl
 
 
 class Task:
@@ -222,6 +222,14 @@ class MathEvaluator:
 @ray.remote
 class RemoteMathEvaluator(MathEvaluator):
     def __init__(
-        self, task: str, lm_calls: List[LanguageModelCallingFunction], rm_call: RewardModelCallingFunction, direct_io=False
+        self,
+        task: str,
+        lm_calls: List[LanguageModelCallingFunction],
+        rm_call: RewardModelCallingFunction,
+        direct_io=False,
+        seed: int = 0,
+        actor_index: int = 0,
     ):
+        # Per-actor RNG (numpy / torch in this worker) — offset avoids identical streams across actors.
+        setup_seed(int(seed) + int(actor_index))
         super().__init__(task, lm_calls, rm_call, direct_io)

@@ -165,17 +165,23 @@ if __name__ == "__main__":
         else:
             raise NotImplementedError
 
-    llm_step_tags = []
-    llm_gen_fns = []
-    for lm in args.LM:
-        llm_step_tags.append(args.llm_step_tag)
-        model_path = lm
-        llm_gen_fns.append(
+    llm_step_tags = [args.llm_step_tag for _ in args.LM]
+
+    def build_llm_gen_fns(actor_index: int):
+        return [
             VLLMRemoteCaller(
-                lm, model_path, args.controller_addr, args.llm_step_tag, apply_chat_template=True, multi_gpu=args.multi_gpu,
-                serve_type=args.serve_type, double_line_break=args.double_line_break
+                lm,
+                lm,
+                args.controller_addr,
+                args.llm_step_tag,
+                apply_chat_template=True,
+                multi_gpu=args.multi_gpu,
+                serve_type=args.serve_type,
+                double_line_break=args.double_line_break,
+                generation_seed=int(args.seed) + int(actor_index),
             )
-        )
+            for lm in args.LM
+        ]
 
     rm_call = partial(rm_call, model_names=args.LM)
 
@@ -329,6 +335,7 @@ if __name__ == "__main__":
         print(f"Error: {e}")
 
     cfg_dict_record["llm_step_tags"] = llm_step_tags
+    cfg_dict_record["seed"] = args.seed
     cfg_dict_record["prm_step_tag"] = args.prm_step_tag
     cfg_dict_record["good_tag"] = args.good_tag
     cfg_dict_record["bad_tag"] = args.bad_tag
@@ -342,7 +349,17 @@ if __name__ == "__main__":
         print(f"Error: {e}")
 
     actor_pool = ActorPool(
-        [RemoteMathEvaluator.remote(args.task_name, llm_gen_fns, rm_call, direct_io=direct_io) for _ in range(args.num_worker)]
+        [
+            RemoteMathEvaluator.remote(
+                args.task_name,
+                build_llm_gen_fns(actor_index),
+                rm_call,
+                direct_io=direct_io,
+                seed=args.seed,
+                actor_index=actor_index,
+            )
+            for actor_index in range(args.num_worker)
+        ]
     )
 
     test_ds = task.test_ds(args.task_name)

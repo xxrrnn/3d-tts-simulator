@@ -79,6 +79,7 @@ class VLLMWorker(BaseModelWorker):
         best_of = params.get("best_of", None)
         include_stop_str_in_output = params.get("include_stop_str_in_output", False)
         logprobs_topk = params.get("logprobs_topk", 20)  # vLLM默认最大支持20
+        raw_seed = params.get("seed", None)
 
         # Handle stop_str
         stop = set()
@@ -95,11 +96,10 @@ class VLLMWorker(BaseModelWorker):
         top_p = max(top_p, 1e-5)
         if temperature <= 1e-5:
             top_p = 1.0
-        sampling_params = SamplingParams(
+        sp_kwargs = dict(
             n=n,
             temperature=temperature,
             top_p=top_p,
-            # use_beam_search=use_beam_search,
             stop=list(stop),
             stop_token_ids=stop_token_ids,
             max_tokens=max_new_tokens,
@@ -110,6 +110,20 @@ class VLLMWorker(BaseModelWorker):
             logprobs=logprobs_topk,
             include_stop_str_in_output=include_stop_str_in_output,
         )
+        if raw_seed is not None:
+            try:
+                sp_kwargs["seed"] = int(raw_seed)
+            except (TypeError, ValueError):
+                pass
+        try:
+            sampling_params = SamplingParams(**sp_kwargs)
+        except TypeError:
+            if "seed" in sp_kwargs:
+                sp_kwargs.pop("seed", None)
+                logger.warning("vLLM SamplingParams rejected 'seed'; retrying without it (upgrade vLLM for per-request seeds).")
+                sampling_params = SamplingParams(**sp_kwargs)
+            else:
+                raise
         results_generator = engine.generate(context, sampling_params, request_id)
 
         async for request_output in results_generator:

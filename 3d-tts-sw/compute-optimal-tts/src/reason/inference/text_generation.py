@@ -67,6 +67,7 @@ def _generate_fastchat(
     multi_gpu=False,
     double_line_break=0,
     first_generation=False,
+    seed=None,
 ) -> ConcatedLMGenResult:
     # 总是通过controller获取worker地址 - 带重试机制
     import time
@@ -120,6 +121,8 @@ def _generate_fastchat(
         "echo": False,
         "include_stop_str_in_output": include_stop_str_in_output,
     }
+    if seed is not None:
+        gen_params["seed"] = int(seed)
 
     try:
         response = requests.post(worker_addr + "/worker_generate", headers=headers, json=gen_params, stream=False)

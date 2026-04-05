@@ -44,6 +44,7 @@ class VLLMRemoteCaller(LanguageModelCallingFunction):
         multi_gpu: bool = False,
         serve_type: str = "fastchat",
         double_line_break: int = 0,
+        generation_seed: Optional[int] = None,
     ):
         self.model_name = model_name
         self.model_path = model_path
@@ -53,6 +54,7 @@ class VLLMRemoteCaller(LanguageModelCallingFunction):
         self.multi_gpu = multi_gpu
         self.serve_type = serve_type
         self.double_line_break = double_line_break
+        self.generation_seed = generation_seed
         super().__init__(llm_step_tag)
 
     def __call__(self, messages: str, config: LMCallingConfig) -> ConcatedLMGenResult:
@@ -74,6 +76,7 @@ class VLLMRemoteCaller(LanguageModelCallingFunction):
                 multi_gpu=self.multi_gpu,
                 double_line_break=self.double_line_break,
                 first_generation=config.first_generation,
+                seed=self.generation_seed,
             )
         elif self.serve_type == "sgl_api":
             return _generate_sgl(
