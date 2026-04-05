@@ -1,19 +1,19 @@
 #!/bin/bash
 
-<<<<<<< HEAD
+# <<<<<<< HEAD
 # 使用 uv 激活虚拟环境，如果没有则跳过
-if command -v uv &> /dev/null; then
-    echo "Using uv environment..."
-elif command -v conda &> /dev/null; then
-    echo "Using conda environment..."
-    # 正确初始化 conda
-    source /root/miniconda3/etc/profile.d/conda.sh
-    conda activate tts
-else
-    echo "Neither uv nor conda found, using system python..."
-fi
-=======
->>>>>>> 207a1d0 (A6000 0401)
+# if command -v uv &> /dev/null; then
+#     echo "Using uv environment..."
+# elif command -v conda &> /dev/null; then
+#     echo "Using conda environment..."
+#     # 正确初始化 conda
+#     source /root/miniconda3/etc/profile.d/conda.sh
+#     conda activate tts
+# else
+#     echo "Neither uv nor conda found, using system python..."
+# fi
+# =======
+# >>>>>>> 207a1d0 (A6000 0401)
 
 # Default arguments
 LM=models--meta-llama--Llama-3.2-1B-Instruct
@@ -35,6 +35,8 @@ local=0
 beam_search_detailed_log=0  # 新增：控制是否输出详细beam search日志 (0=关闭, 1=开启)
 logprobs_topk=20  # 新增：控制记录 top-k logits 的 k 值（vLLM最大支持20）
 ### beam search end
+
+seed=42 #0405 新增seed
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -99,6 +101,11 @@ while [[ $# -gt 0 ]]; do
         local="$2"
         shift 2
         ;;
+    ## seed
+    --seed)
+        seed="$2"
+        shift 2
+        ;;
     ### beam search start
     --beam-log)
         beam_search_detailed_log="$2"
@@ -116,7 +123,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 echo "LM: $LM, RM: $RM, task: $task_name, tree_max_width: $tree_max_width, num_sequence: $num_sequence, question_parallel_num: $question_parallel_num"
-echo "batch_size: $batch_size, max_time: $max_time, n_gpus: $n_gpus, double_line_break: $double_line_break"
+echo "batch_size: $batch_size, max_time: $max_time, n_gpus: $n_gpus, double_line_break: $double_line_break, seed:$seed"
 ### beam search start
 echo "beam_search_detailed_log: $beam_search_detailed_log, logprobs_topk: $logprobs_topk"
 ### beam search end
@@ -204,4 +211,5 @@ python reason/evaluation/evaluate.py \
     --double_line_break $double_line_break \
     --batch_size $batch_size \
     --max_time $max_time \
-    --local $local
+    --local $local \
+    --seed $seed

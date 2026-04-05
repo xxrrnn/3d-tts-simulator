@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 基础路径配置
-BASE_PATH="/root/autodl-tmp/models"
-export LOGDIR="/root/autodl-tmp/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
+BASE_PATH="/media/8T3/x_long32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/models"
+export LOGDIR="/media/8T3/x_long32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
 export HOST_ADDR="0.0.0.0"
 export CONTROLLER_PORT=10014
 export WORKER_BASE_PORT=10081
@@ -21,7 +21,7 @@ EVAL_TIMEOUT_SECONDS=720000
 
 # Policy模型列表
 POLICY_MODELS=(
-    "Qwen2.5-Math-7B-Instruct"
+    # "Qwen2.5-Math-7B-Instruct"
     "Qwen2.5-Math-1.5B-Instruct"
 
 
@@ -38,11 +38,11 @@ POLICY_MODELS=(
 
 # Reward模型列表
 REWARD_MODELS=(
-    "math-shepherd-mistral-7b-prm"
-    "Skywork-o1-Open-PRM-Qwen-2.5-7B"
+    # "math-shepherd-mistral-7b-prm"
+    # "Skywork-o1-Open-PRM-Qwen-2.5-7B"
     "Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
-    "math-shepherd-mistral-7b-prm"
-    "Skywork-o1-Open-PRM-Qwen-2.5-7B"
+    # "math-shepherd-mistral-7b-prm"
+    # "Skywork-o1-Open-PRM-Qwen-2.5-7B"
 
     # "Qwen2.5-Math-PRM-7B"
 )
@@ -50,22 +50,22 @@ REWARD_MODELS=(
 # 数据集配置 (任务名, batch_size)
 # batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
-    "AIME24 30"  # 从 30 降到 15（减少50%）
-    "AMC23 40"   # 从 40 降到 20（减少50%）
+    "AIME24 5"  # 从 30 降到 15（减少50%）
+    # "AMC23 40"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
 
 # Branch宽度配置
 BRANCH_WIDTHS=(
-    8
-    4
+    # 8
+    # 4
     2
 )
 
 # Num_seq配置
 NUM_SEQ_VALUES=(
-    2
-    4
+    # 2
+    # 4
     1
 )
 
@@ -254,7 +254,7 @@ run_evaluation() {
     
     while [ $attempt -le $max_retries ]; do
         log_message "运行评估 (第 ${attempt}/${max_retries} 次): Policy=${policy_path##*/}, Reward=${reward_path##*/}, Task=${task}, BatchSize=${batch_size}, Branch=${branch_width}, NumSeq=${num_seq}"
-
+        # temperature原本是0.7
         timeout --signal=TERM --kill-after=120 "${EVAL_TIMEOUT_SECONDS}" bash scripts/run.sh \
             --method beam_search \
             --LM "$policy_path" \
