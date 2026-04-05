@@ -85,6 +85,16 @@ if __name__ == "__main__":
     parser.add_argument("--task_name", type=str, default="MATH")
     parser.add_argument("--is_few_shot", action="store_true")
     parser.add_argument("--seed", type=int, default=0)
+    #0405： 增加straggler剪枝参数
+    parser.add_argument(
+        "--straggler_prune",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="1=启用 beam 展开时 straggler 剪枝（PRM 分置 0），0=关闭",
+    )
+    parser.add_argument("--straggler_length_ratio", type=float, default=1.5)
+    parser.add_argument("--straggler_min_tokens", type=int, default=80)
     parser.add_argument("--save_dir", type=str, default=None)
     parser.add_argument("--controller_addr", type=str, default="http://localhost:10014")
     parser.add_argument("--num_worker", type=int, default=8)
@@ -297,6 +307,11 @@ if __name__ == "__main__":
             sep=args.sep,
             direct_io=direct_io,
             double_line_break=args.double_line_break,
+            eval_log_policy_model=get_model_name(args.LM[0]),
+            eval_log_reward_model=get_model_name(args.RM),
+            straggler_prune_enabled=bool(args.straggler_prune),
+            straggler_length_ratio=args.straggler_length_ratio,
+            straggler_min_tokens=args.straggler_min_tokens,
         )
         solver_fn = partial(beam_search, method_config, gen_config)
     elif "beam_search" in args.method:
@@ -313,6 +328,11 @@ if __name__ == "__main__":
             sep=args.sep,
             direct_io=direct_io,
             double_line_break=args.double_line_break,
+            eval_log_policy_model=get_model_name(args.LM[0]),
+            eval_log_reward_model=get_model_name(args.RM),
+            straggler_prune_enabled=bool(args.straggler_prune),
+            straggler_length_ratio=args.straggler_length_ratio,
+            straggler_min_tokens=args.straggler_min_tokens,
         )
         solver_fn = partial(beam_search, method_config, gen_config)
     else:
@@ -336,6 +356,9 @@ if __name__ == "__main__":
 
     cfg_dict_record["llm_step_tags"] = llm_step_tags
     cfg_dict_record["seed"] = args.seed
+    cfg_dict_record["straggler_prune"] = args.straggler_prune
+    cfg_dict_record["straggler_length_ratio"] = args.straggler_length_ratio
+    cfg_dict_record["straggler_min_tokens"] = args.straggler_min_tokens
     cfg_dict_record["prm_step_tag"] = args.prm_step_tag
     cfg_dict_record["good_tag"] = args.good_tag
     cfg_dict_record["bad_tag"] = args.bad_tag

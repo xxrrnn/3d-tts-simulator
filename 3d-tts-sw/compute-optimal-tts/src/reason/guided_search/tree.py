@@ -6,6 +6,7 @@ This file is largely borrowed from OpenR (https://github.com/openreasoner/openr)
 import copy
 import json
 import math
+import os
 import traceback
 import time
 
@@ -13,7 +14,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from typing import List, Dict, Any, Optional, Tuple, Union, Callable, Type
-from utils import print_rank_0, print_with_rank
+from utils import print_rank_0, print_with_rank, get_model_name
 from envs.base_env import CoTEnv
 import heapq
 from loguru import logger
@@ -254,6 +255,42 @@ class SearchTree:
         self.direct_io = self._cfg.get("direct_io", 0)
         self.max_actions = self._cfg.get("max_actions", 0)
 
+        self._eval_log_task_name = self._cfg.get("eval_log_task_name", "")
+        self._eval_log_policy_model = self._cfg.get("eval_log_policy_model", "")
+        self._eval_log_reward_model = self._cfg.get("eval_log_reward_model", "")
+        self._eval_log_tree_max_depth = int(self._cfg.get("eval_log_tree_max_depth", 0))
+        self._eval_log_beam_size = int(self._cfg.get("eval_log_beam_size", 0))
+        if not self._eval_log_policy_model and self.model_names:
+            self._eval_log_policy_model = get_model_name(self.model_names[0])
+
+        # 0405：增加straggler判定相关的参数 先设置为默认开启，后面可以参数化
+        # straggler: unusually long sibling branch gets PRM aggregate reward zeroed (beam / MCTS expansion).
+        self._straggler_prune_enabled = self._cfg.get("straggler_prune_enabled", False) #是否启用straggler检测 
+        self._straggler_length_ratio = float(self._cfg.get("straggler_length_ratio", 1.5)) #straggler判定的倍率值
+        self._straggler_min_tokens = int(self._cfg.get("straggler_min_tokens", 80))  # straggler的长度最低阈值
+        self._straggler_prune_events: List[Dict[str, Any]] = []
+
+    def _straggler_run_context_dict(self) -> Dict[str, Any]:
+        return {
+            "task": self._eval_log_task_name,
+            "policy": self._eval_log_policy_model,
+            "reward_model": self._eval_log_reward_model,
+            "tree_max_width": self.max_actions,
+            "tree_max_depth": self._eval_log_tree_max_depth,
+            "beam_size": self._eval_log_beam_size,
+        }
+
+    def straggler_log_payload(self) -> Dict[str, Any]:
+        """写入 record jsonl 的 straggler 配置 + 每次剪枝事件（与 beam 轨迹一并落盘）。"""
+        return {
+            "prune_enabled": self._straggler_prune_enabled,
+            "length_ratio": self._straggler_length_ratio,
+            "min_tokens": self._straggler_min_tokens,
+            "init_critic_value": self._init_critic_value,
+            "context": self._straggler_run_context_dict(),
+            "prune_events": list(self._straggler_prune_events),
+        }
+
     @property
     def num_generated_token(self):
         return self._completion_tokens
@@ -279,8 +316,8 @@ class SearchTree:
             reward_model_fn: The reward model function to evaluate the state.
         """
         ### beam search start
+        self._straggler_prune_events = []
         # 检查是否启用详细日志记录
-        import os
         enable_detailed_log = os.environ.get('BEAM_SEARCH_DETAILED_LOG', '0') == '1'
         
         if max_step == 1:
@@ -614,7 +651,8 @@ class SearchTree:
             # 只在启用详细日志时添加详细日志
             if enable_detailed_log and detailed_beam_logs:
                 traj_list[-1]["detailed_beam_search_log"] = detailed_beam_logs
-            
+            traj_list[-1]["straggler_log"] = self.straggler_log_payload()
+
         return traj_list
         ### beam search end
 
@@ -721,8 +759,38 @@ class SearchTree:
                     # child_values.append(min(rs))
                     # # prob-prm
                     # child_values.append(act['prob'])
+            
+            #=================== 0405： 增加straggler判定，将其reward分数设置为0=============
+            if self._straggler_prune_enabled and len(simulate_env.legal_actions) >= 2: #只有一个分支则不用考虑
+                token_lens = [int(x["num_token"]) for x in simulate_env.legal_actions]
+                n = len(token_lens)
+                for si in range(n):
+                    li = token_lens[si]
+                    if li <= self._straggler_min_tokens:
+                        continue
+                    max_other = max(token_lens[j] for j in range(n) if j != si)
+                    if max_other <= 0:
+                        continue
+                    if li > self._straggler_length_ratio * max_other:
+                        prev_r = child_values[si]
+                        child_values[si] = 0.0
+                        ev: Dict[str, Any] = {
+                            "branch_idx": si,
+                            "num_token": li,
+                            "max_other_siblings": max_other,
+                            "ratio_threshold": self._straggler_length_ratio,
+                            "min_tokens_threshold": self._straggler_min_tokens,
+                            "prm_reward_before": float(prev_r) if prev_r is not None else None,
+                            "prm_reward_after": 0.0,
+                            "action": "beam_value_set_to_zero",
+                        }
+                        ev.update(self._straggler_run_context_dict())
+                        self._straggler_prune_events.append(ev)
+            #==========================================================================
 
         assert len(node.children) == 0
+
+        # 为每个legal_actions建子节点
         for i, action_dict in enumerate(simulate_env.legal_actions):
             action, prob = action_dict["action"], action_dict["prob"]
             model_name = action_dict["model_name"]

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 基础路径配置
-BASE_PATH="/media/8T3/x_long32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/models"
-export LOGDIR="/media/8T3/x_long32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
+BASE_PATH="/root/autodl-tmp/models"
+export LOGDIR="/root/autodl-tmp/x_long32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
 export HOST_ADDR="0.0.0.0"
 export CONTROLLER_PORT=10014
 export WORKER_BASE_PORT=10081
@@ -19,46 +19,53 @@ CHECK_SCRIPT="${SCRIPT_DIR}/process/check_incomplete_questions.py"
 # 卡死检测：单次评估最大运行时长（秒）
 EVAL_TIMEOUT_SECONDS=720000
 
-# Policy模型列表
-POLICY_MODELS=(
-    # "Qwen2.5-Math-7B-Instruct"
-    "Qwen2.5-Math-1.5B-Instruct"
+# # Policy模型列表
+# POLICY_MODELS=(
+#     "Qwen2.5-Math-7B-Instruct"
+#     "Qwen2.5-Math-1.5B-Instruct"
 
 
-    # "Qwen2.5-1.5B-Instruct"
-    # "Qwen2.5-0.5B-Instruct"
-    # "Qwen2.5-3B-Instruct"
+#     # "Qwen2.5-1.5B-Instruct"
+#     # "Qwen2.5-0.5B-Instruct"
+#     # "Qwen2.5-3B-Instruct"
 
 
 
-    # "Llama-3.1-8B-Instruct"
-    # "DeepSeek-R1-Distill-Qwen-1.5B"
-    # "DeepSeek-R1-Distill-Qwen-7B"
-)
+#     # "Llama-3.1-8B-Instruct"
+#     # "DeepSeek-R1-Distill-Qwen-1.5B"
+#     # "DeepSeek-R1-Distill-Qwen-7B"
+# )
 
-# Reward模型列表
-REWARD_MODELS=(
-    # "math-shepherd-mistral-7b-prm"
-    # "Skywork-o1-Open-PRM-Qwen-2.5-7B"
-    "Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
-    # "math-shepherd-mistral-7b-prm"
-    # "Skywork-o1-Open-PRM-Qwen-2.5-7B"
+# # Reward模型列表
+# REWARD_MODELS=(
+#     "math-shepherd-mistral-7b-prm"
+#     # "Skywork-o1-Open-PRM-Qwen-2.5-7B"
+#     "Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+#     # "math-shepherd-mistral-7b-prm"
+#     # "Skywork-o1-Open-PRM-Qwen-2.5-7B"
 
-    # "Qwen2.5-Math-PRM-7B"
+#     # "Qwen2.5-Math-PRM-7B"
+# )
+# 0405：修改为Policy + Reward 固定组合（仅跑以下三对组合）
+# 格式: "Policy目录名|Reward目录名"
+POLICY_REWARD_PAIRS=(
+    "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
+    "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+    "Qwen2.5-Math-1.5B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
 )
 
 # 数据集配置 (任务名, batch_size)
 # batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
-    "AIME24 5"  # 从 30 降到 15（减少50%）
+    "AIME24 30"  # 从 30 降到 15（减少50%）
     # "AMC23 40"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
 
 # Branch宽度配置
 BRANCH_WIDTHS=(
-    # 8
-    # 4
+    8
+    4
     2
 )
 
@@ -69,6 +76,13 @@ NUM_SEQ_VALUES=(
     1
 )
 
+# 评估随机种子（传入 run.sh --seed → evaluate.py）
+EVAL_SEED=42
+# straggler：与 reason/guided_search/tree.py 中 SearchTree 一致（传入 run.sh → evaluate.py）
+STRAGGLER_PRUNE=0              # 0=关闭 1=开启
+STRAGGLER_LENGTH_RATIO=1.5
+STRAGGLER_MIN_TOKENS=80
+
 # 日志函数
 log_message() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
@@ -76,7 +90,7 @@ log_message() {
 
 # 等待函数
 wait_and_log() {
-    local seconds=$1
+    local seconds=$3 #原来是1 等久一点？
     log_message "等待 ${seconds} 秒..."
     sleep $seconds
     log_message "等待完成"
@@ -271,7 +285,11 @@ run_evaluation() {
             --local 0 \
             --beam-log 1 \
             --logprobs-topk 20 \
-            --task "$task"
+            --task "$task" \
+            --seed "$EVAL_SEED" \
+            --straggler_prune "$STRAGGLER_PRUNE" \
+            --straggler_length_ratio "$STRAGGLER_LENGTH_RATIO" \
+            --straggler_min_tokens "$STRAGGLER_MIN_TOKENS"
 
         local exit_code=$?
         if [ $exit_code -eq 0 ]; then
@@ -315,69 +333,114 @@ run_evaluation() {
 
 # 主执行函数
 main() {
-    log_message "开始全组合评估"
-    log_message "Policy模型数量: ${#POLICY_MODELS[@]}"
-    log_message "Reward模型数量: ${#REWARD_MODELS[@]}"
+    # log_message "开始全组合评估"
+    # log_message "Policy模型数量: ${#POLICY_MODELS[@]}"
+    # log_message "Reward模型数量: ${#REWARD_MODELS[@]}"
+    log_message "开始全组合评估（固定 Policy–Reward 对）"
+    log_message "EVAL_SEED=${EVAL_SEED} STRAGGLER_PRUNE=${STRAGGLER_PRUNE} STRAGGLER_LENGTH_RATIO=${STRAGGLER_LENGTH_RATIO} STRAGGLER_MIN_TOKENS=${STRAGGLER_MIN_TOKENS}"
+    log_message "Policy–Reward 对数量: ${#POLICY_REWARD_PAIRS[@]}" #只跑固定的三对组合
     log_message "数据集数量: ${#DATASETS[@]}"
     log_message "Branch宽度数量: ${#BRANCH_WIDTHS[@]}"
     log_message "Num_seq数量: ${#NUM_SEQ_VALUES[@]}"
     
-    local total_combinations=$((${#POLICY_MODELS[@]} * ${#REWARD_MODELS[@]} * ${#DATASETS[@]} * ${#BRANCH_WIDTHS[@]} * ${#NUM_SEQ_VALUES[@]}))
+    # local total_combinations=$((${#POLICY_MODELS[@]} * ${#REWARD_MODELS[@]} * ${#DATASETS[@]} * ${#BRANCH_WIDTHS[@]} * ${#NUM_SEQ_VALUES[@]}))
+    local total_combinations=$((${#POLICY_REWARD_PAIRS[@]} * ${#DATASETS[@]} * ${#BRANCH_WIDTHS[@]} * ${#NUM_SEQ_VALUES[@]}))
     log_message "总组合数: ${total_combinations}"
     
     local current_combination=0
     
-    # 遍历所有Policy模型
-    for policy_model in "${POLICY_MODELS[@]}"; do
+    for pair_line in "${POLICY_REWARD_PAIRS[@]}"; do
+        IFS='|' read -r policy_model reward_model <<< "${pair_line}"
         policy_path="${BASE_PATH}/${policy_model}"
+        reward_path="${BASE_PATH}/${reward_model}"
         
-        # 遍历所有Reward模型
-        for reward_model in "${REWARD_MODELS[@]}"; do
-            reward_path="${BASE_PATH}/${reward_model}"
+        stop_services
+        start_services "$policy_path" "$reward_path"
+        
+        for dataset_config in "${DATASETS[@]}"; do
+            read -r task batch_size <<< "$dataset_config"
             
-            # 停止之前的服务并启动新的服务
-            stop_services
-            start_services "$policy_path" "$reward_path"
-            
-            # 遍历所有数据集
-            for dataset_config in "${DATASETS[@]}"; do
-                read -r task batch_size <<< "$dataset_config"
-                
-                # 遍历所有Branch宽度
-                for branch_width in "${BRANCH_WIDTHS[@]}"; do
-                    # 遍历所有Num_seq值
-                    for num_seq in "${NUM_SEQ_VALUES[@]}"; do
-                        # 检查 branch_width 是否大于 num_seq 且能被 num_seq 整除
-                        if [ $branch_width -le $num_seq ]; then
-                            log_message "跳过不兼容组合: Branch=${branch_width}, NumSeq=${num_seq} (branch_width 必须大于 num_seq)"
-                            continue
-                        fi
-                        if [ $((branch_width % num_seq)) -ne 0 ]; then
-                            log_message "跳过不兼容组合: Branch=${branch_width}, NumSeq=${num_seq} (branch_width 必须能被 num_seq 整除)"
-                            continue
-                        fi
-                        
-                        current_combination=$((current_combination + 1))
-                        
-                        log_message "=== 组合 ${current_combination}/${total_combinations} ==="
-                        log_message "Policy: ${policy_model}"
-                        log_message "Reward: ${reward_model}"
-                        log_message "Dataset: ${task}"
-                        log_message "Branch Width: ${branch_width}"
-                        log_message "Num Seq: ${num_seq}"
-                        
-                        # 检查是否已完成，如果已完成则跳过
-                        if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"; then
-                            continue
-                        fi
-                        
-                        run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq"
-                    done
+            for branch_width in "${BRANCH_WIDTHS[@]}"; do
+                for num_seq in "${NUM_SEQ_VALUES[@]}"; do
+                    if [ $branch_width -le $num_seq ]; then
+                        log_message "跳过不兼容组合: Branch=${branch_width}, NumSeq=${num_seq} (branch_width 必须大于 num_seq)"
+                        continue
+                    fi
+                    if [ $((branch_width % num_seq)) -ne 0 ]; then
+                        log_message "跳过不兼容组合: Branch=${branch_width}, NumSeq=${num_seq} (branch_width 必须能被 num_seq 整除)"
+                        continue
+                    fi
+                    
+                    current_combination=$((current_combination + 1))
+                    
+                    log_message "=== 组合 ${current_combination}/${total_combinations} ==="
+                    log_message "Policy: ${policy_model}"
+                    log_message "Reward: ${reward_model}"
+                    log_message "Dataset: ${task}"
+                    log_message "Branch Width: ${branch_width}"
+                    log_message "Num Seq: ${num_seq}"
+                    
+                    if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"; then
+                        continue
+                    fi
+                    
+                    run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq"
                 done
             done
         done
     done
     
+    #  # 遍历所有Policy模型
+    # for policy_model in "${POLICY_MODELS[@]}"; do
+    #     policy_path="${BASE_PATH}/${policy_model}"
+        
+    #     # 遍历所有Reward模型
+    #     for reward_model in "${REWARD_MODELS[@]}"; do
+    #         reward_path="${BASE_PATH}/${reward_model}"
+            
+    #         # 停止之前的服务并启动新的服务
+    #         stop_services
+    #         start_services "$policy_path" "$reward_path"
+            
+    #         # 遍历所有数据集
+    #         for dataset_config in "${DATASETS[@]}"; do
+    #             read -r task batch_size <<< "$dataset_config"
+                
+    #             # 遍历所有Branch宽度
+    #             for branch_width in "${BRANCH_WIDTHS[@]}"; do
+    #                 # 遍历所有Num_seq值
+    #                 for num_seq in "${NUM_SEQ_VALUES[@]}"; do
+    #                     # 检查 branch_width 是否大于 num_seq 且能被 num_seq 整除
+    #                     if [ $branch_width -le $num_seq ]; then
+    #                         log_message "跳过不兼容组合: Branch=${branch_width}, NumSeq=${num_seq} (branch_width 必须大于 num_seq)"
+    #                         continue
+    #                     fi
+    #                     if [ $((branch_width % num_seq)) -ne 0 ]; then
+    #                         log_message "跳过不兼容组合: Branch=${branch_width}, NumSeq=${num_seq} (branch_width 必须能被 num_seq 整除)"
+    #                         continue
+    #                     fi
+                        
+    #                     current_combination=$((current_combination + 1))
+                        
+    #                     log_message "=== 组合 ${current_combination}/${total_combinations} ==="
+    #                     log_message "Policy: ${policy_model}"
+    #                     log_message "Reward: ${reward_model}"
+    #                     log_message "Dataset: ${task}"
+    #                     log_message "Branch Width: ${branch_width}"
+    #                     log_message "Num Seq: ${num_seq}"
+                        
+    #                     # 检查是否已完成，如果已完成则跳过
+    #                     if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq"; then
+    #                         continue
+    #                     fi
+                        
+    #                     run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq"
+    #                 done
+    #             done
+    #         done
+    #     done
+    # done
+
     # 清理
     stop_services
     log_message "所有评估完成！"
@@ -399,38 +462,50 @@ check_requirements() {
         exit 1
     fi
     
-    for policy_model in "${POLICY_MODELS[@]}"; do
+    # 代替下面两段
+    for pair_line in "${POLICY_REWARD_PAIRS[@]}"; do
+        IFS='|' read -r policy_model reward_model <<< "${pair_line}"
         if [ ! -d "${BASE_PATH}/${policy_model}" ]; then
             log_message "错误: Policy模型不存在: ${BASE_PATH}/${policy_model}"
             exit 1
         fi
-    done
-    
-    for reward_model in "${REWARD_MODELS[@]}"; do
         if [ ! -d "${BASE_PATH}/${reward_model}" ]; then
             log_message "错误: Reward模型不存在: ${BASE_PATH}/${reward_model}"
             exit 1
         fi
     done
+    
+    # for policy_model in "${POLICY_MODELS[@]}"; do
+    #     if [ ! -d "${BASE_PATH}/${policy_model}" ]; then
+    #         log_message "错误: Policy模型不存在: ${BASE_PATH}/${policy_model}"
+    #         exit 1
+    #     fi
+    # done
+    
+    # for reward_model in "${REWARD_MODELS[@]}"; do
+    #     if [ ! -d "${BASE_PATH}/${reward_model}" ]; then
+    #         log_message "错误: Reward模型不存在: ${BASE_PATH}/${reward_model}"
+    #         exit 1
+    #     fi
+    # done
 }
 
 # 脚本入口
 if [ "$1" = "--dry-run" ]; then
     log_message "干跑模式 - 只显示将要执行的组合"
-    for policy_model in "${POLICY_MODELS[@]}"; do
-        for reward_model in "${REWARD_MODELS[@]}"; do
-            for dataset_config in "${DATASETS[@]}"; do
-                read -r task batch_size <<< "$dataset_config"
-                for branch_width in "${BRANCH_WIDTHS[@]}"; do
-                    for num_seq in "${NUM_SEQ_VALUES[@]}"; do
-                        if [ $branch_width -le $num_seq ]; then
-                            echo "SKIP (Branch <= NumSeq): Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}"
-                        elif [ $((branch_width % num_seq)) -ne 0 ]; then
-                            echo "SKIP (不能整除): Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}"
-                        else
-                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}"
-                        fi
-                    done
+    for pair_line in "${POLICY_REWARD_PAIRS[@]}"; do
+        IFS='|' read -r policy_model reward_model <<< "${pair_line}"
+        for dataset_config in "${DATASETS[@]}"; do
+            read -r task batch_size <<< "$dataset_config"
+            for branch_width in "${BRANCH_WIDTHS[@]}"; do
+                for num_seq in "${NUM_SEQ_VALUES[@]}"; do
+                    if [ $branch_width -le $num_seq ]; then
+                        echo "SKIP (Branch <= NumSeq): Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}"
+                    elif [ $((branch_width % num_seq)) -ne 0 ]; then
+                        echo "SKIP (不能整除): Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}"
+                    else
+                        echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}"
+                    fi
                 done
             done
         done

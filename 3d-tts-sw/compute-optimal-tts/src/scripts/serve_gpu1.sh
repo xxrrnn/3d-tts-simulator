@@ -62,9 +62,9 @@ do
     cpu_offload_gb=0
 
     if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
-        gpu_memory_utilization=0.80
+        gpu_memory_utilization=0.70 #0.8->0.7
     else
-        gpu_memory_utilization=0.80
+        gpu_memory_utilization=0.70  # 0.8->0.7
     fi
 
     if [[ "$POLICY_MODEL_PATH" =~ "DeepSeek-R1" ]]; then

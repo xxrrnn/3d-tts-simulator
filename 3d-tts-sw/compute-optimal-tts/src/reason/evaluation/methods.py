@@ -31,6 +31,12 @@ class TreeSearchConfig(BasicConfig):
     sep: List[str] = list
     direct_io: int = 0
     double_line_break: bool = False
+    # 写入 straggler / eval 日志用的短名（与 output 目录命名一致）
+    eval_log_policy_model: str = ""
+    eval_log_reward_model: str = ""
+    straggler_prune_enabled: bool = False
+    straggler_length_ratio: float = 1.5
+    straggler_min_tokens: int = 80
 
     def __post_init__(self):
         assert self.tree_max_width > 0, "Tree width must be greater than 0"
@@ -85,10 +91,25 @@ def beam_search(
         update_legal_action=False,
     )
 
-    search_tree = SearchTree(cfg={"model_names": config.model_names, "direct_io": config.direct_io, "max_actions": config.tree_max_width})
+    search_tree = SearchTree(
+        cfg={
+            "model_names": config.model_names,
+            "direct_io": config.direct_io,
+            "max_actions": config.tree_max_width,
+            "eval_log_task_name": config.task_name,
+            "eval_log_policy_model": config.eval_log_policy_model,
+            "eval_log_reward_model": config.eval_log_reward_model,
+            "eval_log_tree_max_depth": config.tree_max_depth,
+            "eval_log_beam_size": config.beam_size,
+            "straggler_prune_enabled": config.straggler_prune_enabled,
+            "straggler_length_ratio": config.straggler_length_ratio,
+            "straggler_min_tokens": config.straggler_min_tokens,
+        }
+    )
     traj_list = search_tree.beam_search(env, config.beam_size, config.tree_max_depth, rm_call)
 
     ### beam search start
+    straggler_log = traj_list[-1].get("straggler_log") if traj_list else None
     return TreeSearchSolutionOutput(
         solutions=[t["text"] for t in traj_list],
         completion_tokens=[t["api_completion_tokens"] for t in traj_list],
@@ -101,5 +122,6 @@ def beam_search(
         detailed_beam_search_logs=[t.get("detailed_beam_search_log") for t in traj_list],
         final_path_infos=[t.get("final_path_info") for t in traj_list],
         timing_infos=[t.get("timing_info") for t in traj_list],
+        straggler_log=straggler_log,
     )
     ### beam search end

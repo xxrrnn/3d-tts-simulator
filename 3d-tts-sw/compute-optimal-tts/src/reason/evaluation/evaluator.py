@@ -8,7 +8,7 @@ import jsonlines
 import time
 import traceback
 from dataclasses import dataclass
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import os
@@ -112,6 +112,7 @@ class TreeSearchSolutionOutput(SolutionOutput):
     detailed_beam_search_logs: List[Dict] = None  # 新增：详细beam search日志
     final_path_infos: List[Dict] = None          # 新增：最终路径信息
     timing_infos: List[Dict] = None              # 新增：整体与逐步耗时
+    straggler_log: Optional[Dict] = None        # straggler 配置与剪枝事件，写入 record jsonl
     ### beam search end
 
 
@@ -158,6 +159,8 @@ class MathEvaluator:
                 if solution.timing_infos and i < len(solution.timing_infos):
                     if solution.timing_infos[i] is not None:
                         o["timing_info"] = solution.timing_infos[i]
+                if solution.straggler_log is not None and i == 0:
+                    o["straggler_log"] = solution.straggler_log
                 ### beam search end
             # We define the completion_tokens as the tokens consumed between two generated answers, therefore we need to take sum here.
             total_completion_token += solution.completion_tokens[i]
