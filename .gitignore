@@ -154,3 +154,4 @@ datasets/
 data/*.bin
 data/*.pt
 data/*.pth
+*.lock
