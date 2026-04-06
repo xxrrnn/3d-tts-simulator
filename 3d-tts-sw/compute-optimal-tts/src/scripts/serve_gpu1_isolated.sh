@@ -1,34 +1,41 @@
 #!/bin/bash
+# 单机第二路：指定物理 GPU、独立 tmux 会话名、独立端口；不与 serve_gpu1.sh（会话 tts、GPU0）冲突。
+#
+# 用法:
+#   bash serve_gpu1_isolated.sh POLICY_PATH VALUE_PATH HOST CONTROLLER_PORT WORKER_BASE_PORT TMUX_SESSION PHYSICAL_GPU_ID
+
+set -euo pipefail
 
 POLICY_MODEL_PATH=$1
 VALUE_MODEL_PATH=$2
 NUM_RM_WORKER=1
 NUM_LM_WORKER=1
 
-export CUDA_VISIBLE_DEVICES=0
-echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
-n_gpus=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | wc -l)
-echo "n_gpus: $n_gpus"
-
-GPU_LIST=(0 0)
-echo "GPU_LIST:"
-echo "${GPU_LIST[@]}"
-
 HOST_ADDR=$3
 CONTROLLER_PORT=$4
 WORKER_BASE_PORT=$5
+session_name=$6
+PHYSICAL_GPU_ID=$7
+
+export CUDA_VISIBLE_DEVICES="${PHYSICAL_GPU_ID}"
+echo "serve_gpu1_isolated: CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES} tmux=${session_name} controller_port=${CONTROLLER_PORT}"
+echo "n_gpus (visible): $(echo "${CUDA_VISIBLE_DEVICES}" | tr ',' '\n' | wc -l)"
+
+GPU_LIST=(0 0)
+echo "GPU_LIST: ${GPU_LIST[*]}"
+
 export PYTHONPATH=$(pwd)
 PYTHON_EXECUTABLE=$(which python)
 
 LOGDIR=${PYTHONPATH}/logs_fastchat
 export LOGDIR=$LOGDIR
-session_name=tts
-if tmux has-session -t $session_name 2>/dev/null; then
+
+if tmux has-session -t "$session_name" 2>/dev/null; then
     echo "Session $session_name already exists. Killing it."
-    tmux kill-session -t $session_name
+    tmux kill-session -t "$session_name"
 fi
 tmux start-server
-tmux new-session -s $session_name -n controller -d
+tmux new-session -s "$session_name" -n controller -d
 tmux send-keys "source ~/.bashrc && conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
 tmux send-keys "${PYTHON_EXECUTABLE} -m fastchat.serve.controller --port ${CONTROLLER_PORT} --host $HOST_ADDR" Enter
 
@@ -47,14 +54,14 @@ do
         command="CUDA_VISIBLE_DEVICES=${GPU_LIST[$i]} ${PYTHON_EXECUTABLE} -m reason.llm_service.workers.reward_model_worker --model-path $VALUE_MODEL_PATH --controller-address http://$HOST_ADDR:$CONTROLLER_PORT --host $HOST_ADDR --port $WORKER_PORT --worker-address http://$HOST_ADDR:$WORKER_PORT"
     fi
     tmux send-keys "$command" Enter
-    echo "Reward worker $i started on GPU ${GPU_LIST[$i]} with port $WORKER_PORT, model: $VALUE_MODEL_PATH"
+    echo "Reward worker $i started on logical GPU ${GPU_LIST[$i]} with port $WORKER_PORT, model: $VALUE_MODEL_PATH"
 done
 
 for i in $(seq $((NUM_RM_WORKER)) $((NUM_LM_WORKER+NUM_RM_WORKER-1)))
 do
     WORKER_PORT=$((WORKER_BASE_PORT+i))
     tmux new-window -n policy_$i
-    tmux send-keys "source ~/.bashrc && source ${project_root}/.venv/bin/activate 2>/dev/null || conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
+    tmux send-keys "source ~/.bashrc && source ${PYTHONPATH}/.venv/bin/activate 2>/dev/null || conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
 
     max_model_length=8192
     max_num_sequences=4
@@ -62,9 +69,9 @@ do
     cpu_offload_gb=0
 
     if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
-        gpu_memory_utilization=0.8 #0.8->0.7
+        gpu_memory_utilization=0.70
     else
-        gpu_memory_utilization=0.8  # 0.8->0.7
+        gpu_memory_utilization=0.70
     fi
 
     if [[ "$POLICY_MODEL_PATH" =~ "DeepSeek-R1" ]]; then
@@ -86,5 +93,5 @@ do
     fi
 
     tmux send-keys "$command" Enter
-    echo "Policy worker $i started on GPU ${GPU_LIST[$i]} with port $WORKER_PORT, model: $POLICY_MODEL_PATH"
+    echo "Policy worker $i started on logical GPU ${GPU_LIST[$i]} with port $WORKER_PORT, model: $POLICY_MODEL_PATH"
 done

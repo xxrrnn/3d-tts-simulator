@@ -34,8 +34,8 @@ tmux new-session -s $session_name -n controller -d
 tmux send-keys "source ~/.bashrc && conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
 tmux send-keys "${PYTHON_EXECUTABLE} -m fastchat.serve.controller --port ${CONTROLLER_PORT} --host $HOST_ADDR" Enter
 
-echo "Wait 5 seconds ..."
-sleep 5
+echo "Wait 20 seconds for controller to fully initialize..."
+sleep 20
 
 echo "Starting workers"
 for i in $(seq 0 $((NUM_RM_WORKER-1)))

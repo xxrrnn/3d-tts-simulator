@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # 基础路径配置
-BASE_PATH="/root/autodl-tmp/models"
-export LOGDIR="/root/autodl-tmp/x_long32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
+BASE_PATH="/DISK1/data/rnxu_24/Paper/models"
+export LOGDIR="/DISK1/data/rnxu_24/Paper/xlong_32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
 export HOST_ADDR="0.0.0.0"
 export CONTROLLER_PORT=10014
 export WORKER_BASE_PORT=10081
 
 # GPU配置 (统一管理)
-N_GPUS=1  # 可选值: 1, 2, 3, 4
+N_GPUS=4  # 可选值: 1, 2, 3, 4
 
 # 脚本路径配置
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -50,8 +50,8 @@ EVAL_TIMEOUT_SECONDS=720000
 # 0405：修改为Policy + Reward 固定组合（仅跑以下三对组合）
 # 格式: "Policy目录名|Reward目录名"
 POLICY_REWARD_PAIRS=(
-    # "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
-    # "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+    "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
+    "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
     "Qwen2.5-Math-1.5B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
 )
 
@@ -59,15 +59,15 @@ POLICY_REWARD_PAIRS=(
 # batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
     "AIME24 30"  # 从 30 降到 15（减少50%） straggler出现在question19
-    # "AMC23 40"   # 从 40 降到 20（减少50%）
+    "AMC23 40"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
 
 # Branch宽度配置
 BRANCH_WIDTHS=(
     8
-    # 4
-    # 2
+    4
+    2
 )
 
 # Num_seq配置
@@ -80,9 +80,9 @@ NUM_SEQ_VALUES=(
 # 评估随机种子（传入 run.sh --seed → evaluate.py）
 EVAL_SEED=42
 # straggler：与 reason/guided_search/tree.py 中 SearchTree 一致（传入 run.sh → evaluate.py）
-STRAGGLER_PRUNE=1              # 0=关闭 1=开启
+STRAGGLER_PRUNE=0              # 0=关闭 1=开启
 STRAGGLER_LENGTH_RATIO=1.5
-STRAGGLER_MIN_TOKENS=80
+STRAGGLER_MIN_TOKENS=100
 
 # 日志函数
 log_message() {
@@ -100,9 +100,14 @@ wait_and_log() {
 # 停止现有服务
 stop_services() {
     log_message "停止现有服务..."
+    # 停止所有相关进程
     pkill -f "controller.py" 2>/dev/null || true
+    pkill -f "vllm_worker" 2>/dev/null || true
+    pkill -f "reward_model_worker" 2>/dev/null || true
     pkill -f "model_worker.py" 2>/dev/null || true
-    wait_and_log 10
+    # 杀掉 tmux session
+    tmux kill-session -t tts 2>/dev/null || true
+    wait_and_log 15
 }
 
 # 启动服务
@@ -128,8 +133,9 @@ start_services() {
     bash "$serve_script" "$policy_path" "$reward_path" "$HOST_ADDR" "$CONTROLLER_PORT" "$WORKER_BASE_PORT" &
     SERVICE_PID=$!
     
-    # 增加等待时间，确保大模型有足够时间加载到GPU
-    wait_and_log 60
+    # 增加等待时间，确保大模型有足够时间加载到GPU，并且 controller 和 workers 完全启动
+    log_message "等待 controller 和 workers 启动并加载模型..."
+    wait_and_log 120
 }
 
 # 删除锁文件（保留已完成的结果）

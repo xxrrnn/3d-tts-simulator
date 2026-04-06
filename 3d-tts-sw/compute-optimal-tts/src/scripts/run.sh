@@ -202,11 +202,17 @@ echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES, n_gpus: $n_gpus"
 echo "GPU_LIST:"
 echo "${GPU_LIST[@]}"
 
-num_worker=12  #=12 改小一点？
-save_dir=${PYTHONPATH}/output
+num_worker=6  #=12 改小一点？
+# 并行多实例评估时可 export EVAL_SAVE_DIR 指向独立目录（与 eval_all_combinations_straggler_gpu*.sh 一致）
+save_dir="${EVAL_SAVE_DIR:-${PYTHONPATH}/output}"
 LOGDIR=${PYTHONPATH}/logs_fastchat
 export LOGDIR=$LOGDIR
-controller_addr=http://$HOST_ADDR:$CONTROLLER_PORT
+# 客户端访问 controller 时不能用 0.0.0.0 作为目标地址，否则常见为 Connection refused
+_controller_host="${HOST_ADDR}"
+if [ "${_controller_host}" = "0.0.0.0" ] || [ -z "${_controller_host}" ]; then
+    _controller_host=127.0.0.1
+fi
+controller_addr="http://${_controller_host}:${CONTROLLER_PORT}"
 
 echo "Running $method evaluation ..."
 
