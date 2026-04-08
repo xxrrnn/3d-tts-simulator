@@ -268,6 +268,13 @@ class SearchTree:
         self._straggler_prune_enabled = self._cfg.get("straggler_prune_enabled", False) #是否启用straggler检测 
         self._straggler_length_ratio = float(self._cfg.get("straggler_length_ratio", 1.5)) #straggler判定的倍率值
         self._straggler_min_tokens = int(self._cfg.get("straggler_min_tokens", 80))  # straggler的长度最低阈值
+        # 为 True 时：仅当除候选 straggler 外其余兄弟分支的 PRM 分最大值 > 阈值时才置零 straggler
+        self._straggler_prune_other_reward_gate = bool(
+            self._cfg.get("straggler_prune_other_reward_gate", False)
+        )
+        self._straggler_prune_other_reward_threshold = float(
+            self._cfg.get("straggler_prune_other_reward_threshold", 0.0)
+        )
         self._straggler_prune_events: List[Dict[str, Any]] = []
 
     def _straggler_run_context_dict(self) -> Dict[str, Any]:
@@ -286,6 +293,8 @@ class SearchTree:
             "prune_enabled": self._straggler_prune_enabled,
             "length_ratio": self._straggler_length_ratio,
             "min_tokens": self._straggler_min_tokens,
+            "other_reward_gate": self._straggler_prune_other_reward_gate,
+            "other_reward_threshold": self._straggler_prune_other_reward_threshold,
             "init_critic_value": self._init_critic_value,
             "context": self._straggler_run_context_dict(),
             "prune_events": list(self._straggler_prune_events),
@@ -328,7 +337,13 @@ class SearchTree:
         api_call_completion_tokens += info["api_completion_token"]
         if self.root is None:
             root = LanguageNode(text_state=simulate_env.get_state(model_name='raw'))
-            self._expand_leaf_node(root, simulate_env, reward_model_fn)
+            self._expand_leaf_node(
+                root,
+                simulate_env,
+                reward_model_fn,
+                beam_search_step=-1,
+                detailed_beam_logs=detailed_beam_logs,
+            )
             self.root = root
 
         end_nodes, top_k_nodes = [], [(-self.root._initial_value, -self.root._initial_value, -self.root._parent_value, self.root, simulate_env.copy())]
@@ -546,7 +561,14 @@ class SearchTree:
                     if enable_detailed_log and expansion_result:
                         expansion_result["final_status"] = "terminated"
                 else:
-                    self._expand_leaf_node(node, new_env, reward_model_fn)
+                    self._expand_leaf_node(
+                        node,
+                        new_env,
+                        reward_model_fn,
+                        beam_search_step=i,
+                        beam_step_detail=step_detail if enable_detailed_log else None,
+                        detailed_beam_logs=detailed_beam_logs if enable_detailed_log else None,
+                    )
                     if enable_detailed_log and expansion_result:
                         expansion_result["final_status"] = "expanded"
                         expansion_result["num_new_children"] = len(node.children)
@@ -697,6 +719,10 @@ class SearchTree:
         node: Node,
         simulate_env: CoTEnv,
         rm_call: Optional[Callable] = None,
+        *,
+        beam_search_step: Optional[int] = None,
+        beam_step_detail: Optional[Dict[str, Any]] = None,
+        detailed_beam_logs: Optional[Dict[str, Any]] = None,
     ) -> float:
         """
         Overview:
@@ -705,6 +731,12 @@ class SearchTree:
             - node (:obj:`Class Node`): current node when performing mcts search.
             - simulate_env (:obj:`Class BaseGameEnv`): the class of simulate env.
             - rm_call (:obj:`Function`): the Callable to compute the state value.
+            - beam_search_step: beam_search 主循环迭代下标 i（与 detailed_beam_logs step_details[].step 一致）；
+              根节点首次展开前传 -1；若为 None 则 straggler 事件中 step 字段为 None。
+            - beam_step_detail: 当前迭代的 step 详情 dict（与将写入 step_details 的对象相同）；
+              若启用详细 beam 日志，straggler 事件会附加到其 straggler_prune_events。
+            - detailed_beam_logs: 整次搜索的 detailed_beam_search_log 根 dict；根展开（step=-1）时的
+              straggler 写入 root_straggler_prune_events。
         Returns:
             - leaf_value (:obj:`Bool`): the leaf node's value.
         """
@@ -762,6 +794,7 @@ class SearchTree:
             
             #=================== 0405： 增加straggler判定，将其reward分数设置为0=============
             if self._straggler_prune_enabled and len(simulate_env.legal_actions) >= 2: #只有一个分支则不用考虑
+                prm_snapshot = [float(x) for x in child_values]
                 token_lens = [int(x["num_token"]) for x in simulate_env.legal_actions]
                 n = len(token_lens)
                 for si in range(n):
@@ -772,20 +805,36 @@ class SearchTree:
                     if max_other <= 0:
                         continue
                     if li > self._straggler_length_ratio * max_other:
+                        max_other_prm = max(prm_snapshot[j] for j in range(n) if j != si)
+                        if self._straggler_prune_other_reward_gate:
+                            if max_other_prm <= self._straggler_prune_other_reward_threshold:
+                                continue
                         prev_r = child_values[si]
                         child_values[si] = 0.0
                         ev: Dict[str, Any] = {
+                            "step": beam_search_step,
                             "branch_idx": si,
                             "num_token": li,
                             "max_other_siblings": max_other,
                             "ratio_threshold": self._straggler_length_ratio,
                             "min_tokens_threshold": self._straggler_min_tokens,
+                            "max_other_prm_reward": max_other_prm,
+                            "other_reward_gate": self._straggler_prune_other_reward_gate,
+                            "other_reward_threshold": self._straggler_prune_other_reward_threshold,
                             "prm_reward_before": float(prev_r) if prev_r is not None else None,
                             "prm_reward_after": 0.0,
                             "action": "beam_value_set_to_zero",
                         }
                         ev.update(self._straggler_run_context_dict())
                         self._straggler_prune_events.append(ev)
+                        if beam_step_detail is not None:
+                            beam_step_detail.setdefault("straggler_prune_events", []).append(
+                                dict(ev)
+                            )
+                        elif beam_search_step == -1 and detailed_beam_logs is not None:
+                            detailed_beam_logs.setdefault("root_straggler_prune_events", []).append(
+                                dict(ev)
+                            )
             #==========================================================================
 
         assert len(node.children) == 0

@@ -41,6 +41,8 @@ seed=42 #0405 新增seed 可以调整
 straggler_prune=0 #是否开启straggler剪枝，1=剪枝
 straggler_length_ratio=1.5 #straggler判定的长度倍率阈值
 straggler_min_tokens=80 #straggler最短token阈值
+straggler_prune_other_reward_gate=0 #1=仅当兄弟分支PRM最大分>阈值时才剪straggler
+straggler_prune_other_reward_threshold=0.0 #与 gate=1 配合：须严格大于该值
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -122,6 +124,14 @@ while [[ $# -gt 0 ]]; do
         straggler_min_tokens="$2"
         shift 2
         ;;
+    --straggler_prune_other_reward_gate)
+        straggler_prune_other_reward_gate="$2"
+        shift 2
+        ;;
+    --straggler_prune_other_reward_threshold)
+        straggler_prune_other_reward_threshold="$2"
+        shift 2
+        ;;
     ### beam search start
     --beam-log)
         beam_search_detailed_log="$2"
@@ -140,7 +150,7 @@ while [[ $# -gt 0 ]]; do
 done
 echo "LM: $LM, RM: $RM, task: $task_name, tree_max_width: $tree_max_width, num_sequence: $num_sequence, question_parallel_num: $question_parallel_num"
 echo "batch_size: $batch_size, max_time: $max_time, n_gpus: $n_gpus, double_line_break: $double_line_break, seed:$seed"
-echo "straggler_prune: $straggler_prune, straggler_length_ratio: $straggler_length_ratio, straggler_min_tokens: $straggler_min_tokens"
+echo "straggler_prune: $straggler_prune, straggler_length_ratio: $straggler_length_ratio, straggler_min_tokens: $straggler_min_tokens, straggler_prune_other_reward_gate: $straggler_prune_other_reward_gate, straggler_prune_other_reward_threshold: $straggler_prune_other_reward_threshold"
 ### beam search start
 echo "beam_search_detailed_log: $beam_search_detailed_log, logprobs_topk: $logprobs_topk"
 ### beam search end
@@ -238,4 +248,6 @@ python reason/evaluation/evaluate.py \
     --seed $seed \
     --straggler_prune $straggler_prune \
     --straggler_length_ratio $straggler_length_ratio \
-    --straggler_min_tokens $straggler_min_tokens
+    --straggler_min_tokens $straggler_min_tokens \
+    --straggler_prune_other_reward_gate $straggler_prune_other_reward_gate \
+    --straggler_prune_other_reward_threshold $straggler_prune_other_reward_threshold

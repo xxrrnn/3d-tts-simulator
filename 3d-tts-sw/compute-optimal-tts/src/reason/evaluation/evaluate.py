@@ -95,6 +95,19 @@ if __name__ == "__main__":
     )
     parser.add_argument("--straggler_length_ratio", type=float, default=1.5)
     parser.add_argument("--straggler_min_tokens", type=int, default=80)
+    parser.add_argument(
+        "--straggler_prune_other_reward_gate",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="1=仅当非 straggler 兄弟分支 PRM 分最大值>阈值时才剪枝；0=仅按长度倍率判定",
+    )
+    parser.add_argument(
+        "--straggler_prune_other_reward_threshold",
+        type=float,
+        default=0.0,
+        help="与 --straggler_prune_other_reward_gate=1 配合：兄弟分支 PRM 最大分须严格大于该值才剪 straggler",
+    )
     parser.add_argument("--save_dir", type=str, default=None)
     parser.add_argument("--controller_addr", type=str, default="http://localhost:10014")
     parser.add_argument("--num_worker", type=int, default=8)
@@ -312,6 +325,8 @@ if __name__ == "__main__":
             straggler_prune_enabled=bool(args.straggler_prune),
             straggler_length_ratio=args.straggler_length_ratio,
             straggler_min_tokens=args.straggler_min_tokens,
+            straggler_prune_other_reward_gate=bool(args.straggler_prune_other_reward_gate),
+            straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
             eval_seed=int(args.seed),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
@@ -334,6 +349,8 @@ if __name__ == "__main__":
             straggler_prune_enabled=bool(args.straggler_prune),
             straggler_length_ratio=args.straggler_length_ratio,
             straggler_min_tokens=args.straggler_min_tokens,
+            straggler_prune_other_reward_gate=bool(args.straggler_prune_other_reward_gate),
+            straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
             eval_seed=int(args.seed),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
@@ -361,6 +378,8 @@ if __name__ == "__main__":
     cfg_dict_record["straggler_prune"] = args.straggler_prune
     cfg_dict_record["straggler_length_ratio"] = args.straggler_length_ratio
     cfg_dict_record["straggler_min_tokens"] = args.straggler_min_tokens
+    cfg_dict_record["straggler_prune_other_reward_gate"] = args.straggler_prune_other_reward_gate
+    cfg_dict_record["straggler_prune_other_reward_threshold"] = args.straggler_prune_other_reward_threshold
     cfg_dict_record["prm_step_tag"] = args.prm_step_tag
     cfg_dict_record["good_tag"] = args.good_tag
     cfg_dict_record["bad_tag"] = args.bad_tag
