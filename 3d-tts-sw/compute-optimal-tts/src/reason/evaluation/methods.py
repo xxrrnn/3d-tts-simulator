@@ -39,6 +39,8 @@ class TreeSearchConfig(BasicConfig):
     straggler_min_tokens: int = 80
     straggler_prune_other_reward_gate: bool = False
     straggler_prune_other_reward_threshold: float = 0.0
+    # 与 straggler_prune_enabled 同时为 True 时生效：跨 step 延迟剪枝（见 SearchTree）
+    straggler_deferred_prune_enabled: bool = False
     eval_seed: int = 0
     # n>1 时拆成多次 n=1（各带不同派生 seed），避免同请求多样本雷同后被去重成单分支
     split_lm_n_for_seeds: bool = True
@@ -116,6 +118,7 @@ def beam_search(
             "straggler_min_tokens": config.straggler_min_tokens,
             "straggler_prune_other_reward_gate": config.straggler_prune_other_reward_gate,
             "straggler_prune_other_reward_threshold": config.straggler_prune_other_reward_threshold,
+            "straggler_deferred_prune_enabled": config.straggler_deferred_prune_enabled,
         }
     )
     traj_list = search_tree.beam_search(env, config.beam_size, config.tree_max_depth, rm_call)

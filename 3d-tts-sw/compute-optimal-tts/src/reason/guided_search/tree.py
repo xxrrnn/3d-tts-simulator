@@ -275,7 +275,56 @@ class SearchTree:
         self._straggler_prune_other_reward_threshold = float(
             self._cfg.get("straggler_prune_other_reward_threshold", 0.0)
         )
+        # 与即时长度剪枝同时要求 straggler_prune_enabled：跨 step 延迟剪枝（见 beam_search / _expand_leaf_node）
+        self._straggler_deferred_prune_enabled = bool(
+            self._cfg.get("straggler_deferred_prune_enabled", False)
+        )
         self._straggler_prune_events: List[Dict[str, Any]] = []
+        self._straggler_deferred_pending: int = 0
+
+    @property
+    def _straggler_deferred_prune_effective(self) -> bool:
+        return self._straggler_prune_enabled and self._straggler_deferred_prune_enabled
+
+    def _straggler_candidate_indices(self, token_lens: List[int], prm_snapshot: List[float]) -> List[int]:
+        """与 _expand_leaf_node 中 straggler 判定一致，返回兄弟中满足长度+可选 PRM 门控 的下标列表。"""
+        n = len(token_lens)
+        if n < 2 or len(prm_snapshot) != n:
+            return []
+        out: List[int] = []
+        for si in range(n):
+            li = token_lens[si]
+            if li <= self._straggler_min_tokens:
+                continue
+            max_other = max(token_lens[j] for j in range(n) if j != si)
+            if max_other <= 0:
+                continue
+            if li > self._straggler_length_ratio * max_other:
+                max_other_prm = max(prm_snapshot[j] for j in range(n) if j != si)
+                if self._straggler_prune_other_reward_gate:
+                    if max_other_prm <= self._straggler_prune_other_reward_threshold:
+                        continue
+                out.append(si)
+        return out
+
+    def _straggler_deferred_note_selection(
+        self,
+        ordered_keys: List[Any],
+        num_tokens_map: Dict[Any, Any],
+        values_map: Dict[Any, Any],
+        selected: set,
+    ) -> None:
+        """某父节点 beam 选枝后：若有 straggler 候选未被选入 top-k，则置跨 step 标志为 1。"""
+        if not self._straggler_deferred_prune_effective:
+            return
+        if len(ordered_keys) < 2:
+            return
+        tl = [int(num_tokens_map[k]) for k in ordered_keys]
+        pv = [float(values_map[k]) for k in ordered_keys]
+        for loc_i in self._straggler_candidate_indices(tl, pv):
+            if ordered_keys[loc_i] not in selected:
+                self._straggler_deferred_pending = 1
+                return
 
     def _straggler_run_context_dict(self) -> Dict[str, Any]:
         return {
@@ -295,6 +344,8 @@ class SearchTree:
             "min_tokens": self._straggler_min_tokens,
             "other_reward_gate": self._straggler_prune_other_reward_gate,
             "other_reward_threshold": self._straggler_prune_other_reward_threshold,
+            "deferred_prune_enabled": self._straggler_deferred_prune_enabled,
+            "deferred_prune_effective": self._straggler_deferred_prune_effective,
             "init_critic_value": self._init_critic_value,
             "context": self._straggler_run_context_dict(),
             "prune_events": list(self._straggler_prune_events),
@@ -326,6 +377,7 @@ class SearchTree:
         """
         ### beam search start
         self._straggler_prune_events = []
+        self._straggler_deferred_pending = 0
         # 检查是否启用详细日志记录
         enable_detailed_log = os.environ.get('BEAM_SEARCH_DETAILED_LOG', '0') == '1'
         
@@ -335,6 +387,18 @@ class SearchTree:
         api_call_completion_tokens = 0
         _, info = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += info["api_completion_token"]
+
+        search_step_stats = []
+        detailed_beam_logs = None
+        step_branch_token_probs = []
+        if enable_detailed_log:
+            detailed_beam_logs = {
+                "beam_size": beam_size,
+                "max_step": max_step,
+                "initial_root_value": None,
+                "step_details": [],
+            }
+
         if self.root is None:
             root = LanguageNode(text_state=simulate_env.get_state(model_name='raw'))
             self._expand_leaf_node(
@@ -345,22 +409,11 @@ class SearchTree:
                 detailed_beam_logs=detailed_beam_logs,
             )
             self.root = root
+            if enable_detailed_log and detailed_beam_logs is not None:
+                detailed_beam_logs["initial_root_value"] = self.root._initial_value
 
         end_nodes, top_k_nodes = [], [(-self.root._initial_value, -self.root._initial_value, -self.root._parent_value, self.root, simulate_env.copy())]
         k = copy.deepcopy(beam_size)
-        
-        # 初始化搜索过程统计信息和详细记录
-        search_step_stats = []
-        detailed_beam_logs = None
-        step_branch_token_probs = []
-        
-        if enable_detailed_log:
-            detailed_beam_logs = {
-                "beam_size": beam_size,
-                "max_step": max_step,
-                "initial_root_value": self.root._initial_value,
-                "step_details": []
-            }
 
         for i in range(max_step + 1):
             step_start_time = time.perf_counter()
@@ -430,6 +483,13 @@ class SearchTree:
                              cur_node.children.items()],
                             key=lambda x: x[2], reverse=True,
                         )[:k]
+                        selected_indices = set(c_idx for c_idx, _, _, _, _ in top_k_children)
+                        self._straggler_deferred_note_selection(
+                            list(cur_node.children.keys()),
+                            num_tokens,
+                            values,
+                            selected_indices,
+                        )
 
                         if enable_detailed_log:
                             # 按 step 收集每个分支的 token-level probs
@@ -482,6 +542,13 @@ class SearchTree:
                             [(action, child, q_plus_alpha_a[action], values[action], parent_values[action]) for action, child in cur_node.children.items()],
                             key=lambda x: x[2], reverse=True,
                         )[:k]
+                        selected_actions = set(c_act for c_act, _, _, _, _ in top_k_children)
+                        self._straggler_deferred_note_selection(
+                            list(cur_node.children.keys()),
+                            num_tokens,
+                            values,
+                            selected_actions,
+                        )
 
                         if enable_detailed_log:
                             # 按 step 收集每个分支的 token-level probs
@@ -793,48 +860,66 @@ class SearchTree:
                     # child_values.append(act['prob'])
             
             #=================== 0405： 增加straggler判定，将其reward分数设置为0=============
-            if self._straggler_prune_enabled and len(simulate_env.legal_actions) >= 2: #只有一个分支则不用考虑
+            # deferred：仅当 straggler_prune + straggler_deferred 同时开启时，不在本步立即按长度剪枝，
+            # 而是：上一步 beam 若存在「未入选的 straggler」则置 pending=1；本步展开时若 pending=1 且
+            # 再次出现 straggler 候选则置零并清零 pending。
+            if self._straggler_prune_enabled and len(simulate_env.legal_actions) >= 2:
                 prm_snapshot = [float(x) for x in child_values]
                 token_lens = [int(x["num_token"]) for x in simulate_env.legal_actions]
                 n = len(token_lens)
-                for si in range(n):
+                straggler_indices = self._straggler_candidate_indices(token_lens, prm_snapshot)
+
+                def _append_straggler_ev(
+                    si: int,
+                    action_name: str,
+                    prm_reward_before: Optional[float],
+                    extra: Optional[Dict[str, Any]] = None,
+                ) -> None:
                     li = token_lens[si]
-                    if li <= self._straggler_min_tokens:
-                        continue
                     max_other = max(token_lens[j] for j in range(n) if j != si)
-                    if max_other <= 0:
-                        continue
-                    if li > self._straggler_length_ratio * max_other:
-                        max_other_prm = max(prm_snapshot[j] for j in range(n) if j != si)
-                        if self._straggler_prune_other_reward_gate:
-                            if max_other_prm <= self._straggler_prune_other_reward_threshold:
-                                continue
+                    max_other_prm = max(prm_snapshot[j] for j in range(n) if j != si)
+                    ev: Dict[str, Any] = {
+                        "step": beam_search_step,
+                        "branch_idx": si,
+                        "num_token": li,
+                        "max_other_siblings": max_other,
+                        "ratio_threshold": self._straggler_length_ratio,
+                        "min_tokens_threshold": self._straggler_min_tokens,
+                        "max_other_prm_reward": max_other_prm,
+                        "other_reward_gate": self._straggler_prune_other_reward_gate,
+                        "other_reward_threshold": self._straggler_prune_other_reward_threshold,
+                        "prm_reward_before": float(prm_reward_before) if prm_reward_before is not None else None,
+                        "prm_reward_after": 0.0,
+                        "action": action_name,
+                    }
+                    if extra:
+                        ev.update(extra)
+                    ev.update(self._straggler_run_context_dict())
+                    self._straggler_prune_events.append(ev)
+                    if beam_step_detail is not None:
+                        beam_step_detail.setdefault("straggler_prune_events", []).append(dict(ev))
+                    elif beam_search_step == -1 and detailed_beam_logs is not None:
+                        detailed_beam_logs.setdefault("root_straggler_prune_events", []).append(dict(ev))
+
+                if self._straggler_deferred_prune_effective:
+                    if self._straggler_deferred_pending == 1 and straggler_indices:
+                        for si in straggler_indices:
+                            prev_r = child_values[si]
+                            child_values[si] = 0.0
+                            _append_straggler_ev(
+                                si,
+                                "deferred_beam_value_set_to_zero",
+                                float(prev_r) if prev_r is not None else None,
+                                {"deferred_pending_consumed": True},
+                            )
+                        self._straggler_deferred_pending = 0
+                else:
+                    for si in straggler_indices:
                         prev_r = child_values[si]
                         child_values[si] = 0.0
-                        ev: Dict[str, Any] = {
-                            "step": beam_search_step,
-                            "branch_idx": si,
-                            "num_token": li,
-                            "max_other_siblings": max_other,
-                            "ratio_threshold": self._straggler_length_ratio,
-                            "min_tokens_threshold": self._straggler_min_tokens,
-                            "max_other_prm_reward": max_other_prm,
-                            "other_reward_gate": self._straggler_prune_other_reward_gate,
-                            "other_reward_threshold": self._straggler_prune_other_reward_threshold,
-                            "prm_reward_before": float(prev_r) if prev_r is not None else None,
-                            "prm_reward_after": 0.0,
-                            "action": "beam_value_set_to_zero",
-                        }
-                        ev.update(self._straggler_run_context_dict())
-                        self._straggler_prune_events.append(ev)
-                        if beam_step_detail is not None:
-                            beam_step_detail.setdefault("straggler_prune_events", []).append(
-                                dict(ev)
-                            )
-                        elif beam_search_step == -1 and detailed_beam_logs is not None:
-                            detailed_beam_logs.setdefault("root_straggler_prune_events", []).append(
-                                dict(ev)
-                            )
+                        _append_straggler_ev(
+                            si, "beam_value_set_to_zero", float(prev_r) if prev_r is not None else None
+                        )
             #==========================================================================
 
         assert len(node.children) == 0

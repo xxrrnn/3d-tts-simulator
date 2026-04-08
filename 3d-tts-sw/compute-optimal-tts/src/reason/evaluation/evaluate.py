@@ -108,6 +108,13 @@ if __name__ == "__main__":
         default=0.0,
         help="与 --straggler_prune_other_reward_gate=1 配合：兄弟分支 PRM 最大分须严格大于该值才剪 straggler",
     )
+    parser.add_argument(
+        "--straggler_deferred_prune",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="1=启用跨 step 延迟 straggler 剪枝（须与 --straggler_prune=1 同时开启）；0=仅即时长度剪枝",
+    )
     parser.add_argument("--save_dir", type=str, default=None)
     parser.add_argument("--controller_addr", type=str, default="http://localhost:10014")
     parser.add_argument("--num_worker", type=int, default=8)
@@ -327,6 +334,7 @@ if __name__ == "__main__":
             straggler_min_tokens=args.straggler_min_tokens,
             straggler_prune_other_reward_gate=bool(args.straggler_prune_other_reward_gate),
             straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
+            straggler_deferred_prune_enabled=bool(args.straggler_deferred_prune),
             eval_seed=int(args.seed),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
@@ -351,6 +359,7 @@ if __name__ == "__main__":
             straggler_min_tokens=args.straggler_min_tokens,
             straggler_prune_other_reward_gate=bool(args.straggler_prune_other_reward_gate),
             straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
+            straggler_deferred_prune_enabled=bool(args.straggler_deferred_prune),
             eval_seed=int(args.seed),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
@@ -380,6 +389,7 @@ if __name__ == "__main__":
     cfg_dict_record["straggler_min_tokens"] = args.straggler_min_tokens
     cfg_dict_record["straggler_prune_other_reward_gate"] = args.straggler_prune_other_reward_gate
     cfg_dict_record["straggler_prune_other_reward_threshold"] = args.straggler_prune_other_reward_threshold
+    cfg_dict_record["straggler_deferred_prune"] = args.straggler_deferred_prune
     cfg_dict_record["prm_step_tag"] = args.prm_step_tag
     cfg_dict_record["good_tag"] = args.good_tag
     cfg_dict_record["bad_tag"] = args.bad_tag
