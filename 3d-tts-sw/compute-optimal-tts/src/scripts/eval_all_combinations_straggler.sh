@@ -1,8 +1,14 @@
 #!/bin/bash
 
-# 基础路径配置
-BASE_PATH="/DISK1/data/rnxu_24/Paper/models"
-export LOGDIR="/DISK1/data/rnxu_24/Paper/xlong_32/3d-tts-simulator/3d-tts-sw/compute-optimal-tts/src/logs"
+eval "$(conda shell.bash hook)"
+conda activate tts
+
+# 路径相对本仓库根目录（REPO_ROOT）；BASE_PATH 指向 Paper/models（与仓库同级目录下的 models）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SRC_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+REPO_ROOT="$(cd "${SRC_DIR}/../../.." && pwd)"
+BASE_PATH="${REPO_ROOT}/../../models"
+export LOGDIR="${REPO_ROOT}/3d-tts-sw/compute-optimal-tts/src/logs"
 export HOST_ADDR="0.0.0.0"
 export CONTROLLER_PORT=10014
 export WORKER_BASE_PORT=10081
@@ -10,9 +16,6 @@ export WORKER_BASE_PORT=10081
 # GPU配置 (统一管理)
 N_GPUS=1  # 可选值: 1, 2, 3, 4
 
-# 脚本路径配置
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 OUTPUT_BASE_DIR="${SRC_DIR}/output"
 CHECK_SCRIPT="${SCRIPT_DIR}/process/check_incomplete_questions.py"
 
@@ -30,8 +33,8 @@ POLICY_REWARD_PAIRS=(
 # 数据集配置 (任务名, batch_size)
 # batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
-    "AIME24 30"  # 从 30 降到 15（减少50%） straggler出现在question19
-    "AMC23 40"   # 从 40 降到 20（减少50%）
+    "AIME24 5"  # 从 30 降到 15（减少50%） straggler出现在question19
+    # "AMC23 40"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
 
@@ -44,8 +47,8 @@ BEAM_WIDTH_NUMSEQ_PAIRS=(
     # "4 2"
 )
 
-# 评估随机种子基值（传入 run.sh --seed → evaluate.py）
-# 同一 straggler 配置重复跑 EVAL_REPEAT_COUNT 次时，第 k 次使用 seed = EVAL_SEED + (k-1)
+# 评估随机种子（传入 run.sh --seed → evaluate.py）
+# 同一 straggler 配置重复跑 EVAL_REPEAT_COUNT 次时，每次均使用 EVAL_SEED（不随 run 递增）
 EVAL_SEED=42
 
 # 0408：增加循环次数，循环三次取均值。
@@ -61,7 +64,7 @@ EVAL_TREE_MAX_DEPTH=40
 # PRUNE=1: 开启straggler，遍历不同的ratio和min_tokens组合
 STRAGGLER_PRUNE_VALUES=(
     0    # 关闭
-    1    # 开启
+    # 1    # 开启
 )
 
 # 仅当 PRUNE=1 时，以下参数才会被遍历
@@ -91,7 +94,7 @@ STRAGGLER_OTHER_REWARD_THRESHOLD_VALUES=(
 # 跨 step 延迟 straggler 剪枝（须 PRUNE=1；与 tree 中 straggler_deferred_prune 对应）。PRUNE=0 时脚本固定传 0。
 STRAGGLER_DEFERRED_PRUNE_VALUES=(
     0
-    1
+    # 1
 )
 
 REWARD_SUBCONFIG_COUNT=0
@@ -115,6 +118,46 @@ wait_and_log() {
     log_message "等待 ${seconds} 秒..."
     sleep $seconds
     log_message "等待完成"
+}
+
+# 健康检查函数 - 检查服务是否就绪
+check_service_health() {
+    local max_attempts=30  # 最多检查30次
+    local attempt=1
+    
+    log_message "开始健康检查..."
+    
+    while [ $attempt -le $max_attempts ]; do
+        # 检查 controller
+        if ! curl -s "http://${HOST_ADDR}:${CONTROLLER_PORT}/test_connection" > /dev/null 2>&1; then
+            log_message "尝试 ${attempt}/${max_attempts}: Controller 未就绪，继续等待..."
+            sleep 5
+            attempt=$((attempt + 1))
+            continue
+        fi
+        
+        # 检查 reward model worker (10081)
+        if ! curl -s -X POST "http://${HOST_ADDR}:10081/worker_get_status" -H "Content-Type: application/json" --max-time 5 > /dev/null 2>&1; then
+            log_message "尝试 ${attempt}/${max_attempts}: Reward Model Worker 未就绪，继续等待..."
+            sleep 5
+            attempt=$((attempt + 1))
+            continue
+        fi
+        
+        # 检查 policy model worker (10082)
+        if ! curl -s -X POST "http://${HOST_ADDR}:10082/worker_get_status" -H "Content-Type: application/json" --max-time 5 > /dev/null 2>&1; then
+            log_message "尝试 ${attempt}/${max_attempts}: Policy Model Worker 未就绪，继续等待..."
+            sleep 5
+            attempt=$((attempt + 1))
+            continue
+        fi
+        
+        log_message "✓ 所有服务健康检查通过！"
+        return 0
+    done
+    
+    log_message "警告: 健康检查超时，但将继续执行..."
+    return 1
 }
 
 # 停止现有服务
@@ -153,9 +196,10 @@ start_services() {
     bash "$serve_script" "$policy_path" "$reward_path" "$HOST_ADDR" "$CONTROLLER_PORT" "$WORKER_BASE_PORT" &
     SERVICE_PID=$!
     
-    # 增加等待时间，确保大模型有足够时间加载到GPU，并且 controller 和 workers 完全启动
+    # 等待服务启动并通过健康检查
     log_message "等待 controller 和 workers 启动并加载模型..."
-    wait_and_log 60
+    wait_and_log 30  # 先等待30秒让服务有时间启动
+    check_service_health  # 然后进行健康检查
 }
 
 # 删除锁文件（保留已完成的结果）
@@ -327,7 +371,7 @@ run_evaluation() {
     local straggler_other_thr=${11}
     local straggler_deferred=${12:-0}
     local run_idx=${13:-1}
-    local run_seed=$((EVAL_SEED + run_idx - 1))
+    local run_seed=$EVAL_SEED
     local max_retries=3
     local attempt=1
     
@@ -357,7 +401,8 @@ run_evaluation() {
             --straggler_min_tokens "$straggler_min" \
             --straggler_prune_other_reward_gate "$straggler_other_gate" \
             --straggler_prune_other_reward_threshold "$straggler_other_thr" \
-            --straggler_deferred_prune "$straggler_deferred"
+            --straggler_deferred_prune "$straggler_deferred" \
+            --deterministic 1
 
         local exit_code=$?
         if [ $exit_code -eq 0 ]; then
@@ -383,15 +428,15 @@ run_evaluation() {
 
             attempt=$((attempt + 1))
             if [ $attempt -le $max_retries ]; then
-                log_message "将在 60 秒后进行下一次重试..."
-                wait_and_log 60
+                log_message "将在 10 秒后进行下一次重试..."
+                wait_and_log 10
             else
                 log_message "评估最终失败: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 已达到最大重试次数 (${max_retries})"
             fi
         fi
     done
 
-    wait_and_log 60
+    wait_and_log 20
 }
 
 # 主执行函数
@@ -402,7 +447,7 @@ main() {
     fi
 
     log_message "开始全组合评估（固定 Policy–Reward 对 + Straggler参数扫描）"
-    log_message "EVAL_SEED=${EVAL_SEED}，每配置重复次数 EVAL_REPEAT_COUNT=${EVAL_REPEAT_COUNT}（采用：同一配置连续跑 N 次，seed 递增）"
+    log_message "EVAL_SEED=${EVAL_SEED}，每配置重复次数 EVAL_REPEAT_COUNT=${EVAL_REPEAT_COUNT}（各次 run 均使用同一 seed）"
     log_message "Policy–Reward 对数量: ${#POLICY_REWARD_PAIRS[@]}"
     log_message "数据集数量: ${#DATASETS[@]}"
     log_message "Beam(宽×num_seq) 组合数: ${#BEAM_WIDTH_NUMSEQ_PAIRS[@]}"
@@ -452,7 +497,7 @@ main() {
                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
                             current_combination=$((current_combination + 1))
                             
-                            log_message "=== 运行 ${current_combination}/${total_combinations}（配置重复 ${repeat_idx}/${EVAL_REPEAT_COUNT}，seed=$((EVAL_SEED + repeat_idx - 1))）==="
+                            log_message "=== 运行 ${current_combination}/${total_combinations}（配置重复 ${repeat_idx}/${EVAL_REPEAT_COUNT}，seed=${EVAL_SEED}）==="
                             log_message "Policy: ${policy_model}"
                             log_message "Reward: ${reward_model}"
                             log_message "Dataset: ${task}"
@@ -477,7 +522,7 @@ main() {
                                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
                                             current_combination=$((current_combination + 1))
                                             
-                                            log_message "=== 运行 ${current_combination}/${total_combinations}（配置重复 ${repeat_idx}/${EVAL_REPEAT_COUNT}，seed=$((EVAL_SEED + repeat_idx - 1))）==="
+                                            log_message "=== 运行 ${current_combination}/${total_combinations}（配置重复 ${repeat_idx}/${EVAL_REPEAT_COUNT}，seed=${EVAL_SEED}）==="
                                             log_message "Policy: ${policy_model}"
                                             log_message "Reward: ${reward_model}"
                                             log_message "Dataset: ${task}"
@@ -502,7 +547,7 @@ main() {
                                                 for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
                                                 current_combination=$((current_combination + 1))
                                                 
-                                                log_message "=== 运行 ${current_combination}/${total_combinations}（配置重复 ${repeat_idx}/${EVAL_REPEAT_COUNT}，seed=$((EVAL_SEED + repeat_idx - 1))）==="
+                                                log_message "=== 运行 ${current_combination}/${total_combinations}（配置重复 ${repeat_idx}/${EVAL_REPEAT_COUNT}，seed=${EVAL_SEED}）==="
                                                 log_message "Policy: ${policy_model}"
                                                 log_message "Reward: ${reward_model}"
                                                 log_message "Dataset: ${task}"
@@ -568,7 +613,7 @@ check_requirements() {
 
 # 脚本入口
 if [ "$1" = "--dry-run" ]; then
-    log_message "干跑模式 - 只显示将要执行的组合（每配置 ${EVAL_REPEAT_COUNT} 次，EVAL_REPEAT_COUNT 可改脚本顶部变量）"
+    log_message "干跑模式 - 只显示将要执行的组合（每配置 ${EVAL_REPEAT_COUNT} 次，各次 seed=${EVAL_SEED}；EVAL_REPEAT_COUNT 可改脚本顶部变量）"
     for pair_line in "${POLICY_REWARD_PAIRS[@]}"; do
         IFS='|' read -r policy_model reward_model <<< "${pair_line}"
         for dataset_config in "${DATASETS[@]}"; do
@@ -587,7 +632,7 @@ if [ "$1" = "--dry-run" ]; then
                 for straggler_prune in "${STRAGGLER_PRUNE_VALUES[@]}"; do
                         if [ $straggler_prune -eq 0 ]; then
                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
-                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=0 (关闭) og=0 thr=0 def=0, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=$((EVAL_SEED + repeat_idx - 1))"
+                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=0 (关闭) og=0 thr=0 def=0, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=${EVAL_SEED}"
                             done
                         else
                             for straggler_ratio in "${STRAGGLER_LENGTH_RATIO_VALUES[@]}"; do
@@ -596,14 +641,14 @@ if [ "$1" = "--dry-run" ]; then
                                         if [ "$straggler_other_gate" -eq 0 ]; then
                                             for straggler_deferred in "${STRAGGLER_DEFERRED_PRUNE_VALUES[@]}"; do
                                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
-                                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=0 thr=0 def=${straggler_deferred}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=$((EVAL_SEED + repeat_idx - 1))"
+                                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=0 thr=0 def=${straggler_deferred}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=${EVAL_SEED}"
                                             done
                                             done
                                         else
                                             for straggler_other_thr in "${STRAGGLER_OTHER_REWARD_THRESHOLD_VALUES[@]}"; do
                                                 for straggler_deferred in "${STRAGGLER_DEFERRED_PRUNE_VALUES[@]}"; do
                                                 for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
-                                                echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=1 thr=${straggler_other_thr} def=${straggler_deferred}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=$((EVAL_SEED + repeat_idx - 1))"
+                                                echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=1 thr=${straggler_other_thr} def=${straggler_deferred}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=${EVAL_SEED}"
                                                 done
                                                 done
                                             done

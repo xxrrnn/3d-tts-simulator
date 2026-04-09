@@ -46,6 +46,8 @@ class TreeSearchConfig(BasicConfig):
     split_lm_n_for_seeds: bool = True
     # 并行线程上限（HTTP 到同一 worker）；<=0 表示 min(n, 256)
     split_lm_parallel_workers: int = 32
+    # 严格确定性模式：串行发送 LLM 请求避免 batch 组合差异导致的浮点非确定性
+    deterministic: bool = False
 
     def __post_init__(self):
         assert self.tree_max_width > 0, "Tree width must be greater than 0"
@@ -93,6 +95,7 @@ def beam_search(
             "eval_seed": config.eval_seed,
             "split_lm_n_for_seeds": config.split_lm_n_for_seeds,
             "split_lm_parallel_workers": config.split_lm_parallel_workers,
+            "deterministic": config.deterministic,
         },
         math_problems=[{
             "question": problem_inst["question"],

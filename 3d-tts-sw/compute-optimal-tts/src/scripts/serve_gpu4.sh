@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# conda activate tts
+# 默认 conda 环境为 tts；使用 tts-v1 时请运行 eval_all_combinations_straggler_ttsv1.sh 或 export CONDA_ENV=tts-v1
 
 POLICY_MODEL_PATH=$1
 VALUE_MODEL_PATH=$2
@@ -19,6 +19,7 @@ echo "${GPU_LIST[@]}"
 HOST_ADDR=$3
 CONTROLLER_PORT=$4
 WORKER_BASE_PORT=$5
+CONDA_ENV_NAME="${CONDA_ENV:-tts}"
 export PYTHONPATH=$(pwd)
 PYTHON_EXECUTABLE=$(which python)
 
@@ -31,7 +32,7 @@ if tmux has-session -t $session_name 2>/dev/null; then
 fi
 tmux start-server
 tmux new-session -s $session_name -n controller -d
-tmux send-keys "source ~/.bashrc && conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
+tmux send-keys "source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
 tmux send-keys "${PYTHON_EXECUTABLE} -m fastchat.serve.controller --port ${CONTROLLER_PORT} --host $HOST_ADDR" Enter
 
 echo "Wait 20 seconds for controller to fully initialize..."
@@ -42,7 +43,7 @@ for i in $(seq 0 $((NUM_RM_WORKER-1)))
 do
     WORKER_PORT=$((WORKER_BASE_PORT+i))
     tmux new-window -n reward_$i
-    tmux send-keys "source ~/.bashrc && conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
+    tmux send-keys "source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
     if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
         command="pwd"
     else
@@ -56,7 +57,7 @@ for i in $(seq $((NUM_RM_WORKER)) $((NUM_LM_WORKER+NUM_RM_WORKER-1)))
 do
     WORKER_PORT=$((WORKER_BASE_PORT+i))
     tmux new-window -n policy_$i
-    tmux send-keys "source ~/.bashrc && conda activate tts && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
+    tmux send-keys "source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
 
     max_model_length=8192
     max_num_sequences=0

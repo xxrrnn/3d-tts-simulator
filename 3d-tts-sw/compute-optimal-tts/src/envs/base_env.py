@@ -321,8 +321,12 @@ class CoTEnv(BaseEnv):
                         config=LMCallingConfig(n=1, seed=sid, **base_kw),
                     )
 
-                with ThreadPoolExecutor(max_workers=max_workers) as ex:
-                    parts: List[ConcatedLMGenResult] = list(ex.map(_one_branch, range(n)))
+                deterministic_mode = bool(self.config.get("deterministic", False))
+                if deterministic_mode:
+                    parts: List[ConcatedLMGenResult] = [_one_branch(i) for i in range(n)]
+                else:
+                    with ThreadPoolExecutor(max_workers=max_workers) as ex:
+                        parts: List[ConcatedLMGenResult] = list(ex.map(_one_branch, range(n)))
                 result: ConcatedLMGenResult = _merge_concated_lm_results(parts)
             else:
                 sid0 = _derive_lm_branch_seed(eval_seed, qtext, step_depth, 0)

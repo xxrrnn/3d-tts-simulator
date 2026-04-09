@@ -21,6 +21,7 @@ RM=models--Skywork--Skywork-o1-Open-PRM-Qwen-2.5-7B
 task_name=MATH
 method=beam_search
 temperature=0.7
+top_k=-1
 max_new_tokens=204800
 tree_max_depth=40
 tree_max_width=8
@@ -44,6 +45,7 @@ straggler_min_tokens=80 #straggler最短token阈值
 straggler_prune_other_reward_gate=0 #1=仅当兄弟分支PRM最大分>阈值时才剪straggler
 straggler_prune_other_reward_threshold=0.0 #与 gate=1 配合：须严格大于该值
 straggler_deferred_prune=0 #1=跨 step 延迟 straggler 剪枝（须 straggler_prune=1）
+deterministic=0 #1=严格确定性模式（串行 LLM 请求，消除 batch 浮点差异，会降低吞吐）
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -66,6 +68,10 @@ while [[ $# -gt 0 ]]; do
         ;;
     --temperature)
         temperature="$2"
+        shift 2
+        ;;
+    --top_k)
+        top_k="$2"
         shift 2
         ;;
     --max_new_tokens)
@@ -135,6 +141,10 @@ while [[ $# -gt 0 ]]; do
         ;;
     --straggler_deferred_prune)
         straggler_deferred_prune="$2"
+        shift 2
+        ;;
+    --deterministic)
+        deterministic="$2"
         shift 2
         ;;
     ### beam search start
@@ -222,10 +232,13 @@ num_worker=6  #=12 改小一点？
 save_dir="${EVAL_SAVE_DIR:-${PYTHONPATH}/output}"
 LOGDIR=${PYTHONPATH}/logs_fastchat
 export LOGDIR=$LOGDIR
-# 客户端访问 controller 时不能用 0.0.0.0 作为目标地址，否则常见为 Connection refused
-_controller_host="${HOST_ADDR}"
-if [ "${_controller_host}" = "0.0.0.0" ] || [ -z "${_controller_host}" ]; then
-    _controller_host=127.0.0.1
+# 客户端访问 controller：优先 CONTROLLER_CLIENT_HOST（供 Ray worker 与 driver 同机但须用局域网 IP 的场景）
+_controller_host="${CONTROLLER_CLIENT_HOST:-}"
+if [ -z "${_controller_host}" ]; then
+    _controller_host="${HOST_ADDR}"
+    if [ "${_controller_host}" = "0.0.0.0" ] || [ -z "${_controller_host}" ]; then
+        _controller_host=127.0.0.1
+    fi
 fi
 controller_addr="http://${_controller_host}:${CONTROLLER_PORT}"
 
@@ -236,6 +249,7 @@ python reason/evaluation/evaluate.py \
     --RM $VALUE_MODEL_PATH \
     --task_name $task_name \
     --temperature $temperature \
+    --top_k $top_k \
     --max_new_tokens $max_new_tokens \
     --num_sequence $num_sequence \
     --tree_max_width $tree_max_width \
@@ -256,4 +270,5 @@ python reason/evaluation/evaluate.py \
     --straggler_min_tokens $straggler_min_tokens \
     --straggler_prune_other_reward_gate $straggler_prune_other_reward_gate \
     --straggler_prune_other_reward_threshold $straggler_prune_other_reward_threshold \
-    --straggler_deferred_prune $straggler_deferred_prune
+    --straggler_deferred_prune $straggler_deferred_prune \
+    --deterministic $deterministic

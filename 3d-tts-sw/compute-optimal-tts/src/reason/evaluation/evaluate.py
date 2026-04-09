@@ -125,6 +125,13 @@ if __name__ == "__main__":
     parser.add_argument("--multi_gpu", action="store_true")
     parser.add_argument("--batch_size", type=int, default=0)
     parser.add_argument("--max_time", type=int, default=0)
+    parser.add_argument(
+        "--deterministic",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="1=严格确定性模式：串行发送 LLM 请求，消除 batch 组合导致的浮点非确定性；会降低吞吐",
+    )
 
     args = parser.parse_args()
 
@@ -336,6 +343,7 @@ if __name__ == "__main__":
             straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
             straggler_deferred_prune_enabled=bool(args.straggler_deferred_prune),
             eval_seed=int(args.seed),
+            deterministic=bool(args.deterministic),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
     elif "beam_search" in args.method:
@@ -361,6 +369,7 @@ if __name__ == "__main__":
             straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
             straggler_deferred_prune_enabled=bool(args.straggler_deferred_prune),
             eval_seed=int(args.seed),
+            deterministic=bool(args.deterministic),
         )
         solver_fn = partial(beam_search, method_config, gen_config)
     else:

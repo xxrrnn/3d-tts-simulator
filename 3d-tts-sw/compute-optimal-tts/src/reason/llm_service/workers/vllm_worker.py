@@ -2,6 +2,13 @@
 This file is largely borrowed from FastChat (https://github.com/lm-sys/FastChat) and OpenR (https://github.com/openreasoner/openr)
 """
 
+import os
+# 使用 FLASH_ATTN 后端（forward pass 始终确定性）；若需回退到 xformers 可设环境变量
+# VLLM_ATTENTION_BACKEND=XFORMERS
+os.environ.setdefault('VLLM_ATTENTION_BACKEND', 'FLASH_ATTN')
+# 强制 cuBLAS 使用确定性算法（避免 GEMM 运算的浮点非确定性）
+os.environ.setdefault('CUBLAS_WORKSPACE_CONFIG', ':4096:8')
+
 import argparse
 import asyncio
 import json
