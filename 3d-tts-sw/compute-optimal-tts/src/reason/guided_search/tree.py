@@ -281,10 +281,200 @@ class SearchTree:
         )
         self._straggler_prune_events: List[Dict[str, Any]] = []
         self._straggler_deferred_pending: int = 0
+        
+        # MLP predictor for straggler detection
+        self._straggler_predictor_enabled = bool(
+            self._cfg.get("straggler_predictor_enabled", False)
+        )
+        self._straggler_predictor_weights = self._cfg.get("straggler_predictor_weights", "")
+        self._straggler_predictor_priors = self._cfg.get("straggler_predictor_priors", "")
+        self._active_branch_gate = int(self._cfg.get("active_branch_gate", 2))
+        self._predictor = None
+        self._predictor_priors = None
+        if self._straggler_predictor_enabled and self._straggler_predictor_weights:
+            self._init_predictor()
+        
+        # MLP predictor for straggler detection
+        self._straggler_predictor_enabled = bool(
+            self._cfg.get("straggler_predictor_enabled", False)
+        )
+        self._straggler_predictor_weights = self._cfg.get("straggler_predictor_weights", "")
+        self._straggler_predictor_priors = self._cfg.get("straggler_predictor_priors", "")
+        self._active_branch_gate = int(self._cfg.get("active_branch_gate", 2))
+        self._predictor = None
+        self._predictor_priors = None
+        if self._straggler_predictor_enabled and self._straggler_predictor_weights:
+            self._init_predictor()
+
+    def _init_predictor(self) -> None:
+        """Initialize MLP predictor for straggler detection."""
+        try:
+            from pathlib import Path
+            import json
+            weights_path = Path(self._straggler_predictor_weights)
+            if weights_path.exists():
+                from predictor.adaptive_threshold_model import MLPAdaptiveThresholdPredictor
+                self._predictor = MLPAdaptiveThresholdPredictor.load(str(weights_path))
+                if self._straggler_predictor_priors:
+                    priors_path = Path(self._straggler_predictor_priors)
+                    if priors_path.exists():
+                        with open(priors_path, encoding="utf-8") as f:
+                            self._predictor_priors = json.load(f)
+        except Exception as e:
+            print_rank_0(f"Warning: Failed to load predictor: {e}")
+            self._predictor = None
+
+    def _init_predictor(self) -> None:
+        """Initialize MLP predictor for straggler detection."""
+        try:
+            from pathlib import Path
+            import json
+            weights_path = Path(self._straggler_predictor_weights)
+            if weights_path.exists():
+                from predictor.adaptive_threshold_model import MLPAdaptiveThresholdPredictor
+                self._predictor = MLPAdaptiveThresholdPredictor.load(str(weights_path))
+                if self._straggler_predictor_priors:
+                    priors_path = Path(self._straggler_predictor_priors)
+                    if priors_path.exists():
+                        with open(priors_path, encoding="utf-8") as f:
+                            self._predictor_priors = json.load(f)
+        except Exception as e:
+            print_rank_0(f"Warning: Failed to load predictor: {e}")
+            self._predictor = None
+
+    def _predict_straggler_with_mlp(
+        self,
+        legal_actions: List[Dict[str, Any]],
+        token_lens: List[int],
+        prm_snapshot: List[float],
+        beam_search_step: int,
+    ) -> List[int]:
+        """Use MLP predictor to detect stragglers when n_active_branches <= gate."""
+        if not self._predictor or not legal_actions:
+            return []
+        
+        try:
+            from predictor.adaptive_threshold_features import extract_adaptive_threshold_features
+            straggler_indices = []
+            n = len(token_lens)
+            
+            for si in range(n):
+                my_tokens = token_lens[si]
+                if my_tokens <= self._straggler_min_tokens:
+                    continue
+                
+                other_tokens = [t for j, t in enumerate(token_lens) if j != si]
+                max_other = max(other_tokens) if other_tokens else 0
+                if max_other <= 0:
+                    continue
+                
+                obs_point = max_other
+                sibling_visible_counts = [min(t, obs_point) for t in other_tokens]
+                n_active_branches = sum(1 for t in token_lens if t >= obs_point)
+                step_total_tokens = sum(min(t, obs_point) for t in token_lens)
+                
+                # Extract features for MLP prediction
+                action_dict = legal_actions[si]
+                features = extract_adaptive_threshold_features(
+                    token_probs=action_dict.get("token_probs", []),
+                    token_topk_logprobs=action_dict.get("token_topk_logprobs"),
+                    obs_point=obs_point,
+                    max_other_tokens=max_other,
+                    sibling_token_counts=sibling_visible_counts,
+                    n_branches=n,
+                    n_active_branches=n_active_branches,
+                    step_idx=beam_search_step,
+                    total_steps=1,
+                    step_total_tokens=step_total_tokens,
+                    prior_step_total_tokens=0,
+                    beam_width=self.max_actions,
+                    config_prior=0.5,
+                )
+                
+                # Predict with MLP
+                fired, threshold = self._predictor.predict_label(
+                    features,
+                    current_tokens=my_tokens,
+                    max_other_tokens=max_other,
+                    n_active_branches=n_active_branches,
+                    active_branch_gate=self._active_branch_gate,
+                )
+                
+                if fired:
+                    straggler_indices.append(si)
+            
+            return straggler_indices
+        except Exception as e:
+            print_rank_0(f"Warning: MLP prediction failed: {e}")
+            return []
 
     @property
     def _straggler_deferred_prune_effective(self) -> bool:
         return self._straggler_prune_enabled and self._straggler_deferred_prune_enabled
+
+    def _predict_straggler_with_mlp(
+        self,
+        legal_actions: List[Dict[str, Any]],
+        token_lens: List[int],
+        prm_snapshot: List[float],
+        beam_search_step: int,
+    ) -> List[int]:
+        """Use MLP predictor to detect stragglers when active branches <= gate."""
+        try:
+            from predictor.adaptive_threshold_features import extract_adaptive_threshold_features
+            
+            n = len(token_lens)
+            straggler_indices = []
+            
+            for si in range(n):
+                my_tokens = token_lens[si]
+                other_tokens = [t for j, t in enumerate(token_lens) if j != si]
+                max_other = max(other_tokens) if other_tokens else 0
+                
+                if my_tokens < max_other:
+                    continue
+                
+                obs_point = max_other
+                sibling_visible_counts = [min(t, obs_point) for t in other_tokens]
+                n_active_branches = sum(1 for t in token_lens if t >= obs_point)
+                
+                # Extract features from legal_actions
+                action_dict = legal_actions[si]
+                token_probs = action_dict.get("token_probs", [])
+                token_topk_logprobs = action_dict.get("token_topk_logprobs")
+                
+                features = extract_adaptive_threshold_features(
+                    token_probs=token_probs,
+                    token_topk_logprobs=token_topk_logprobs,
+                    obs_point=obs_point,
+                    max_other_tokens=max_other,
+                    sibling_token_counts=sibling_visible_counts,
+                    n_branches=n,
+                    n_active_branches=n_active_branches,
+                    step_idx=beam_search_step,
+                    total_steps=1,
+                    step_total_tokens=sum(min(t, obs_point) for t in token_lens),
+                    prior_step_total_tokens=0,
+                    beam_width=self.max_actions,
+                    config_prior=0.5,
+                )
+                
+                # Predict with MLP
+                fired, threshold = self._predictor.predict_label(
+                    features,
+                    current_tokens=my_tokens,
+                    max_other_tokens=max_other,
+                    n_active_branches=n_active_branches,
+                    active_branch_gate=self._active_branch_gate,
+                )
+                
+                if fired:
+                    straggler_indices.append(si)
+            
+            return straggler_indices
+        except Exception as e:
+            print_rank_0(f"Warning: MLP prediction failed: {e}, falling back to length-based detection")
+            return self._straggler_candidate_indices(token_lens, prm_snapshot)
 
     def _straggler_candidate_indices(self, token_lens: List[int], prm_snapshot: List[float]) -> List[int]:
         """与 _expand_leaf_node 中 straggler 判定一致，返回兄弟中满足长度+可选 PRM 门控 的下标列表。"""
@@ -867,7 +1057,20 @@ class SearchTree:
                 prm_snapshot = [float(x) for x in child_values]
                 token_lens = [int(x["num_token"]) for x in simulate_env.legal_actions]
                 n = len(token_lens)
-                straggler_indices = self._straggler_candidate_indices(token_lens, prm_snapshot)
+                
+                # Use MLP predictor when active branches <= gate
+                n_active_branches = sum(1 for length in token_lens if length > 0)
+                used_predictor = False
+                if self._straggler_predictor_enabled and self._predictor and n_active_branches <= self._active_branch_gate:
+                    straggler_indices = self._predict_straggler_with_mlp(
+                        simulate_env.legal_actions,
+                        token_lens,
+                        prm_snapshot,
+                        beam_search_step
+                    )
+                    used_predictor = True
+                else:
+                    straggler_indices = self._straggler_candidate_indices(token_lens, prm_snapshot)
 
                 def _append_straggler_ev(
                     si: int,
@@ -891,6 +1094,12 @@ class SearchTree:
                         "prm_reward_before": float(prm_reward_before) if prm_reward_before is not None else None,
                         "prm_reward_after": 0.0,
                         "action": action_name,
+                        # Predictor-related info
+                        "predictor_enabled": self._straggler_predictor_enabled,
+                        "predictor_used": used_predictor,
+                        "active_branch_gate": self._active_branch_gate,
+                        "n_active_branches": n_active_branches,
+                        "all_straggler_indices": list(straggler_indices),
                     }
                     if extra:
                         ev.update(extra)

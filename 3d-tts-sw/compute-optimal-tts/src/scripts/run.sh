@@ -46,6 +46,10 @@ straggler_min_tokens=80 #straggler最短token阈值
 straggler_prune_other_reward_gate=0 #1=仅当兄弟分支PRM最大分>阈值时才剪straggler
 straggler_prune_other_reward_threshold=0.0 #与 gate=1 配合：须严格大于该值
 straggler_deferred_prune=0 #1=跨 step 延迟 straggler 剪枝（须 straggler_prune=1）
+straggler_predictor_enabled=1 #1=启用 MLP 预测器进行 straggler 检测
+straggler_predictor_weights="" #MLP 预测器权重文件路径
+straggler_predictor_priors="" #MLP 预测器先验文件路径
+active_branch_gate=2 #活跃分支数阈值，当 n_active_branches <= 此值时调用 MLP 预测器
 deterministic=0 #1=严格确定性模式（串行 LLM 请求，消除 batch 浮点差异，会降低吞吐）
 
 # Parse arguments
@@ -144,6 +148,22 @@ while [[ $# -gt 0 ]]; do
         straggler_deferred_prune="$2"
         shift 2
         ;;
+    --straggler_predictor_enabled)
+        straggler_predictor_enabled="$2"
+        shift 2
+        ;;
+    --straggler_predictor_weights)
+        straggler_predictor_weights="$2"
+        shift 2
+        ;;
+    --straggler_predictor_priors)
+        straggler_predictor_priors="$2"
+        shift 2
+        ;;
+    --active_branch_gate)
+        active_branch_gate="$2"
+        shift 2
+        ;;
     --deterministic)
         deterministic="$2"
         shift 2
@@ -170,7 +190,7 @@ while [[ $# -gt 0 ]]; do
 done
 echo "LM: $LM, RM: $RM, task: $task_name, tree_max_width: $tree_max_width, num_sequence: $num_sequence, question_parallel_num: $question_parallel_num"
 echo "batch_size: $batch_size, max_time: $max_time, n_gpus: $n_gpus, double_line_break: $double_line_break, seed:$seed"
-echo "straggler_prune: $straggler_prune, straggler_length_ratio: $straggler_length_ratio, straggler_min_tokens: $straggler_min_tokens, straggler_prune_other_reward_gate: $straggler_prune_other_reward_gate, straggler_prune_other_reward_threshold: $straggler_prune_other_reward_threshold, straggler_deferred_prune: $straggler_deferred_prune"
+echo "straggler_prune: $straggler_prune, straggler_length_ratio: $straggler_length_ratio, straggler_min_tokens: $straggler_min_tokens, straggler_prune_other_reward_gate: $straggler_prune_other_reward_gate, straggler_prune_other_reward_threshold: $straggler_prune_other_reward_threshold, straggler_deferred_prune: $straggler_deferred_prune, straggler_predictor_enabled: $straggler_predictor_enabled, active_branch_gate: $active_branch_gate"
 ### beam search start
 echo "beam_search_detailed_log: $beam_search_detailed_log, logprobs_topk: $logprobs_topk"
 ### beam search end
@@ -283,4 +303,8 @@ python reason/evaluation/evaluate.py \
     --straggler_prune_other_reward_gate $straggler_prune_other_reward_gate \
     --straggler_prune_other_reward_threshold $straggler_prune_other_reward_threshold \
     --straggler_deferred_prune $straggler_deferred_prune \
+    --straggler_predictor_enabled $straggler_predictor_enabled \
+    --straggler_predictor_weights $straggler_predictor_weights \
+    --straggler_predictor_priors $straggler_predictor_priors \
+    --active_branch_gate $active_branch_gate \
     --deterministic $deterministic

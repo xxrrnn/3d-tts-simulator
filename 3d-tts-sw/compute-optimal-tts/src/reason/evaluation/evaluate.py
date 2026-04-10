@@ -115,6 +115,32 @@ if __name__ == "__main__":
         choices=[0, 1],
         help="1=启用跨 step 延迟 straggler 剪枝（须与 --straggler_prune=1 同时开启）；0=仅即时长度剪枝",
     )
+    parser.add_argument(
+        "--straggler_predictor_enabled",
+        type=int,
+        default=0,
+        choices=[0, 1],
+        help="1=启用 MLP 预测器进行 straggler 检测；0=关闭",
+    )
+    parser.add_argument(
+        "--straggler_predictor_weights",
+        type=str,
+        default="",
+        help="MLP 预测器权重文件路径",
+    )
+    parser.add_argument(
+        "--straggler_predictor_priors",
+        type=str,
+        default="",
+        help="MLP 预测器先验文件路径",
+    )
+    parser.add_argument(
+        "--active_branch_gate",
+        type=int,
+        default=2,
+        choices=[1, 2],
+        help="活跃分支数阈值，当 n_active_branches <= 此值时调用 MLP 预测器",
+    )
     parser.add_argument("--save_dir", type=str, default=None)
     parser.add_argument("--controller_addr", type=str, default="http://localhost:10014")
     parser.add_argument("--num_worker", type=int, default=8)
@@ -343,6 +369,10 @@ if __name__ == "__main__":
             straggler_prune_other_reward_gate=bool(args.straggler_prune_other_reward_gate),
             straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
             straggler_deferred_prune_enabled=bool(args.straggler_deferred_prune),
+            straggler_predictor_enabled=bool(args.straggler_predictor_enabled),
+            straggler_predictor_weights=args.straggler_predictor_weights,
+            straggler_predictor_priors=args.straggler_predictor_priors,
+            active_branch_gate=args.active_branch_gate,
             eval_seed=int(args.seed),
             deterministic=bool(args.deterministic),
         )
@@ -369,6 +399,10 @@ if __name__ == "__main__":
             straggler_prune_other_reward_gate=bool(args.straggler_prune_other_reward_gate),
             straggler_prune_other_reward_threshold=args.straggler_prune_other_reward_threshold,
             straggler_deferred_prune_enabled=bool(args.straggler_deferred_prune),
+            straggler_predictor_enabled=bool(args.straggler_predictor_enabled),
+            straggler_predictor_weights=args.straggler_predictor_weights,
+            straggler_predictor_priors=args.straggler_predictor_priors,
+            active_branch_gate=args.active_branch_gate,
             eval_seed=int(args.seed),
             deterministic=bool(args.deterministic),
         )
@@ -400,6 +434,10 @@ if __name__ == "__main__":
     cfg_dict_record["straggler_prune_other_reward_gate"] = args.straggler_prune_other_reward_gate
     cfg_dict_record["straggler_prune_other_reward_threshold"] = args.straggler_prune_other_reward_threshold
     cfg_dict_record["straggler_deferred_prune"] = args.straggler_deferred_prune
+    cfg_dict_record["straggler_predictor_enabled"] = args.straggler_predictor_enabled
+    cfg_dict_record["straggler_predictor_weights"] = args.straggler_predictor_weights
+    cfg_dict_record["straggler_predictor_priors"] = args.straggler_predictor_priors
+    cfg_dict_record["active_branch_gate"] = args.active_branch_gate
     cfg_dict_record["prm_step_tag"] = args.prm_step_tag
     cfg_dict_record["good_tag"] = args.good_tag
     cfg_dict_record["bad_tag"] = args.bad_tag

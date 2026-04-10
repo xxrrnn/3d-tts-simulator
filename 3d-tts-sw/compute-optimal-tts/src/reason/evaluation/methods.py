@@ -41,6 +41,11 @@ class TreeSearchConfig(BasicConfig):
     straggler_prune_other_reward_threshold: float = 0.0
     # 与 straggler_prune_enabled 同时为 True 时生效：跨 step 延迟剪枝（见 SearchTree）
     straggler_deferred_prune_enabled: bool = False
+    # MLP predictor for straggler detection
+    straggler_predictor_enabled: bool = False
+    straggler_predictor_weights: str = ""
+    straggler_predictor_priors: str = ""
+    active_branch_gate: int = 2
     eval_seed: int = 0
     # n>1 时拆成多次 n=1（各带不同派生 seed），避免同请求多样本雷同后被去重成单分支
     split_lm_n_for_seeds: bool = True
@@ -122,6 +127,10 @@ def beam_search(
             "straggler_prune_other_reward_gate": config.straggler_prune_other_reward_gate,
             "straggler_prune_other_reward_threshold": config.straggler_prune_other_reward_threshold,
             "straggler_deferred_prune_enabled": config.straggler_deferred_prune_enabled,
+            "straggler_predictor_enabled": config.straggler_predictor_enabled,
+            "straggler_predictor_weights": config.straggler_predictor_weights,
+            "straggler_predictor_priors": config.straggler_predictor_priors,
+            "active_branch_gate": config.active_branch_gate,
         }
     )
     traj_list = search_tree.beam_search(env, config.beam_size, config.tree_max_depth, rm_call)
