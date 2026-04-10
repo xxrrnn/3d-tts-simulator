@@ -32,6 +32,7 @@ max_time=3
 n_gpus=1
 double_line_break=1
 local=0
+num_worker=6  # 默认6；严格确定性模式建议设为1
 ### beam search start
 beam_search_detailed_log=0  # 新增：控制是否输出详细beam search日志 (0=关闭, 1=开启)
 logprobs_topk=20  # 新增：控制记录 top-k logits 的 k 值（vLLM最大支持20）
@@ -147,6 +148,10 @@ while [[ $# -gt 0 ]]; do
         deterministic="$2"
         shift 2
         ;;
+    --num_worker)
+        num_worker="$2"
+        shift 2
+        ;;
     ### beam search start
     --beam-log)
         beam_search_detailed_log="$2"
@@ -169,6 +174,14 @@ echo "straggler_prune: $straggler_prune, straggler_length_ratio: $straggler_leng
 ### beam search start
 echo "beam_search_detailed_log: $beam_search_detailed_log, logprobs_topk: $logprobs_topk"
 ### beam search end
+
+# 严格确定性模式：强制 num_worker=1 以消除跨题调度的非确定性
+if [ "$deterministic" -eq 1 ]; then
+    if [ "$num_worker" -ne 1 ]; then
+        echo "[deterministic=1] 强制 num_worker=1（原值 $num_worker）以保证跨题调度顺序确定"
+        num_worker=1
+    fi
+fi
 
 if [ $method == "beam_search" ]; then
     # 只有当max_new_tokens未设置或为默认值时才设置
@@ -227,7 +240,6 @@ echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES, n_gpus: $n_gpus"
 echo "GPU_LIST:"
 echo "${GPU_LIST[@]}"
 
-num_worker=6  #=12 改小一点？
 # 并行多实例评估时可 export EVAL_SAVE_DIR 指向独立目录（与 eval_all_combinations_straggler_gpu*.sh 一致）
 save_dir="${EVAL_SAVE_DIR:-${PYTHONPATH}/output}"
 LOGDIR=${PYTHONPATH}/logs_fastchat

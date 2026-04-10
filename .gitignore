@@ -124,7 +124,7 @@ dmypy.json
 # Custom patterns for this project
 3d-tts-sw/data/models/
 3d-tts-sw/src/envs/MATH/latex2sympy/.venv/
-3d-tts-sw/compute-optimal-tts/process/
+# 3d-tts-sw/compute-optimal-tts/process/
 *.incomplete
 
 # Output files and visualizations

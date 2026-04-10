@@ -215,7 +215,8 @@ if __name__ == "__main__":
                 multi_gpu=args.multi_gpu,
                 serve_type=args.serve_type,
                 double_line_break=args.double_line_break,
-                generation_seed=int(args.seed) + int(actor_index),
+                # generation_seed=int(args.seed) + int(actor_index),
+                generation_seed=int(args.seed),  # 后备默认值；beam_search 中会被 _derive_lm_branch_seed 覆盖 尝试一下这样写，看有无多个branch、是否可复现
             )
             for lm in args.LM
         ]

@@ -10,8 +10,8 @@ decode / prefill **仅**从 ``detailed_beam_search_log`` 解析（需 ``BEAM_SEA
 可选字段（命令行）：
 
 - ``--include-reward``：将每分支 ``reward_score`` 以 ``branch_rewards`` 写入各 step（默认不写）。
-- ``--no-token-topk-logprobs``：不写 ``branch_token_topk_logprobs``（默认写）。
-- ``--no-token-probs``：不写 ``branch_token_probs``（对应 detailed 中 ``token_probs``，默认写）。
+- ``--token-topk-logprobs``：写 ``branch_token_topk_logprobs``（默认不写）。
+- ``--token-probs``：写 ``branch_token_probs``（对应 detailed 中 ``token_probs``，默认不写）。
 
 **仅处理** ``num_sequence=1`` 的配置目录：
 
@@ -24,11 +24,11 @@ decode / prefill **仅**从 ``detailed_beam_search_log`` 解析（需 ``BEAM_SEA
 usage::
 
     python gen_workload_beam_1.py --input ../../src/output/AMC23_beam_search
-    # 默认：有 branch_token_probs、branch_token_topk_logprobs，无 branch_rewards
+    # 默认：无 branch_token_probs、branch_token_topk_logprobs，无 branch_rewards
 
     python gen_workload_beam_1.py --input ... --include-reward
-    python gen_workload_beam_1.py --input ... --no-token-topk-logprobs
-    python gen_workload_beam_1.py --input ... --no-token-probs
+    python gen_workload_beam_1.py --input ... --token-topk-logprobs
+    python gen_workload_beam_1.py --input ... --token-probs
 """
 
 import argparse
@@ -82,8 +82,8 @@ def _decode_steps_from_detailed(
     data: Dict[str, Any],
     *,
     include_reward: bool = False,
-    include_token_probs: bool = True,
-    include_token_topk_logprobs: bool = True,
+    include_token_probs: bool = False,
+    include_token_topk_logprobs: bool = False,
 ) -> List[Dict[str, Any]]:
     steps: List[Dict[str, Any]] = []
     if not data.get("output"):
@@ -145,8 +145,8 @@ def generate_workload_for_question(
     output_dir: Path,
     *,
     include_reward: bool = False,
-    include_token_probs: bool = True,
-    include_token_topk_logprobs: bool = True,
+    include_token_probs: bool = False,
+    include_token_topk_logprobs: bool = False,
 ) -> bool:
     record_file = question_dir / "record_0.jsonl"
     if not record_file.exists():
@@ -192,8 +192,8 @@ def generate_all_workloads(
     dataset_name: str,
     *,
     include_reward: bool = False,
-    include_token_probs: bool = True,
-    include_token_topk_logprobs: bool = True,
+    include_token_probs: bool = False,
+    include_token_topk_logprobs: bool = False,
 ) -> None:
     logger.info(f"Starting workload generation for dataset: {dataset_name}")
     if not input_dir.exists():
@@ -244,14 +244,14 @@ def main() -> None:
         help="将每分支 reward（detailed 中 reward_score）写入 decode.steps[].branch_rewards；默认不写",
     )
     parser.add_argument(
-        "--no-token-topk-logprobs",
+        "--token-topk-logprobs",
         action="store_true",
-        help="不写 decode.steps[].branch_token_topk_logprobs；默认写入",
+        help="写 decode.steps[].branch_token_topk_logprobs；默认不写",
     )
     parser.add_argument(
-        "--no-token-probs",
+        "--token-probs",
         action="store_true",
-        help="不写 decode.steps[].branch_token_probs（detailed 中 token_probs）；默认写入",
+        help="写 decode.steps[].branch_token_probs（detailed 中 token_probs）；默认不写",
     )
     args = parser.parse_args()
     if args.verbose:
@@ -261,8 +261,8 @@ def main() -> None:
     logger.info(f"Dataset: {dataset_name}")
     logger.info(f"Input: {input_path}")
     logger.info(f"Output root: {_WORKLOAD_ROOT / dataset_name}")
-    include_token_probs = not args.no_token_probs
-    include_token_topk_logprobs = not args.no_token_topk_logprobs
+    include_token_probs = args.token_probs
+    include_token_topk_logprobs = args.token_topk_logprobs
     logger.info(
         "workload 可选字段: include_reward=%s, include_token_probs=%s, include_token_topk_logprobs=%s",
         args.include_reward,

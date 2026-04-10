@@ -41,8 +41,7 @@ _STRAGGLER_DIR = Path(__file__).resolve().parent / "straggler"
 _DEFAULT_OUTPUT_JSON = _STRAGGLER_DIR / "stragglers.json"
 
 STRAGGLER_RATIO = 1.5
-#对比阈值=80和100下的straggler数量变化
-STRAGGLER_MIN_TOKENS = 90
+STRAGGLER_MIN_TOKENS = 100
 
 
 def is_straggler_branch(my_tokens: int, max_other_tokens: int) -> bool:
