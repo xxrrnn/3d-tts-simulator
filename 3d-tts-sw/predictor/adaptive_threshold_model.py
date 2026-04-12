@@ -51,6 +51,9 @@ class BaseAdaptiveThresholdPredictor:
             max_other_tokens=max_other_tokens,
             group_key=group_key,
         )
+        # gate_ok: fire when n_active_branches <= active_branch_gate
+        # e.g., gate=1 means fire when only 1 branch is still active (others finished)
+        # gate=2 means fire when 2 or fewer branches are still active
         gate_ok = (
             n_active_branches is None
             or int(n_active_branches) <= int(active_branch_gate)

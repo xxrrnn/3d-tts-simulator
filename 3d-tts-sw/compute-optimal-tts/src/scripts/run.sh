@@ -50,6 +50,8 @@ straggler_predictor_enabled=1 #1=启用 MLP 预测器进行 straggler 检测
 straggler_predictor_weights="" #MLP 预测器权重文件路径
 straggler_predictor_priors="" #MLP 预测器先验文件路径
 active_branch_gate=2 #活跃分支数阈值，当 n_active_branches <= 此值时调用 MLP 预测器
+straggler_budget_on=0 #1=启用 straggler budget（前 N 步不剪枝）
+straggler_budget=2 #前 N 步不剪枝（仅 budget_on=1 时生效）
 deterministic=0 #1=严格确定性模式（串行 LLM 请求，消除 batch 浮点差异，会降低吞吐）
 
 # Parse arguments
@@ -162,6 +164,14 @@ while [[ $# -gt 0 ]]; do
         ;;
     --active_branch_gate)
         active_branch_gate="$2"
+        shift 2
+        ;;
+    --straggler_budget_on)
+        straggler_budget_on="$2"
+        shift 2
+        ;;
+    --straggler_budget)
+        straggler_budget="$2"
         shift 2
         ;;
     --deterministic)
@@ -307,4 +317,6 @@ python reason/evaluation/evaluate.py \
     --straggler_predictor_weights $straggler_predictor_weights \
     --straggler_predictor_priors $straggler_predictor_priors \
     --active_branch_gate $active_branch_gate \
+    --straggler_budget_on $straggler_budget_on \
+    --straggler_budget $straggler_budget \
     --deterministic $deterministic

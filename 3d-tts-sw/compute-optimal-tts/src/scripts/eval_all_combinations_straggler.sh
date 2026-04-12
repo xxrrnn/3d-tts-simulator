@@ -25,22 +25,22 @@ EVAL_TIMEOUT_SECONDS=720000
 # 0405：修改为Policy + Reward 固定组合（仅跑以下三对组合）
 # 格式: "Policy目录名|Reward目录名"
 POLICY_REWARD_PAIRS=(
-    # "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
-    "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+    "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
+    # "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
     # "Qwen2.5-Math-1.5B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
 )
 
 # 数据集配置 (任务名, batch_size)
 # batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
-    "AIME24 4"  # 从 30 降到 15（减少50%） straggler出现在question19
-    # "AMC23 30"   # 从 40 降到 20（减少50%）
+    "AIME24 30"  # 从 30 降到 15（减少50%） straggler出现在question19
+    "AMC23 40"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
 
 # (tree_max_width, num_seq) 仅遍历下列组合
 BEAM_WIDTH_NUMSEQ_PAIRS=(
-    # "8 1"
+    "8 1"
     "4 1"
     # "2 1"
     # "8 2"
@@ -49,7 +49,7 @@ BEAM_WIDTH_NUMSEQ_PAIRS=(
 
 # 评估随机种子（传入 run.sh --seed → evaluate.py）
 # 同一 straggler 配置重复跑 EVAL_REPEAT_COUNT 次时，每次均使用 EVAL_SEED（不随 run 递增）
-EVAL_SEED=42
+EVAL_SEED=43
 
 # 0408：增加循环次数，循环三次取均值。
 # 每个 (Policy, Reward, Task, Beam, Straggler) 配置连续评估次数；取平均时请合并各 _run* 目录下的 avg_result.json
@@ -108,7 +108,7 @@ PRUNE1_SUBCONFIGS=0
 # ========== MLP预测器配置 ==========
 # 是否启用MLP预测器进行straggler检测（0=关闭，1=开启）
 STRAGGLER_PREDICTOR_ENABLED=(
-    0
+    # 0
     1
 )
 
@@ -121,7 +121,15 @@ STRAGGLER_PREDICTOR_WEIGHTS="${REPO_ROOT}/3d-tts-sw/predictor/adaptive_threshold
 STRAGGLER_PREDICTOR_PRIORS="${REPO_ROOT}/3d-tts-sw/predictor/adaptive_threshold_priors.json"
 
 # 活跃分支门控阈值（当活跃分支数 <= 此值时调用预测器）
-ACTIVE_BRANCH_GATE=2
+ACTIVE_BRANCH_GATE=1
+
+# Straggler 预算保护（BUDGET_ON=1 时启用：beam_search_step < STRAGGLER_BUDGET 时跳过剪枝）
+STRAGGLER_BUDGET_ON=(
+    0
+    1   
+)
+# 0=关闭, 1=启用
+STRAGGLER_BUDGET=2      # 前 N 步不剪枝（默认 2）
 # ====================================
 
 # 日志函数
@@ -295,7 +303,8 @@ check_evaluation_completed() {
     local straggler_other_thr=${10}
     local straggler_deferred=${11:-0}
     local predictor_enabled=${12:-0}
-    local run_idx=${13:-1}
+    local budget_on=${13:-0}
+    local run_idx=${14:-1}
 
     local policy_model="${policy_path##*/}"
     local reward_model="${reward_path##*/}"
@@ -303,12 +312,12 @@ check_evaluation_completed() {
     run_suffix=$(eval_repeat_run_suffix "$run_idx")
 
     # 构建重命名后的目录路径
-    local renamed_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/${EVAL_TREE_MAX_DEPTH}_${branch_width}_${num_seq}_straggler_${straggler_prune}_${straggler_ratio}_${straggler_min}_${straggler_other_gate}_${straggler_other_thr}_def${straggler_deferred}_pred${predictor_enabled}${run_suffix}"
+    local renamed_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/${EVAL_TREE_MAX_DEPTH}_${branch_width}_${num_seq}_straggler_${straggler_prune}_${straggler_ratio}_${straggler_min}_${straggler_other_gate}_${straggler_other_thr}_def${straggler_deferred}_pred${predictor_enabled}_bud${budget_on}${run_suffix}"
     local result_file="${renamed_dir}/avg_result.json"
 
     # 检查重命名后的目录中的avg_result.json是否存在
     if [ -f "$result_file" ]; then
-        log_message "✓ 跳过已完成的评估: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${predictor_enabled}, run=${run_idx}/${EVAL_REPEAT_COUNT}"
+        log_message "✓ 跳过已完成的评估: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${predictor_enabled}_bud${budget_on}, run=${run_idx}/${EVAL_REPEAT_COUNT}"
         return 0  # 已完成
     else
         return 1  # 未完成
@@ -353,7 +362,8 @@ rename_output_dir() {
     local straggler_other_thr=${10}
     local straggler_deferred=${11:-0}
     local predictor_enabled=${12:-0}
-    local run_idx=${13:-1}
+    local budget_on=${13:-0}
+    local run_idx=${14:-1}
 
     local policy_model="${policy_path##*/}"
     local reward_model="${reward_path##*/}"
@@ -363,8 +373,8 @@ rename_output_dir() {
     # 原始输出目录
     local output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/${EVAL_TREE_MAX_DEPTH}_${branch_width}_${num_seq}"
     
-    # 重命名后的目录（添加straggler参数后缀，及可选的重复次序后缀）
-    local new_output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/${EVAL_TREE_MAX_DEPTH}_${branch_width}_${num_seq}_straggler_${straggler_prune}_${straggler_ratio}_${straggler_min}_${straggler_other_gate}_${straggler_other_thr}_def${straggler_deferred}_pred${predictor_enabled}${run_suffix}"
+    # 重命名后的目录（添加straggler参数后缀，及可选的重复次序后缀；须与 check_evaluation_completed 中路径一致）
+    local new_output_dir="${OUTPUT_BASE_DIR}/${task}_beam_search/${policy_model}/${reward_model}/${EVAL_TREE_MAX_DEPTH}_${branch_width}_${num_seq}_straggler_${straggler_prune}_${straggler_ratio}_${straggler_min}_${straggler_other_gate}_${straggler_other_thr}_def${straggler_deferred}_pred${predictor_enabled}_bud${budget_on}${run_suffix}"
     
     if [ -d "$output_dir" ]; then
         log_message "重命名输出目录: $output_dir -> $new_output_dir"
@@ -390,13 +400,14 @@ run_evaluation() {
     local straggler_other_thr=${11}
     local straggler_deferred=${12:-0}
     local straggler_predictor_enabled=${13:-0}
-    local run_idx=${14:-1}
+    local straggler_budget_on=${14:-0}
+    local run_idx=${15:-1}
     local run_seed=$EVAL_SEED
     local max_retries=3
     local attempt=1
 
     while [ $attempt -le $max_retries ]; do
-        log_message "运行评估 (重试 ${attempt}/${max_retries}, 配置重复 ${run_idx}/${EVAL_REPEAT_COUNT}, seed=${run_seed}): Policy=${policy_path##*/}, Reward=${reward_path##*/}, Task=${task}, BatchSize=${batch_size}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}"
+        log_message "运行评估 (重试 ${attempt}/${max_retries}, 配置重复 ${run_idx}/${EVAL_REPEAT_COUNT}, seed=${run_seed}): Policy=${policy_path##*/}, Reward=${reward_path##*/}, Task=${task}, BatchSize=${batch_size}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud_on=${straggler_budget_on}_budget=${STRAGGLER_BUDGET}"
         # 0406:max_new_tokens限制为8192
         timeout --signal=TERM --kill-after=120 "${EVAL_TIMEOUT_SECONDS}" bash scripts/run.sh \
             --method beam_search \
@@ -426,20 +437,22 @@ run_evaluation() {
             --straggler_predictor_weights "$STRAGGLER_PREDICTOR_WEIGHTS" \
             --straggler_predictor_priors "$STRAGGLER_PREDICTOR_PRIORS" \
             --active_branch_gate "$ACTIVE_BRANCH_GATE" \
+            --straggler_budget_on "$straggler_budget_on" \
+            --straggler_budget "$STRAGGLER_BUDGET" \
             --deterministic 1
 
         local exit_code=$?
         if [ $exit_code -eq 0 ]; then
-            log_message "评估完成: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 成功 (重试第 ${attempt} 次)"
+            log_message "评估完成: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud_on=${straggler_budget_on}_budget=${STRAGGLER_BUDGET}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 成功 (重试第 ${attempt} 次)"
 
             # 评估成功后，重命名输出目录
-            rename_output_dir "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$run_idx"
+            rename_output_dir "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$straggler_budget_on" "$run_idx"
             break
         else
             if [ $exit_code -eq 124 ] || [ $exit_code -eq 137 ]; then
-                log_message "检测到评估卡死/超时: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 退出码: ${exit_code}"
+                log_message "检测到评估卡死/超时: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud_on=${straggler_budget_on}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 退出码: ${exit_code}"
             else
-                log_message "评估失败: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 退出码: ${exit_code}"
+                log_message "评估失败: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud_on=${straggler_budget_on}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 退出码: ${exit_code}"
             fi
 
             # 失败时的智能清理策略
@@ -455,7 +468,7 @@ run_evaluation() {
                 log_message "将在 10 秒后进行下一次重试..."
                 wait_and_log 10
             else
-                log_message "评估最终失败: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 已达到最大重试次数 (${max_retries})"
+                log_message "评估最终失败: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud_on=${straggler_budget_on}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 已达到最大重试次数 (${max_retries})"
             fi
         fi
     done
@@ -471,15 +484,17 @@ main() {
     fi
 
     log_message "开始全组合评估（固定 Policy–Reward 对 + Straggler参数扫描）"
+    log_message "输出根目录 OUTPUT_BASE_DIR=${OUTPUT_BASE_DIR}（PRUNE=1 时结果子目录名含 _bud0 或 _bud1 等，与 STRAGGLER_BUDGET_ON 一致）"
     log_message "EVAL_SEED=${EVAL_SEED}，每配置重复次数 EVAL_REPEAT_COUNT=${EVAL_REPEAT_COUNT}（各次 run 均使用同一 seed）"
     log_message "Policy–Reward 对数量: ${#POLICY_REWARD_PAIRS[@]}"
     log_message "数据集数量: ${#DATASETS[@]}"
     log_message "Beam(宽×num_seq) 组合数: ${#BEAM_WIDTH_NUMSEQ_PAIRS[@]}"
     log_message "Straggler配置: Prune=0 (1) + Prune=1 (ratio×min×每档子配置=${PRUNE1_SUBCONFIGS}；og=1 仅扫 threshold 且 def=0；og=0 扫 deferred，与 og=1 互斥)"
+    log_message "Straggler Budget: BUDGET_ON 扫描值=$(printf '%s ' "${STRAGGLER_BUDGET_ON[@]}"), BUDGET=${STRAGGLER_BUDGET}（前 ${STRAGGLER_BUDGET} 个 workload step 不剪枝）"
     
     # prune=0: 1；prune=1: ratio×min×([gate 含1] threshold 档 + [gate 含0] deferred 档)；og=1 与 def=1 从不同时
     local base_combinations=$((${#POLICY_REWARD_PAIRS[@]} * ${#DATASETS[@]} * ${#BEAM_WIDTH_NUMSEQ_PAIRS[@]}))
-    local straggler_configs=$((1 + ${#STRAGGLER_RATIO_MIN_PAIRS[@]} * PRUNE1_SUBCONFIGS * ${#STRAGGLER_PREDICTOR_ENABLED[@]}))
+    local straggler_configs=$((1 + ${#STRAGGLER_RATIO_MIN_PAIRS[@]} * PRUNE1_SUBCONFIGS * ${#STRAGGLER_PREDICTOR_ENABLED[@]} * ${#STRAGGLER_BUDGET_ON[@]}))
     local total_combinations=$((base_combinations * straggler_configs * EVAL_REPEAT_COUNT))
     log_message "总运行次数: ${total_combinations} (基础${base_combinations} × Straggler配置${straggler_configs} × 每配置重复${EVAL_REPEAT_COUNT})"
     
@@ -528,12 +543,13 @@ main() {
                             log_message "Branch Width: ${branch_width}"
                             log_message "Num Seq: ${num_seq}"
                             log_message "Straggler Prune: ${straggler_prune} (关闭)"
+                            log_message "Straggler Budget: PRUNE=0 时不扫描 bud_on（记录与目录名固定 bud_on=0, budget 参数无效）"
                             
-                            if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "0" "$repeat_idx"; then
+                            if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "0" "0" "$repeat_idx"; then
                                 continue
                             fi
 
-                            run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "0" "$repeat_idx"
+                            run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "0" "0" "$repeat_idx"
                             done
                         else
                             # prune=1：兄弟分支门控(og=1) 与 deferred 互斥 — og=1 时 def=0；og=0 时扫 deferred
@@ -544,6 +560,7 @@ main() {
                                         straggler_deferred=0
                                         for straggler_other_thr in "${STRAGGLER_OTHER_REWARD_THRESHOLD_VALUES[@]}"; do
                                             for straggler_predictor_enabled in "${STRAGGLER_PREDICTOR_ENABLED[@]}"; do
+                                            for straggler_budget_on in "${STRAGGLER_BUDGET_ON[@]}"; do
                                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
                                             current_combination=$((current_combination + 1))
 
@@ -558,12 +575,14 @@ main() {
                                             log_message "Straggler Min Tokens: ${straggler_min}"
                                             log_message "Straggler 兄弟PRM门控: 开启 og=1 threshold=${straggler_other_thr}（deferred 关闭 def=0）"
                                             log_message "Straggler 预测器: pred=${straggler_predictor_enabled}"
+                                            log_message "Straggler Budget: bud_on=${straggler_budget_on} budget=${STRAGGLER_BUDGET}"
 
-                                            if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$repeat_idx"; then
+                                            if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$straggler_budget_on" "$repeat_idx"; then
                                                 continue
                                             fi
 
-                                            run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$repeat_idx"
+                                            run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$straggler_budget_on" "$repeat_idx"
+                                            done
                                             done
                                             done
                                         done
@@ -573,6 +592,7 @@ main() {
                                         straggler_other_thr=0
                                         for straggler_deferred in "${STRAGGLER_DEFERRED_PRUNE_VALUES[@]}"; do
                                             for straggler_predictor_enabled in "${STRAGGLER_PREDICTOR_ENABLED[@]}"; do
+                                            for straggler_budget_on in "${STRAGGLER_BUDGET_ON[@]}"; do
                                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
                                             current_combination=$((current_combination + 1))
 
@@ -588,12 +608,14 @@ main() {
                                             log_message "Straggler 兄弟PRM门控: 关闭 (og=0 thr=0)"
                                             log_message "Straggler 延迟剪枝 def: ${straggler_deferred}"
                                             log_message "Straggler 预测器: pred=${straggler_predictor_enabled}"
+                                            log_message "Straggler Budget: bud_on=${straggler_budget_on} budget=${STRAGGLER_BUDGET}"
 
-                                            if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$repeat_idx"; then
+                                            if check_evaluation_completed "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$straggler_budget_on" "$repeat_idx"; then
                                                 continue
                                             fi
 
-                                            run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$repeat_idx"
+                                            run_evaluation "$policy_path" "$reward_path" "$task" "$batch_size" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$straggler_budget_on" "$repeat_idx"
+                                            done
                                             done
                                             done
                                         done
@@ -642,6 +664,31 @@ check_requirements() {
 # 脚本入口
 if [ "$1" = "--dry-run" ]; then
     log_message "干跑模式 - 只显示将要执行的组合（每配置 ${EVAL_REPEAT_COUNT} 次，各次 seed=${EVAL_SEED}；EVAL_REPEAT_COUNT 可改脚本顶部变量）"
+    echo ""
+    echo "=== Straggler MLP 预测器（与 run.sh 一致；每行 pred=0/1 对应是否启用）==="
+    echo "  STRAGGLER_PREDICTOR_WEIGHTS=${STRAGGLER_PREDICTOR_WEIGHTS}"
+    echo "  STRAGGLER_PREDICTOR_PRIORS=${STRAGGLER_PREDICTOR_PRIORS}"
+    echo "  ACTIVE_BRANCH_GATE=${ACTIVE_BRANCH_GATE}"
+    echo "  STRAGGLER_PREDICTOR_ENABLED 扫描值: $(printf '%s ' "${STRAGGLER_PREDICTOR_ENABLED[@]}")"
+    echo "  说明: PRUNE=0 时 pred 固定为 0；PRUNE=1 时按上表扫描 pred。run.sh 始终传入上述 weights/priors/active_branch_gate。"
+    if [ -f "${STRAGGLER_PREDICTOR_WEIGHTS}" ]; then
+        echo "  （weights 文件存在）"
+    else
+        echo "  （警告: weights 文件不存在: ${STRAGGLER_PREDICTOR_WEIGHTS}）"
+    fi
+    if [ -f "${STRAGGLER_PREDICTOR_PRIORS}" ]; then
+        echo "  （priors 文件存在）"
+    else
+        echo "  （警告: priors 文件不存在: ${STRAGGLER_PREDICTOR_PRIORS}）"
+    fi
+    echo "======================================================================"
+    echo ""
+    echo "=== Straggler Budget（前 N 步不剪枝）==="
+    echo "  STRAGGLER_BUDGET_ON 扫描值: $(printf '%s ' "${STRAGGLER_BUDGET_ON[@]}")"
+    echo "  STRAGGLER_BUDGET=${STRAGGLER_BUDGET}（bud_on=1 时前 ${STRAGGLER_BUDGET} 个 workload step 跳过剪枝）"
+    echo "  说明: PRUNE=0 时 bud 固定为 0；PRUNE=1 时按上表扫描 bud_on。"
+    echo "======================================================================"
+    echo ""
     for pair_line in "${POLICY_REWARD_PAIRS[@]}"; do
         IFS='|' read -r policy_model reward_model <<< "${pair_line}"
         for dataset_config in "${DATASETS[@]}"; do
@@ -668,8 +715,10 @@ if [ "$1" = "--dry-run" ]; then
                                     if [ "$GATE_HAS_1" -eq 1 ]; then
                                         for straggler_other_thr in "${STRAGGLER_OTHER_REWARD_THRESHOLD_VALUES[@]}"; do
                                             for straggler_predictor_enabled in "${STRAGGLER_PREDICTOR_ENABLED[@]}"; do
+                                            for straggler_budget_on in "${STRAGGLER_BUDGET_ON[@]}"; do
                                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
-                                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=1 thr=${straggler_other_thr} def=0 pred=${straggler_predictor_enabled}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=${EVAL_SEED}"
+                                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=1 thr=${straggler_other_thr} def=0 pred=${straggler_predictor_enabled} bud=${straggler_budget_on}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=${EVAL_SEED}"
+                                            done
                                             done
                                             done
                                         done
@@ -677,8 +726,10 @@ if [ "$1" = "--dry-run" ]; then
                                     if [ "$GATE_HAS_0" -eq 1 ]; then
                                         for straggler_deferred in "${STRAGGLER_DEFERRED_PRUNE_VALUES[@]}"; do
                                             for straggler_predictor_enabled in "${STRAGGLER_PREDICTOR_ENABLED[@]}"; do
+                                            for straggler_budget_on in "${STRAGGLER_BUDGET_ON[@]}"; do
                                             for ((repeat_idx=1; repeat_idx<=EVAL_REPEAT_COUNT; repeat_idx++)); do
-                                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=0 thr=0 def=${straggler_deferred} pred=${straggler_predictor_enabled}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=${EVAL_SEED}"
+                                            echo "Policy: ${policy_model}, Reward: ${reward_model}, Task: ${task}, BatchSize: ${batch_size}, Branch: ${branch_width}, NumSeq: ${num_seq}, Straggler: PRUNE=1 RATIO=${straggler_ratio} MIN=${straggler_min} og=0 thr=0 def=${straggler_deferred} pred=${straggler_predictor_enabled} bud=${straggler_budget_on}, run=${repeat_idx}/${EVAL_REPEAT_COUNT}, seed=${EVAL_SEED}"
+                                            done
                                             done
                                             done
                                         done

@@ -46,6 +46,8 @@ class TreeSearchConfig(BasicConfig):
     straggler_predictor_weights: str = ""
     straggler_predictor_priors: str = ""
     active_branch_gate: int = 2
+    straggler_budget_on: bool = False
+    straggler_budget: int = 2
     eval_seed: int = 0
     # n>1 时拆成多次 n=1（各带不同派生 seed），避免同请求多样本雷同后被去重成单分支
     split_lm_n_for_seeds: bool = True
@@ -131,6 +133,8 @@ def beam_search(
             "straggler_predictor_weights": config.straggler_predictor_weights,
             "straggler_predictor_priors": config.straggler_predictor_priors,
             "active_branch_gate": config.active_branch_gate,
+            "straggler_budget_on": config.straggler_budget_on,
+            "straggler_budget": config.straggler_budget,
         }
     )
     traj_list = search_tree.beam_search(env, config.beam_size, config.tree_max_depth, rm_call)

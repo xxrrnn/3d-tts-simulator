@@ -82,9 +82,9 @@ do
     cpu_offload_gb=0
 
     if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
-        gpu_memory_utilization=0.50 #0.8->0.65->0.50 降低以解决内存不足
+        gpu_memory_utilization=0.85 #增加到0.7，7bpolicy + 1.5b reward才能加载到gpu上
     else
-        gpu_memory_utilization=0.50  # 0.8->0.65->0.50 降低以解决内存不足
+        gpu_memory_utilization=0.85  # 0.8->0.65->0.50 降低以解决内存不足
     fi
 
     if [[ "$POLICY_MODEL_PATH" =~ "DeepSeek-R1" ]]; then
