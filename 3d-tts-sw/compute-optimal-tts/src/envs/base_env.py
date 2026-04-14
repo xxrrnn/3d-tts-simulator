@@ -29,6 +29,7 @@ def _merge_concated_lm_results(parts: List["ConcatedLMGenResult"]) -> "ConcatedL
     if not parts:
         raise ValueError("empty LM result parts")
     texts, num_tokens, cum_logps, logp_avg, fr, tlog, ttop = [], [], [], [], [], [], []
+    total_gpu_time_ms = 0.0
     for p in parts:
         if len(p.text) != 1:
             raise ValueError("merge expects n=1 per chunk")
@@ -39,6 +40,7 @@ def _merge_concated_lm_results(parts: List["ConcatedLMGenResult"]) -> "ConcatedL
         fr.append(p.finish_reason[0])
         tlog.append(p.token_logprobs[0] if p.token_logprobs else [])
         ttop.append(p.token_topk_logprobs[0] if p.token_topk_logprobs else [])
+        total_gpu_time_ms += getattr(p, 'gpu_time_ms', 0.0)
     return ConcatedLMGenResult(
         text=texts,
         prompt_tokens=parts[0].prompt_tokens,
@@ -48,6 +50,7 @@ def _merge_concated_lm_results(parts: List["ConcatedLMGenResult"]) -> "ConcatedL
         finish_reason=fr,
         token_logprobs=tlog,
         token_topk_logprobs=ttop,
+        gpu_time_ms=total_gpu_time_ms,
     )
 
 
@@ -203,21 +206,22 @@ class CoTEnv(BaseEnv):
             is_few_shot=self.is_few_shot,
             model_names=self.model_names,
         )
+        llm_gpu_time_ms = 0.0
         if update_legal_action:
             cnt = 0
             max_try = 1
             while cnt < max_try:
                 cnt += 1
                 try:
-                    self._legal_actions, api_completion_token = self.update_legal_actions(initial=True)
+                    self._legal_actions, api_completion_token, llm_gpu_time_ms = self.update_legal_actions(initial=True)
                     break
                 except Exception as e:
                     if cnt == max_try:
-                        self._legal_actions, api_completion_token = self.update_legal_actions(initial=True, force_update=True)
+                        self._legal_actions, api_completion_token, llm_gpu_time_ms = self.update_legal_actions(initial=True, force_update=True)
                         print("Force update legal actions:", self._legal_actions)
         else:
             api_completion_token = 0
-        info = {"api_completion_token": api_completion_token}
+        info = {"api_completion_token": api_completion_token, "llm_gpu_time_ms": llm_gpu_time_ms}
         return self.get_state(model_name='raw'), info
 
     def step(self, action, update_legal_action=True, model_name="", custom_n=0, reward=0.0, num_token=0, prob=0.0, token_probs=None, token_topk_logprobs=None):
@@ -240,8 +244,9 @@ class CoTEnv(BaseEnv):
             while cnt < 3:
                 cnt += 1
                 try:
-                    self._legal_actions, api_completion_token = self.update_legal_actions(custom_n=custom_n)
+                    self._legal_actions, api_completion_token, llm_gpu_time_ms = self.update_legal_actions(custom_n=custom_n)
                     info["api_completion_token"] = api_completion_token
+                    info["llm_gpu_time_ms"] = llm_gpu_time_ms
                     break
                 except NoLegalActionException as e:
                     if cnt == 3:
@@ -250,6 +255,7 @@ class CoTEnv(BaseEnv):
                         self._legal_actions = None
                         info["winner"] = 2
                         info["api_completion_token"] = 0
+                        info["llm_gpu_time_ms"] = 0.0
                     else:
                         pass
         else:
@@ -257,6 +263,7 @@ class CoTEnv(BaseEnv):
             if info["winner"] == 1:
                 reward = 1.0
             info["api_completion_token"] = 0
+            info["llm_gpu_time_ms"] = 0.0
         return state, reward, terminated, truncated, info
 
     def get_state(self, model_name='other', add_step_prompt=False):
@@ -429,9 +436,12 @@ class CoTEnv(BaseEnv):
 
         if len(self.llm_gen_fns) == 1:
             completion_tokens = result.completion_tokens
+            llm_gpu_time_ms = getattr(result, 'gpu_time_ms', 0.0)
+        else:
+            llm_gpu_time_ms = 0.0
         self._next_state_terminated = next_state_terminated
 
-        return _legal_actions, completion_tokens
+        return _legal_actions, completion_tokens, llm_gpu_time_ms
 
     def set_problem(self, idx):
         self.math_problem = self.math_problems[idx]

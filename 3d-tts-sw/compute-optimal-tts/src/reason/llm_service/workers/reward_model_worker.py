@@ -186,12 +186,27 @@ class ModelWorker(BaseModelWorker):
     def reward_inference_gate(self, params):
         input_str = params["input_str"]
         try:
+            # CUDA Event 计时：记录 GPU 推理开始时间
+            gpu_time_ms = 0.0
+            cuda_available = torch.cuda.is_available()
+            if cuda_available:
+                start_event = torch.cuda.Event(enable_timing=True)
+                end_event = torch.cuda.Event(enable_timing=True)
+                start_event.record()
+            
             if isinstance(input_str, list):
                 reward = [r if isinstance(r, list) else r.tolist() for r in self.infer_fn(input_str)]
             else:
                 reward = self.infer_fn(input_str).tolist()
+            
+            # CUDA Event 计时：记录 GPU 推理结束时间
+            if cuda_available:
+                end_event.record()
+                torch.cuda.synchronize()
+                gpu_time_ms = start_event.elapsed_time(end_event)
+            
             # ret = {"input": input_str, "reward": reward}
-            ret = {"reward": reward}
+            ret = {"reward": reward, "gpu_time_ms": gpu_time_ms}
             gc.collect()
             torch.cuda.empty_cache()
         except torch.cuda.OutOfMemoryError as e:

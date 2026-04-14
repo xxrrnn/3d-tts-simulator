@@ -251,7 +251,8 @@ cd ${PYTHONPATH}
 
 # 根据 n_gpus 动态设置 CUDA_VISIBLE_DEVICES 和 GPU_LIST
 if [ $n_gpus -eq 1 ]; then
-    export CUDA_VISIBLE_DEVICES=0
+    : "${CUDA_VISIBLE_DEVICES:=0}"
+    export CUDA_VISIBLE_DEVICES
     GPU_LIST=(0 0)
 elif [ $n_gpus -eq 2 ]; then
     export CUDA_VISIBLE_DEVICES=0,1

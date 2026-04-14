@@ -296,6 +296,10 @@ class SearchTree:
         self._predictor_priors = None
         if self._straggler_predictor_enabled and self._straggler_predictor_weights:
             self._init_predictor()
+        
+        # GPU 计时变量（在 beam_search 开始时重置）
+        self._total_llm_gpu_time_ms = 0.0
+        self._total_rm_gpu_time_ms = 0.0
 
     def _init_predictor(self) -> None:
         """Initialize MLP predictor for straggler detection."""
@@ -569,8 +573,11 @@ class SearchTree:
             assert self.direct_io
         search_start_time = time.perf_counter()
         api_call_completion_tokens = 0
+        self._total_llm_gpu_time_ms = 0.0  # 累积 LLM GPU 计时（毫秒）
+        self._total_rm_gpu_time_ms = 0.0   # 累积 RM GPU 计时（毫秒）
         _, info = simulate_env.reset(update_legal_action=True)
         api_call_completion_tokens += info["api_completion_token"]
+        self._total_llm_gpu_time_ms += info.get("llm_gpu_time_ms", 0.0)
 
         search_step_stats = []
         detailed_beam_logs = None
@@ -798,6 +805,7 @@ class SearchTree:
                     token_probs=node.token_prob_list,
                 )
                 api_call_completion_tokens += info["api_completion_token"]
+                self._total_llm_gpu_time_ms += info.get("llm_gpu_time_ms", 0.0)
                 
                 if enable_detailed_log and expansion_result:
                     expansion_result.update({
@@ -904,6 +912,9 @@ class SearchTree:
                     "total_elapsed_sec": total_search_elapsed_sec,
                     "per_step_elapsed_sec": per_step_elapsed_sec,
                     "step_count": len(per_step_elapsed_sec),
+                    "total_llm_gpu_time_ms": self._total_llm_gpu_time_ms,
+                    "total_rm_gpu_time_ms": self._total_rm_gpu_time_ms,
+                    "total_gpu_time_ms": self._total_llm_gpu_time_ms + self._total_rm_gpu_time_ms,
                 },
                 # num_generated_token is hard to compute for each single answer
             }
@@ -1010,7 +1021,12 @@ class SearchTree:
                 prm_inputs = [(simulate_env.question, simulate_env.answer + x["action"]) for x in simulate_env.legal_actions]
                 for i in range(2):
                     try:
-                        prms = rm_call(prm_inputs)
+                        rm_result = rm_call(prm_inputs, return_gpu_time=True)
+                        if isinstance(rm_result, tuple) and len(rm_result) == 2:
+                            prms, rm_gpu_time_ms = rm_result
+                            self._total_rm_gpu_time_ms += rm_gpu_time_ms
+                        else:
+                            prms = rm_result
                         break
                     except Exception as e:
                         import traceback

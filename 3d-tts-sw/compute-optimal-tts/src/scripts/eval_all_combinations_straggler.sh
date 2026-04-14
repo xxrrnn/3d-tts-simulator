@@ -16,8 +16,21 @@ export WORKER_BASE_PORT=10081
 # GPU配置 (统一管理)
 N_GPUS=1  # 可选值: 1, 2, 3, 4
 
+# 仅 N_GPUS=1：指定本机物理 GPU 编号（供 serve_gpu1 与 run.sh/评估子进程继承；多卡请改用其它 serve_gpu*.sh，勿依赖此项）
+if [ "${N_GPUS}" -eq 1 ]; then
+    : "${CUDA_VISIBLE_DEVICES:=0}"
+    export CUDA_VISIBLE_DEVICES
+fi
+
 OUTPUT_BASE_DIR="${SRC_DIR}/output"
 CHECK_SCRIPT="${SCRIPT_DIR}/process/check_incomplete_questions.py"
+
+# ========== 功耗记录配置 ==========
+# 是否启用功耗记录（0=关闭，1=开启）
+RECORD_POWER=1
+# 功耗数据保存目录
+POWER_OUTPUT_DIR="${SRC_DIR}/power"
+# ================================
 
 # 卡死检测：单次评估最大运行时长（秒）
 EVAL_TIMEOUT_SECONDS=720000
@@ -25,24 +38,24 @@ EVAL_TIMEOUT_SECONDS=720000
 # 0405：修改为Policy + Reward 固定组合（仅跑以下三对组合）
 # 格式: "Policy目录名|Reward目录名"
 POLICY_REWARD_PAIRS=(
-    "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
-    # "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
+    # "Qwen2.5-Math-1.5B-Instruct|math-shepherd-mistral-7b-prm"
+    "Qwen2.5-Math-7B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
     # "Qwen2.5-Math-1.5B-Instruct|Skywork-o1-Open-PRM-Qwen-2.5-1.5B"
 )
 
 # 数据集配置 (任务名, batch_size)
 # batch_size: 一次性分配给评估的题目数量（降低以减少内存占用）
 DATASETS=(
-    "AIME24 30"  # 从 30 降到 15（减少50%） straggler出现在question19
-    "AMC23 40"   # 从 40 降到 20（减少50%）
+    "AIME24 5"  # 从 30 降到 15（减少50%） straggler出现在question19
+    "AMC23 5"   # 从 40 降到 20（减少50%）
     # "MATH 500"
 )
 
 # (tree_max_width, num_seq) 仅遍历下列组合
 BEAM_WIDTH_NUMSEQ_PAIRS=(
-    "8 1"
     "4 1"
-    # "2 1"
+    "8 1"
+    "2 1"
     # "8 2"
     # "4 2"
 )
@@ -63,7 +76,7 @@ EVAL_TREE_MAX_DEPTH=40
 # PRUNE 优先级最高：仅 STRAGGLER_PRUNE_VALUES=1 时启用剪枝；PRUNE=0 时 ratio/min/门控/deferred 均无意义（脚本固定传 0）
 STRAGGLER_PRUNE_VALUES=(
     0    # 关闭
-    1    # 开启
+    # 1    # 开启
 )
 
 # 仅当 PRUNE=1 时遍历 ratio / min_tokens (ratio, min_tokens)
@@ -126,7 +139,7 @@ ACTIVE_BRANCH_GATE=1
 # Straggler 预算保护（BUDGET_ON=1 时启用：beam_search_step < STRAGGLER_BUDGET 时跳过剪枝）
 STRAGGLER_BUDGET_ON=(
     0
-    1   
+    # 1   
 )
 # 0=关闭, 1=启用
 STRAGGLER_BUDGET=2      # 前 N 步不剪枝（默认 2）
@@ -136,6 +149,238 @@ STRAGGLER_BUDGET=2      # 前 N 步不剪枝（默认 2）
 log_message() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
 }
+
+# ========== 功耗监控函数 ==========
+# 全局变量：功耗监控进程PID和临时文件
+POWER_MONITOR_PID=""
+POWER_TEMP_FILE=""
+
+# 获取当前使用的GPU ID列表
+get_gpu_ids() {
+    if [ -n "${CUDA_VISIBLE_DEVICES:-}" ]; then
+        echo "$CUDA_VISIBLE_DEVICES" | tr ',' ' '
+    else
+        # 默认使用GPU 0
+        echo "0"
+    fi
+}
+
+# 启动功耗监控（后台每秒采样nvidia-smi）
+start_power_monitor() {
+    local question_id=$1
+    local config_name=$2
+    
+    if [ "${RECORD_POWER}" -ne 1 ]; then
+        return
+    fi
+    
+    # 创建临时文件存储功耗数据
+    POWER_TEMP_FILE=$(mktemp "/tmp/power_monitor_${question_id}_XXXXXX.csv")
+    
+    # 获取GPU ID列表
+    local gpu_ids
+    gpu_ids=$(get_gpu_ids)
+    local gpu_id_csv
+    gpu_id_csv=$(echo "$gpu_ids" | tr ' ' ',')
+    
+    log_message "启动功耗监控: question=${question_id}, GPUs=${gpu_id_csv}, 输出文件=${POWER_TEMP_FILE}"
+    
+    # 后台启动nvidia-smi循环采样（每秒一次）
+    (
+        while true; do
+            # 获取时间戳和功耗（格式: timestamp, gpu_id, power.draw [W]）
+            nvidia-smi --query-gpu=timestamp,index,power.draw --format=csv,noheader,nounits -i "$gpu_id_csv" >> "$POWER_TEMP_FILE" 2>/dev/null
+            sleep 1
+        done
+    ) &
+    POWER_MONITOR_PID=$!
+    
+    log_message "功耗监控进程已启动: PID=${POWER_MONITOR_PID}"
+}
+
+# 停止功耗监控并计算平均功耗
+stop_power_monitor() {
+    local question_id=$1
+    local config_power_dir=$2
+    
+    if [ "${RECORD_POWER}" -ne 1 ]; then
+        echo "0"
+        return
+    fi
+    
+    if [ -z "$POWER_MONITOR_PID" ] || ! kill -0 "$POWER_MONITOR_PID" 2>/dev/null; then
+        log_message "警告: 功耗监控进程不存在或已停止" >&2
+        echo "0"
+        return
+    fi
+    
+    # 停止监控进程
+    kill "$POWER_MONITOR_PID" 2>/dev/null || true
+    wait "$POWER_MONITOR_PID" 2>/dev/null || true
+    POWER_MONITOR_PID=""
+    
+    log_message "功耗监控进程已停止，开始计算平均功耗..." >&2
+    
+    if [ ! -f "$POWER_TEMP_FILE" ] || [ ! -s "$POWER_TEMP_FILE" ]; then
+        log_message "警告: 功耗数据文件为空或不存在: ${POWER_TEMP_FILE}" >&2
+        echo "0"
+        return
+    fi
+    
+    # 计算平均功耗（所有GPU的总功耗的时间平均值）
+    # CSV格式: timestamp, gpu_index, power_draw
+    local avg_power
+    avg_power=$(awk -F', ' '
+        BEGIN { total=0; count=0 }
+        {
+            # 第三列是功耗值
+            power = $3
+            if (power ~ /^[0-9.]+$/) {
+                total += power
+                count++
+            }
+        }
+        END {
+            if (count > 0) {
+                printf "%.2f", total / count
+            } else {
+                print "0"
+            }
+        }
+    ' "$POWER_TEMP_FILE")
+    
+    local sample_count
+    sample_count=$(wc -l < "$POWER_TEMP_FILE")
+    
+    log_message "配置 ${question_id} 平均功耗: ${avg_power} W (采样点数: ${sample_count})" >&2
+    
+    # 保存原始采样数据到配置目录（CSV格式：timestamp, gpu_index, power_draw）
+    if [ -n "$config_power_dir" ] && [ -d "$config_power_dir" ]; then
+        local raw_data_file="${config_power_dir}/power_samples.csv"
+        # 添加CSV头部（如果文件不存在）
+        if [ ! -f "$raw_data_file" ]; then
+            echo "timestamp,gpu_index,power_draw_w" > "$raw_data_file"
+        fi
+        # 追加采样数据（去除nvidia-smi输出中的空格）
+        sed 's/, /,/g' "$POWER_TEMP_FILE" >> "$raw_data_file"
+        log_message "原始采样数据已保存: ${raw_data_file}" >&2
+    fi
+    
+    # 清理临时文件
+    rm -f "$POWER_TEMP_FILE"
+    POWER_TEMP_FILE=""
+    
+    echo "$avg_power"
+}
+
+# 计算配置的所有问题平均功耗并保存汇总
+calculate_config_avg_power() {
+    local config_power_dir=$1
+    local config_name=$2
+    
+    if [ "${RECORD_POWER}" -ne 1 ]; then
+        return
+    fi
+    
+    if [ ! -d "$config_power_dir" ]; then
+        log_message "警告: 配置功耗目录不存在: ${config_power_dir}"
+        return
+    fi
+    
+    # 统计所有问题的功耗
+    local total_power=0
+    local question_count=0
+    local power_values=""
+    
+    for power_file in "${config_power_dir}"/question_*_power.json; do
+        if [ -f "$power_file" ]; then
+            local power
+            power=$(grep -o '"avg_power_w": [0-9.]*' "$power_file" | awk -F': ' '{print $2}')
+            if [ -n "$power" ] && [ "$power" != "0" ]; then
+                total_power=$(echo "$total_power + $power" | bc)
+                question_count=$((question_count + 1))
+                if [ -n "$power_values" ]; then
+                    power_values="${power_values}, ${power}"
+                else
+                    power_values="${power}"
+                fi
+            fi
+        fi
+    done
+    
+    if [ $question_count -gt 0 ]; then
+        local avg_power
+        avg_power=$(echo "scale=2; $total_power / $question_count" | bc)
+        
+        log_message "配置 ${config_name} 平均功耗: ${avg_power} W (问题数: ${question_count})"
+        
+        # 保存配置汇总
+        local summary_file="${config_power_dir}/power_summary.json"
+        echo "{
+    \"config_name\": \"${config_name}\",
+    \"avg_power_w\": ${avg_power},
+    \"total_questions\": ${question_count},
+    \"question_powers\": [${power_values}]
+}" > "$summary_file"
+        
+        log_message "功耗汇总已保存: ${summary_file}"
+    else
+        log_message "警告: 配置 ${config_name} 没有有效的功耗数据"
+    fi
+}
+
+# 创建配置的功耗输出目录
+create_power_output_dir() {
+    local config_name=$1
+    
+    if [ "${RECORD_POWER}" -ne 1 ]; then
+        echo ""
+        return
+    fi
+    
+    # 确保功耗输出根目录存在
+    mkdir -p "${POWER_OUTPUT_DIR}"
+    
+    # 创建配置专属目录
+    local config_power_dir="${POWER_OUTPUT_DIR}/${config_name}"
+    mkdir -p "$config_power_dir"
+    
+    echo "$config_power_dir"
+}
+
+# 保存配置的功耗汇总（整个评估过程的平均功耗）
+save_config_power_summary() {
+    local config_power_dir=$1
+    local config_name=$2
+    local avg_power=$3
+    local task=$4
+    local batch_size=$5
+    
+    if [ "${RECORD_POWER}" -ne 1 ]; then
+        return
+    fi
+    
+    if [ -z "$config_power_dir" ] || [ ! -d "$config_power_dir" ]; then
+        log_message "警告: 功耗目录无效，无法保存汇总"
+        return
+    fi
+    
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    local summary_file="${config_power_dir}/power_summary.json"
+    echo "{
+    \"config_name\": \"${config_name}\",
+    \"task\": \"${task}\",
+    \"batch_size\": ${batch_size},
+    \"avg_power_w\": ${avg_power},
+    \"timestamp\": \"${timestamp}\",
+    \"gpu_ids\": \"${CUDA_VISIBLE_DEVICES:-0}\"
+}" > "$summary_file"
+    
+    log_message "✓ 功耗汇总已保存: ${summary_file} (平均功耗: ${avg_power} W)"
+}
+# ================================
 
 # 等待函数
 wait_and_log() {
@@ -203,7 +448,7 @@ start_services() {
     local policy_path=$1
     local reward_path=$2
     
-    log_message "启动服务: Policy=${policy_path##*/}, Reward=${reward_path##*/}, GPUs=${N_GPUS}"
+    log_message "启动服务: Policy=${policy_path##*/}, Reward=${reward_path##*/}, GPUs=${N_GPUS}, CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-unset}"
     
     export VALUE_MODEL_PATH="$reward_path"
     export POLICY_MODEL_PATH="$policy_path"
@@ -406,8 +651,26 @@ run_evaluation() {
     local max_retries=3
     local attempt=1
 
+    # 构建配置名称（用于功耗记录目录）
+    local policy_model="${policy_path##*/}"
+    local reward_model="${reward_path##*/}"
+    local run_suffix
+    run_suffix=$(eval_repeat_run_suffix "$run_idx")
+    local config_name="${task}_${policy_model}_${reward_model}_${EVAL_TREE_MAX_DEPTH}_${branch_width}_${num_seq}_straggler_${straggler_prune}_${straggler_ratio}_${straggler_min}_${straggler_other_gate}_${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud${straggler_budget_on}${run_suffix}"
+    
+    # 创建功耗输出目录
+    local config_power_dir=""
+    if [ "${RECORD_POWER}" -eq 1 ]; then
+        config_power_dir=$(create_power_output_dir "$config_name")
+        log_message "功耗记录已启用，输出目录: ${config_power_dir}"
+    fi
+
     while [ $attempt -le $max_retries ]; do
         log_message "运行评估 (重试 ${attempt}/${max_retries}, 配置重复 ${run_idx}/${EVAL_REPEAT_COUNT}, seed=${run_seed}): Policy=${policy_path##*/}, Reward=${reward_path##*/}, Task=${task}, BatchSize=${batch_size}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud_on=${straggler_budget_on}_budget=${STRAGGLER_BUDGET}"
+        
+        # 启动功耗监控（整个配置的评估过程）
+        start_power_monitor "config_${attempt}" "$config_name"
+        
         # 0406:max_new_tokens限制为8192
         timeout --signal=TERM --kill-after=120 "${EVAL_TIMEOUT_SECONDS}" bash scripts/run.sh \
             --method beam_search \
@@ -439,11 +702,21 @@ run_evaluation() {
             --active_branch_gate "$ACTIVE_BRANCH_GATE" \
             --straggler_budget_on "$straggler_budget_on" \
             --straggler_budget "$STRAGGLER_BUDGET" \
-            --deterministic 1
+            --deterministic 0
 
         local exit_code=$?
+        
+        # 停止功耗监控并保存结果
+        local avg_power
+        avg_power=$(stop_power_monitor "config_${attempt}" "$config_power_dir")
+        
         if [ $exit_code -eq 0 ]; then
             log_message "评估完成: ${task}, Branch=${branch_width}, NumSeq=${num_seq}, Straggler=${straggler_prune}_${straggler_ratio}_${straggler_min}_og${straggler_other_gate}_thr${straggler_other_thr}_def${straggler_deferred}_pred${straggler_predictor_enabled}_bud_on=${straggler_budget_on}_budget=${STRAGGLER_BUDGET}, run=${run_idx}/${EVAL_REPEAT_COUNT} - 成功 (重试第 ${attempt} 次)"
+            
+            # 保存功耗汇总（成功时）
+            if [ "${RECORD_POWER}" -eq 1 ] && [ -n "$config_power_dir" ]; then
+                save_config_power_summary "$config_power_dir" "$config_name" "$avg_power" "$task" "$batch_size"
+            fi
 
             # 评估成功后，重命名输出目录
             rename_output_dir "$policy_path" "$reward_path" "$task" "$branch_width" "$num_seq" "$straggler_prune" "$straggler_ratio" "$straggler_min" "$straggler_other_gate" "$straggler_other_thr" "$straggler_deferred" "$straggler_predictor_enabled" "$straggler_budget_on" "$run_idx"
@@ -491,6 +764,14 @@ main() {
     log_message "Beam(宽×num_seq) 组合数: ${#BEAM_WIDTH_NUMSEQ_PAIRS[@]}"
     log_message "Straggler配置: Prune=0 (1) + Prune=1 (ratio×min×每档子配置=${PRUNE1_SUBCONFIGS}；og=1 仅扫 threshold 且 def=0；og=0 扫 deferred，与 og=1 互斥)"
     log_message "Straggler Budget: BUDGET_ON 扫描值=$(printf '%s ' "${STRAGGLER_BUDGET_ON[@]}"), BUDGET=${STRAGGLER_BUDGET}（前 ${STRAGGLER_BUDGET} 个 workload step 不剪枝）"
+    if [ "${N_GPUS}" -eq 1 ]; then
+        log_message "N_GPUS=1，CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}（serve_gpu1 与 scripts/run.sh 继承）"
+    fi
+    if [ "${RECORD_POWER}" -eq 1 ]; then
+        log_message "功耗记录: 已启用，输出目录=${POWER_OUTPUT_DIR}"
+    else
+        log_message "功耗记录: 已关闭"
+    fi
     
     # prune=0: 1；prune=1: ratio×min×([gate 含1] threshold 档 + [gate 含0] deferred 档)；og=1 与 def=1 从不同时
     local base_combinations=$((${#POLICY_REWARD_PAIRS[@]} * ${#DATASETS[@]} * ${#BEAM_WIDTH_NUMSEQ_PAIRS[@]}))
@@ -687,6 +968,16 @@ if [ "$1" = "--dry-run" ]; then
     echo "  STRAGGLER_BUDGET_ON 扫描值: $(printf '%s ' "${STRAGGLER_BUDGET_ON[@]}")"
     echo "  STRAGGLER_BUDGET=${STRAGGLER_BUDGET}（bud_on=1 时前 ${STRAGGLER_BUDGET} 个 workload step 跳过剪枝）"
     echo "  说明: PRUNE=0 时 bud 固定为 0；PRUNE=1 时按上表扫描 bud_on。"
+    echo "======================================================================"
+    echo ""
+    echo "=== 功耗记录配置 ==="
+    echo "  RECORD_POWER=${RECORD_POWER}（0=关闭，1=开启）"
+    echo "  POWER_OUTPUT_DIR=${POWER_OUTPUT_DIR}"
+    if [ "${RECORD_POWER}" -eq 1 ]; then
+        echo "  说明: 功耗记录已启用，每个配置的评估过程中每秒采样nvidia-smi功耗，结果保存到上述目录。"
+    else
+        echo "  说明: 功耗记录已关闭。如需启用，请将 RECORD_POWER 设为 1。"
+    fi
     echo "======================================================================"
     echo ""
     for pair_line in "${POLICY_REWARD_PAIRS[@]}"; do

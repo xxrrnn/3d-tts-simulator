@@ -5,14 +5,12 @@ VALUE_MODEL_PATH=$2
 NUM_RM_WORKER=1
 NUM_LM_WORKER=1
 
-export CUDA_VISIBLE_DEVICES=0
-echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES"
-n_gpus=$(echo $CUDA_VISIBLE_DEVICES | tr ',' '\n' | wc -l)
-echo "n_gpus: $n_gpus"
-
-GPU_LIST=(0 0)
-echo "GPU_LIST:"
-echo "${GPU_LIST[@]}"
+# 物理 GPU：由调用方 export（eval_all_combinations_straggler.sh 等）；单卡上两 worker 共用同一可见设备，进程内均为 cuda:0
+DEVICE_ID="${CUDA_VISIBLE_DEVICES:-0}"
+export CUDA_VISIBLE_DEVICES="${DEVICE_ID}"
+echo "CUDA_VISIBLE_DEVICES: $CUDA_VISIBLE_DEVICES (DEVICE_ID=${DEVICE_ID})"
+n_gpus=$(echo "$CUDA_VISIBLE_DEVICES" | tr ',' '\n' | grep -c .)
+echo "n_gpus (visible device count): $n_gpus"
 
 HOST_ADDR=$3
 CONTROLLER_PORT=$4
@@ -60,38 +58,42 @@ for i in $(seq 0 $((NUM_RM_WORKER-1)))
 do
     WORKER_PORT=$((WORKER_BASE_PORT+i))
     tmux new-window -n reward_$i
-    tmux send-keys "source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && export LOGDIR=${LOGDIR} && cd ${PYTHONPATH} " Enter
+    tmux send-keys "source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && export LOGDIR=${LOGDIR} && export CUDA_VISIBLE_DEVICES=${DEVICE_ID} && cd ${PYTHONPATH} " Enter
     if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
         command="pwd"
     else
-        command="CUDA_VISIBLE_DEVICES=${GPU_LIST[$i]} python -m reason.llm_service.workers.reward_model_worker --model-path $VALUE_MODEL_PATH --controller-address ${CONTROLLER_URL} --host $HOST_ADDR --port $WORKER_PORT --worker-address http://${REGISTER_HOST}:$WORKER_PORT"
+        command="python -m reason.llm_service.workers.reward_model_worker --model-path $VALUE_MODEL_PATH --controller-address ${CONTROLLER_URL} --host $HOST_ADDR --port $WORKER_PORT --worker-address http://${REGISTER_HOST}:$WORKER_PORT"
     fi
     tmux send-keys "$command" Enter
-    echo "Reward worker $i started on GPU ${GPU_LIST[$i]} with port $WORKER_PORT, model: $VALUE_MODEL_PATH"
+    echo "Reward worker $i started with CUDA_VISIBLE_DEVICES=${DEVICE_ID}, port $WORKER_PORT, model: $VALUE_MODEL_PATH"
 done
 
 for i in $(seq $((NUM_RM_WORKER)) $((NUM_LM_WORKER+NUM_RM_WORKER-1)))
 do
     WORKER_PORT=$((WORKER_BASE_PORT+i))
     tmux new-window -n policy_$i
-    tmux send-keys "source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && export LOGDIR=${LOGDIR} && export VLLM_ATTENTION_BACKEND=XFORMERS && cd ${PYTHONPATH} " Enter
+    tmux send-keys "source ~/.bashrc && conda activate ${CONDA_ENV_NAME} && export LOGDIR=${LOGDIR} && export CUDA_VISIBLE_DEVICES=${DEVICE_ID} && export VLLM_ATTENTION_BACKEND=XFORMERS && cd ${PYTHONPATH} " Enter
 
     max_model_length=8192
     max_num_sequences=4
     enforce_eager=false
     cpu_offload_gb=0
 
-    if [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
-        gpu_memory_utilization=0.85 #增加到0.7，7bpolicy + 1.5b reward才能加载到gpu上
+    # 优先使用调用方 export 的 VLLM_GPU_MEMORY_UTILIZATION（eval_all_combinations_straggler.sh 按 Policy–Reward 对设置）
+    if [ -n "${VLLM_GPU_MEMORY_UTILIZATION:-}" ]; then
+        gpu_memory_utilization="${VLLM_GPU_MEMORY_UTILIZATION}"
+    elif [[ "$VALUE_MODEL_PATH" =~ "dummy" ]]; then
+        gpu_memory_utilization=0.85
     else
-        gpu_memory_utilization=0.85  # 0.8->0.65->0.50 降低以解决内存不足
+        gpu_memory_utilization=0.85
     fi
+    echo "vLLM gpu_memory_utilization=${gpu_memory_utilization} (env VLLM_GPU_MEMORY_UTILIZATION=${VLLM_GPU_MEMORY_UTILIZATION:-unset})"
 
     if [[ "$POLICY_MODEL_PATH" =~ "DeepSeek-R1" ]]; then
         max_model_length=32768
     fi
 
-    command="CUDA_VISIBLE_DEVICES=${GPU_LIST[$i]} python -m reason.llm_service.workers.vllm_worker --max_model_length ${max_model_length} --gpu_memory_utilization ${gpu_memory_utilization} --swap_space 16 --model-path $POLICY_MODEL_PATH --controller-address ${CONTROLLER_URL} --host $HOST_ADDR --port $WORKER_PORT --worker-address http://${REGISTER_HOST}:$WORKER_PORT"
+    command="python -m reason.llm_service.workers.vllm_worker --max_model_length ${max_model_length} --gpu_memory_utilization ${gpu_memory_utilization} --swap_space 16 --model-path $POLICY_MODEL_PATH --controller-address ${CONTROLLER_URL} --host $HOST_ADDR --port $WORKER_PORT --worker-address http://${REGISTER_HOST}:$WORKER_PORT"
     if [[ $max_num_sequences -gt 0 ]]; then
         command="$command --max_num_sequences $max_num_sequences"
     fi
@@ -106,5 +108,5 @@ do
     fi
 
     tmux send-keys "$command" Enter
-    echo "Policy worker $i started on GPU ${GPU_LIST[$i]} with port $WORKER_PORT, model: $POLICY_MODEL_PATH"
+    echo "Policy worker $i started with CUDA_VISIBLE_DEVICES=${DEVICE_ID}, port $WORKER_PORT, model: $POLICY_MODEL_PATH"
 done

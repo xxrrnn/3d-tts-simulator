@@ -20,6 +20,7 @@ class ConcatedLMGenResult:
     finish_reason: List[str]
     token_logprobs: List[List[float]]
     token_topk_logprobs: List[List[dict]] = None  # 添加topk logprobs字段
+    gpu_time_ms: float = 0.0  # GPU 推理时间（毫秒），由 CUDA Event 计时
 
     # post init compute number of completion_tokens
     def __post_init__(self):
@@ -145,6 +146,7 @@ def _generate_fastchat(
         finish_reason=results["finish_reason"],
         token_logprobs=results.get("token_logprobs", [[] for _ in results["text"]]),
         token_topk_logprobs=results.get("token_topk_logprobs", [[] for _ in results["text"]]),
+        gpu_time_ms=results.get("gpu_time_ms", 0.0),
     )
 
 

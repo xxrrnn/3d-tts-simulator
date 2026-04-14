@@ -155,7 +155,7 @@ class RemoteRewardModelConfig(RewardModelBaseConfig):
     multi_gpu: bool
 
 
-def _reward_inference_fastchat(input_str, model_name, controller_addr="http://localhost:10014", multi_gpu=False, timeout=0):
+def _reward_inference_fastchat(input_str, model_name, controller_addr="http://localhost:10014", multi_gpu=False, timeout=0, return_gpu_time=False):
     if multi_gpu:
         ret = requests.post(controller_addr + "/get_worker_address", json={"model": model_name})
         worker_addr = ret.json()["address"]
@@ -168,6 +168,7 @@ def _reward_inference_fastchat(input_str, model_name, controller_addr="http://lo
     gen_params = {"input_str": input_str}
     req_timeout = timeout if timeout and timeout > 0 else 120
     response = None
+    gpu_time_ms = 0.0
     try:
         response = requests.post(
             worker_addr + "/worker_reward_inference",
@@ -180,6 +181,7 @@ def _reward_inference_fastchat(input_str, model_name, controller_addr="http://lo
         if "reward" not in results:
             raise RuntimeError(f"Invalid RM response: missing 'reward' key, got keys={list(results.keys())}")
         reward = results["reward"]
+        gpu_time_ms = results.get("gpu_time_ms", 0.0)
     except Exception as e:
         for i in range(len(input_str)):
             print(f'input_str {i}: {input_str[i]}')
@@ -195,6 +197,8 @@ def _reward_inference_fastchat(input_str, model_name, controller_addr="http://lo
             f"RM inference failed for model={model_name} at worker={worker_addr}"
         ) from e
 
+    if return_gpu_time:
+        return reward, gpu_time_ms
     return reward
 
 
@@ -307,7 +311,8 @@ class RMRemoteCaller(RewardModelCallingFunction):
         legal_action: Optional[List[str]] = [],
         process: Optional[bool] = True,
         timeout: Optional[int] = 0,
-    ) -> Union[List[int], List[List[int]]]:
+        return_gpu_time: Optional[bool] = False,
+    ) -> Union[List[int], List[List[int]], Tuple[Union[List[int], List[List[int]]], float]]:
         if process:
             input_str = self.process_input(qa_pairs, model_names, verbose=verbose, legal_action=legal_action)
         else:
@@ -315,8 +320,11 @@ class RMRemoteCaller(RewardModelCallingFunction):
 
         if local:
             infer_fn = get_infer_fn(self.model_name, rm_serve_type='fastchat')
-            return infer_fn(input_str)
+            result = infer_fn(input_str)
+            if return_gpu_time:
+                return result, 0.0  # local 模式无法获取 GPU 计时
+            return result
 
         return _reward_inference_fastchat(
-            input_str=input_str, model_name=self.model_name, controller_addr=self.controller_addr, timeout=timeout
+            input_str=input_str, model_name=self.model_name, controller_addr=self.controller_addr, timeout=timeout, return_gpu_time=return_gpu_time
         )

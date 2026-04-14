@@ -16,6 +16,7 @@ import time
 from typing import List
 import uuid
 
+import torch
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.responses import StreamingResponse, JSONResponse
 import uvicorn
@@ -131,6 +132,15 @@ class VLLMWorker(BaseModelWorker):
                 sampling_params = SamplingParams(**sp_kwargs)
             else:
                 raise
+        
+        # CUDA Event 计时：记录 GPU 推理开始时间
+        gpu_time_ms = 0.0
+        cuda_available = torch.cuda.is_available()
+        if cuda_available:
+            start_event = torch.cuda.Event(enable_timing=True)
+            end_event = torch.cuda.Event(enable_timing=True)
+            start_event.record()
+        
         results_generator = engine.generate(context, sampling_params, request_id)
 
         async for request_output in results_generator:
@@ -143,6 +153,16 @@ class VLLMWorker(BaseModelWorker):
             # Note: usage is not supported yet
             prompt_tokens = len(request_output.prompt_token_ids)
             completion_tokens = sum(len(output.token_ids) for output in request_output.outputs)
+            
+            # 检查是否是最后一个输出（所有 output 都有 finish_reason）
+            is_final = all(output.finish_reason is not None for output in request_output.outputs)
+            
+            # CUDA Event 计时：在最后一个输出时记录 GPU 推理结束时间
+            if is_final and cuda_available:
+                end_event.record()
+                torch.cuda.synchronize()
+                gpu_time_ms = start_event.elapsed_time(end_event)
+            
             ret = {
                 "text": text_outputs,
                 "error_code": 0,
@@ -154,6 +174,7 @@ class VLLMWorker(BaseModelWorker):
                 "cumulative_logprob": [output.cumulative_logprob for output in request_output.outputs],
                 "output_token_len": [len(output.token_ids) for output in request_output.outputs],
                 "finish_reason": [output.finish_reason for output in request_output.outputs],
+                "gpu_time_ms": gpu_time_ms,  # 添加 GPU 计时（毫秒）
             }
             token_logprobs = []
             token_topk_logprobs = []

@@ -24,6 +24,8 @@ decode / prefill **仅**从 ``detailed_beam_search_log`` 解析（需 ``BEAM_SEA
 usage::
 
     python gen_workload_beam_1.py --input ../../src/output/AMC23_beam_search
+    # 也可具体到某一配置目录（其下含 question_*），例如：
+    # .../AMC23_beam_search/<policy>/<reward>/40_8_1_straggler_0_0_0_0_0_def0_pred0_bud0
     # 默认：有 branch_token_probs、branch_token_topk_logprobs，无 branch_rewards
 
     python gen_workload_beam_1.py --input ... --include-reward
@@ -51,6 +53,15 @@ def _is_beam1_config_dir(name: str) -> bool:
         base, _, _ = name.partition("_straggler_")
         return bool(base) and base.endswith("_1")
     return False
+
+
+def _is_single_config_input_dir(path: Path) -> bool:
+    """``--input`` 是否已指向某一 beam=1 配置目录（直接包含 question_*）。"""
+    if not path.is_dir():
+        return False
+    if not _is_beam1_config_dir(path.name):
+        return False
+    return any(p.is_dir() and p.name.startswith("question_") for p in path.iterdir())
 
 
 def _extract_result(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -189,16 +200,66 @@ def generate_workload_for_question(
 
 def generate_all_workloads(
     input_dir: Path,
-    dataset_name: str,
+    dataset_name: Optional[str],
     *,
     include_reward: bool = False,
     include_token_probs: bool = True,
     include_token_topk_logprobs: bool = True,
 ) -> None:
-    logger.info(f"Starting workload generation for dataset: {dataset_name}")
+    input_dir = input_dir.resolve()
     if not input_dir.exists():
         logger.error(f"Input directory does not exist: {input_dir}")
         return
+
+    if (
+        _is_beam1_config_dir(input_dir.name)
+        and input_dir.is_dir()
+        and not _is_single_config_input_dir(input_dir)
+    ):
+        logger.error(
+            "Input 目录名符合 beam=1 配置，但未发现任何 question_* 子目录: %s",
+            input_dir,
+        )
+        return
+
+    # --input 具体到 …/<policy>/<reward>/<config>（含 question_*）时只处理该配置
+    if _is_single_config_input_dir(input_dir):
+        config_dir = input_dir
+        reward_dir = config_dir.parent
+        policy_dir = reward_dir.parent
+        dataset_dir = policy_dir.parent
+        ds_name = dataset_name if dataset_name else dataset_dir.name
+        logger.info(
+            "Single config input: %s (dataset=%s, policy=%s, reward=%s)",
+            config_dir.name,
+            ds_name,
+            policy_dir.name,
+            reward_dir.name,
+        )
+        logger.info(f"Starting workload generation for dataset: {ds_name}")
+        output_base = (
+            _WORKLOAD_ROOT / ds_name / policy_dir.name / reward_dir.name / config_dir.name
+        )
+        output_base.mkdir(parents=True, exist_ok=True)
+        generated_count = 0
+        total_questions = 0
+        for question_dir in sorted(config_dir.iterdir(), key=lambda p: p.name):
+            if not question_dir.is_dir() or not question_dir.name.startswith("question_"):
+                continue
+            total_questions += 1
+            if generate_workload_for_question(
+                question_dir,
+                output_base,
+                include_reward=include_reward,
+                include_token_probs=include_token_probs,
+                include_token_topk_logprobs=include_token_topk_logprobs,
+            ):
+                generated_count += 1
+        logger.info(f"Generated {generated_count}/{total_questions} workloads")
+        return
+
+    ds_name = dataset_name if dataset_name else input_dir.name
+    logger.info(f"Starting workload generation for dataset: {ds_name}")
     generated_count = 0
     total_questions = 0
     for policy_dir in sorted(input_dir.iterdir(), key=lambda p: p.name):
@@ -216,7 +277,7 @@ def generate_all_workloads(
                     logger.debug(f"    Skip config (not num_seq=1 / *_1[_straggler_*]): {config_dir.name}")
                     continue
                 logger.info(f"    Processing config: {config_dir.name}")
-                output_base = _WORKLOAD_ROOT / dataset_name / policy_dir.name / reward_dir.name / config_dir.name
+                output_base = _WORKLOAD_ROOT / ds_name / policy_dir.name / reward_dir.name / config_dir.name
                 output_base.mkdir(parents=True, exist_ok=True)
                 for question_dir in sorted(config_dir.iterdir(), key=lambda p: p.name):
                     if not question_dir.is_dir() or not question_dir.name.startswith("question_"):
@@ -235,8 +296,15 @@ def generate_all_workloads(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="最简化工作负载生成器（num_seq=1：*_1 或 *_1_straggler_*）")
-    parser.add_argument("--input", required=True, help="输入目录路径")
-    parser.add_argument("--dataset", help="数据集名称")
+    parser.add_argument(
+        "--input",
+        required=True,
+        help="输入目录：可为数据集根（如 AMC23_beam_search）或具体到 …/<policy>/<reward>/<beam1 配置名>（含 question_*）",
+    )
+    parser.add_argument(
+        "--dataset",
+        help="写入 model_workloads/<dataset>/… 的数据集名；默认从路径推断（单配置输入时为上级数据集目录名）",
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="详细输出")
     parser.add_argument(
         "--include-reward",
@@ -257,10 +325,16 @@ def main() -> None:
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
     input_path = Path(args.input)
-    dataset_name = args.dataset or input_path.name
-    logger.info(f"Dataset: {dataset_name}")
+    resolved = input_path.resolve()
+    if args.dataset:
+        log_dataset = args.dataset
+    elif _is_single_config_input_dir(resolved):
+        log_dataset = resolved.parent.parent.parent.name
+    else:
+        log_dataset = resolved.name
+    logger.info(f"Dataset (for output): {log_dataset}")
     logger.info(f"Input: {input_path}")
-    logger.info(f"Output root: {_WORKLOAD_ROOT / dataset_name}")
+    logger.info(f"Output root: {_WORKLOAD_ROOT / log_dataset}")
     include_token_probs = not args.no_token_probs
     include_token_topk_logprobs = not args.no_token_topk_logprobs
     logger.info(
@@ -271,7 +345,7 @@ def main() -> None:
     )
     generate_all_workloads(
         input_path,
-        dataset_name,
+        args.dataset,
         include_reward=args.include_reward,
         include_token_probs=include_token_probs,
         include_token_topk_logprobs=include_token_topk_logprobs,

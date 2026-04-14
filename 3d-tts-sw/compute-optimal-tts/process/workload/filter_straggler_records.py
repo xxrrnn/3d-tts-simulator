@@ -12,8 +12,8 @@ usage::
     # 默认读同目录下 straggler/straggler_AIME_1.5_100.json，筛后写入 straggler/ 下 *_filtered.json
     python filter_straggler_records.py
 
-    python filter_straggler_records.py \\
-        --input ./straggler/straggler_AIME_1.5_100.json \\
+    python filter_straggler_records.py \
+        --input ./straggler/straggler_AIME_1.5_100.json \
         -o ./straggler/straggler_AIME_1.5_100_filtered.json
     python filter_straggler_records.py --question-ids 0,1,3 --input /path/to/stragglers.json
 """
